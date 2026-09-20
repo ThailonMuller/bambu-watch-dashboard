@@ -24,6 +24,11 @@ describe("budget calculator", () => {
     expect(result.suggestedPrice).toBe(2.5);
   });
 
+  it("does not include negative plate values in the material cost", () => {
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 0 });
+    expect(result.materialCost).toBe(2);
+  });
+
   it("keeps product identity available for the spreadsheet record", () => {
     expect(DEFAULT_BUDGET_INPUT.productId).toBe("1001");
     expect(DEFAULT_BUDGET_INPUT.productName).toBe("Vaso orgânico v3");
