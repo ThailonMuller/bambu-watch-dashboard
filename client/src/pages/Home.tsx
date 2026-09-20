@@ -14,6 +14,7 @@ import {
   Copy,
   DollarSign,
   Package,
+  Pencil,
   Percent,
   ReceiptText,
   RotateCcw,
@@ -21,6 +22,7 @@ import {
   Cloud,
   ExternalLink,
   Fan,
+  History,
   Layers3,
   LockKeyhole,
   Menu,
@@ -269,6 +271,15 @@ type FilamentDebit = {
   status: "pending" | "approved" | "rejected";
 };
 
+type FilamentHistoryEntry = {
+  id: number;
+  piece: string;
+  grams: number;
+  color: string;
+  status: "approved" | "rejected";
+  createdAt: string;
+};
+
 const initialFilaments: FilamentItem[] = [
   { id: 1, name: "PLA Silk Violeta", material: "PLA", color: "#9b4dff", grams: 820, lowThreshold: 200 },
   { id: 2, name: "PLA Ciano", material: "PLA", color: "#00d8f5", grams: 145, lowThreshold: 200 },
@@ -286,11 +297,17 @@ function FilamentsView() {
   const [debits, setDebits] = useState<FilamentDebit[]>(() => {
     try { return JSON.parse(window.localStorage.getItem("falcaorosa3d-filament-debits") || "null") || initialDebits; } catch { return initialDebits; }
   });
+  const [history, setHistory] = useState<FilamentHistoryEntry[]>(() => {
+    try { return JSON.parse(window.localStorage.getItem("falcaorosa3d-filament-history") || "[]"); } catch { return []; }
+  });
+  const [editingNameId, setEditingNameId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
   const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", color: "#9b4dff", grams: "", lowThreshold: "200" });
   const [newDebit, setNewDebit] = useState({ piece: "", grams: "", color: "#9b4dff" });
 
   useEffect(() => { window.localStorage.setItem("falcaorosa3d-filaments", JSON.stringify(filaments)); }, [filaments]);
   useEffect(() => { window.localStorage.setItem("falcaorosa3d-filament-debits", JSON.stringify(debits)); }, [debits]);
+  useEffect(() => { window.localStorage.setItem("falcaorosa3d-filament-history", JSON.stringify(history)); }, [history]);
 
   const addFilament = () => {
     const grams = Number(newFilament.grams);
@@ -310,6 +327,15 @@ function FilamentsView() {
   };
 
   const updateFilament = (id: number, patch: Partial<FilamentItem>) => setFilaments((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item));
+  const startNameEdit = (item: FilamentItem) => { setEditingNameId(item.id); setEditingName(item.name); };
+  const saveNameEdit = (id: number) => {
+    const name = editingName.trim();
+    if (!name) { toast.error("O nome do filamento não pode ficar vazio"); return; }
+    updateFilament(id, { name });
+    setEditingNameId(null);
+    toast.success("Nome do filamento atualizado");
+  };
+  const addHistory = (debit: FilamentDebit, status: FilamentHistoryEntry["status"]) => setHistory((current) => [{ id: Date.now(), piece: debit.piece, grams: debit.grams, color: debit.color, status, createdAt: new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) }, ...current]);
   const approveDebit = (debit: FilamentDebit) => {
     setFilaments((current) => {
       const matchingIndex = current.findIndex((item) => item.color.toLowerCase() === debit.color.toLowerCase());
@@ -317,16 +343,18 @@ function FilamentsView() {
       return current.map((item, index) => index === matchingIndex ? { ...item, grams: debitStock(item.grams, debit.grams) } : item);
     });
     setDebits((current) => current.map((item) => item.id === debit.id ? { ...item, status: "approved" } : item));
+    addHistory(debit, "approved");
     toast.success("Débito aprovado", { description: `${debit.grams} g descontados do estoque compatível para ${debit.piece}.` });
   };
-  const rejectDebit = (id: number) => { setDebits((current) => current.map((item) => item.id === id ? { ...item, status: "rejected" } : item)); toast.info("Débito rejeitado"); };
+  const rejectDebit = (id: number) => { const debit = debits.find((item) => item.id === id); if (debit) addHistory(debit, "rejected"); setDebits((current) => current.map((item) => item.id === id ? { ...item, status: "rejected" } : item)); toast.info("Débito rejeitado"); };
   const pendingDebits = debits.filter((item) => item.status === "pending");
 
   return <div className="filaments-view">
     <div className="section-heading"><div><p className="eyebrow">MATERIAIS</p><h2>Consumo de filamentos</h2><p>Controle seu estoque em gramas e confirme os débitos gerados pelas impressões.</p></div><div className="budget-safe-note"><LockKeyhole size={16} /> controle local</div></div>
     <section className="filament-add-card"><div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><div><h3>Adicionar filamento</h3><p>Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p></div></div><div className="filament-form-grid"><label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label><label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label><label className="budget-field"><span>Quantidade (g)</span><input className="budget-text-input" type="number" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label><label className="budget-field"><span>Avisar abaixo de (g)</span><input className="budget-text-input" type="number" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label><label className="budget-field color-field"><span>Cor da bobina</span><div className="color-input-wrap"><input type="color" value={newFilament.color} onChange={(event) => setNewFilament((current) => ({ ...current, color: event.target.value }))} /><code>{newFilament.color.toUpperCase()}</code></div></label><button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button></div></section>
-    <div className="filament-stock-grid">{filaments.map((item) => { const low = isLowStock(item.grams, item.lowThreshold); return <article className={`filament-spool-card ${low ? "is-low" : ""}`} key={item.id}><div className="spool-top"><div className="spool-disc" style={{ background: `linear-gradient(135deg, ${item.color}, #241035)` }}><span /></div><div className="spool-copy"><div><span className="filament-material">{item.material}</span>{low && <span className="low-badge"><AlertCircle size={11} /> Filamento baixo</span>}</div><h3>{item.name}</h3><p>Limite de aviso: {item.lowThreshold} g</p></div><input className="inline-color-input" type="color" value={item.color} onChange={(event) => updateFilament(item.id, { color: event.target.value })} aria-label={`Editar cor de ${item.name}`} /></div><div className="spool-amount"><strong>{item.grams} g</strong><span>disponíveis</span></div><div className="stock-progress"><span style={{ width: `${Math.min(100, Math.max(4, item.grams / Math.max(item.lowThreshold * 5, 1) * 100))}%`, background: item.color }} /></div><div className="spool-edit-row"><label>Estoque (g)<input type="number" min="0" value={item.grams} onChange={(event) => updateFilament(item.id, { grams: Math.max(0, Number(event.target.value) || 0) })} /></label><label>Aviso (g)<input type="number" min="0" value={item.lowThreshold} onChange={(event) => updateFilament(item.id, { lowThreshold: Math.max(0, Number(event.target.value) || 0) })} /></label></div></article>; })}</div>
+    <div className="filament-stock-grid">{filaments.map((item) => { const low = isLowStock(item.grams, item.lowThreshold); const isEditing = editingNameId === item.id; return <article className={`filament-spool-card ${low ? "is-low" : ""}`} key={item.id}><div className="spool-top"><div className="spool-disc" style={{ background: `linear-gradient(135deg, ${item.color}, #241035)` }}><span /></div><div className="spool-copy"><div><span className="filament-material">{item.material}</span>{low && <span className="low-badge"><AlertCircle size={11} /> Filamento baixo</span>}</div>{isEditing ? <div className="name-edit-row"><input value={editingName} onChange={(event) => setEditingName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") saveNameEdit(item.id); if (event.key === "Escape") setEditingNameId(null); }} autoFocus /><button onClick={() => saveNameEdit(item.id)} aria-label="Salvar nome"><Check size={13} /></button></div> : <div className="spool-name-row"><h3>{item.name}</h3><button className="edit-name-button" onClick={() => startNameEdit(item)} aria-label={`Editar nome de ${item.name}`}><Pencil size={12} /></button></div>}<p>Limite de aviso: {item.lowThreshold} g</p></div><input className="inline-color-input" type="color" value={item.color} onChange={(event) => updateFilament(item.id, { color: event.target.value })} aria-label={`Editar cor de ${item.name}`} /></div><div className="spool-amount"><strong>{item.grams} g</strong><span>disponíveis</span></div><div className="stock-progress"><span style={{ width: `${Math.min(100, Math.max(4, item.grams / Math.max(item.lowThreshold * 5, 1) * 100))}%`, background: item.color }} /></div><div className="spool-edit-row"><label>Estoque (g)<input type="number" min="0" value={item.grams} onChange={(event) => updateFilament(item.id, { grams: Math.max(0, Number(event.target.value) || 0) })} /></label><label>Aviso (g)<input type="number" min="0" value={item.lowThreshold} onChange={(event) => updateFilament(item.id, { lowThreshold: Math.max(0, Number(event.target.value) || 0) })} /></label></div></article>; })}</div>
     <section className="debit-card"><div className="filament-card-heading"><div className="settings-symbol pink"><ReceiptText size={19} /></div><div><h3>Débitos de filamentos</h3><p>Confirme ou rejeite o material usado por cada impressão.</p></div><span className="pending-count">{pendingDebits.length} aguardando</span></div><div className="debit-add-row"><input className="budget-text-input" value={newDebit.piece} onChange={(event) => setNewDebit((current) => ({ ...current, piece: event.target.value }))} placeholder="Nome da peça / arquivo" /><input className="budget-text-input grams-input" type="number" min="0" step="1" value={newDebit.grams} onChange={(event) => setNewDebit((current) => ({ ...current, grams: event.target.value }))} placeholder="g" /><input className="debit-color" type="color" value={newDebit.color} onChange={(event) => setNewDebit((current) => ({ ...current, color: event.target.value }))} aria-label="Cor do débito" /><button className="filament-primary-button" onClick={addDebit}><Plus size={15} /> Adicionar débito</button></div><div className="debit-list">{debits.map((debit) => <div className={`debit-row debit-${debit.status}`} key={debit.id}><span className="debit-color-dot" style={{ background: debit.color }} /><div className="debit-copy"><strong>{debit.piece}</strong><span>{debit.grams} g · {debit.status === "pending" ? "aguardando confirmação" : debit.status === "approved" ? "aprovado" : "rejeitado"}</span></div>{debit.status === "pending" ? <div className="debit-actions"><button className="approve-button" onClick={() => approveDebit(debit)}><Check size={14} /> Aprovar</button><button className="reject-button" onClick={() => rejectDebit(debit.id)}><X size={14} /> Rejeitar</button></div> : <span className="debit-status-label">{debit.status === "approved" ? "Confirmado" : "Rejeitado"}</span>}</div>)}</div></section>
+    <section className="history-card"><div className="filament-card-heading"><div className="settings-symbol blue"><History size={19} /></div><div><h3>Histórico de consumo</h3><p>Registro dos débitos confirmados ou rejeitados.</p></div><span className="history-total">{history.length} registros</span></div>{history.length === 0 ? <div className="history-empty"><History size={21} /><span>Nenhum consumo registrado ainda.</span></div> : <div className="history-list">{history.map((entry) => <div className="history-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><div className="history-copy"><strong>{entry.piece}</strong><span>{entry.createdAt} · {entry.grams} g</span></div><span className={`history-status ${entry.status}`}>{entry.status === "approved" ? "Aprovado" : "Rejeitado"}</span></div>)}</div>}</section>
   </div>;
 }
 
