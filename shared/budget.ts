@@ -1,5 +1,5 @@
 export const DEFAULT_BUDGET_INPUT = {
-  productId: "FALCAO-001",
+  productId: "1001",
   productName: "Vaso orgânico v3",
   plateCosts: [18.9],
   otherCosts: 3.44,
@@ -35,6 +35,14 @@ export type BudgetResult = {
   shopeeFee: number;
   suggestedPrice: number;
 };
+
+export function isValidProductId(value: string) {
+  return /^\d+$/.test(value.trim());
+}
+
+export function hasDuplicateProductId(items: readonly { productId: string }[], productId: string) {
+  return items.some((item) => item.productId === productId);
+}
 
 const money = (value: number) => Math.round(((Number.isFinite(value) ? value : 0) + 1e-9) * 100) / 100;
 const percentage = (value: number) => Math.max(0, Number.isFinite(value) ? value : 0) / 100;

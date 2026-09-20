@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, DEFAULT_BUDGET_INPUT } from "../shared/budget";
+import { calculateBudget, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("calculates the default quote and includes the fixed Shopee fee", () => {
@@ -19,7 +19,14 @@ describe("budget calculator", () => {
   });
 
   it("keeps product identity available for the spreadsheet record", () => {
-    expect(DEFAULT_BUDGET_INPUT.productId).toBe("FALCAO-001");
+    expect(DEFAULT_BUDGET_INPUT.productId).toBe("1001");
     expect(DEFAULT_BUDGET_INPUT.productName).toBe("Vaso orgânico v3");
+  });
+
+  it("accepts only numeric IDs and rejects duplicates", () => {
+    expect(isValidProductId("12345")).toBe(true);
+    expect(isValidProductId("FALCAO-001")).toBe(false);
+    expect(hasDuplicateProductId([{ productId: "12345" }], "12345")).toBe(true);
+    expect(hasDuplicateProductId([{ productId: "12345" }], "67890")).toBe(false);
   });
 });

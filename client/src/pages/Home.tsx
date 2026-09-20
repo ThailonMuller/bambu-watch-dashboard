@@ -39,7 +39,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { calculateBudget, DEFAULT_BUDGET_INPUT, type BudgetInput, type BudgetResult } from "../../../shared/budget";
+import { calculateBudget, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 
 type PrinterState = "printing" | "idle" | "offline";
 type View = "overview" | "printers" | "settings" | "budget";
@@ -306,9 +306,19 @@ function BudgetView() {
       toast.error("ID do produto obrigatório");
       return;
     }
+    if (!isValidProductId(productId)) {
+      setSpreadsheetError("O ID do produto deve conter somente números.");
+      toast.error("ID inválido");
+      return;
+    }
     if (!productName) {
       setSpreadsheetError("Informe o nome do produto antes de adicionar à planilha.");
       toast.error("Nome do produto obrigatório");
+      return;
+    }
+    if (hasDuplicateProductId(spreadsheet, productId)) {
+      setSpreadsheetError("Este ID já está cadastrado na planilha. Use um ID numérico diferente.");
+      toast.error("ID duplicado");
       return;
     }
     setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.suggestedPrice, addedAt: new Date().toLocaleDateString("pt-BR") }]);
@@ -355,7 +365,7 @@ function BudgetView() {
       <div className="budget-layout">
         <section className="budget-form-card">
           <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>O ID e o nome identificam o item no controle de vendas.</p></div></div>
-          <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value })); }} placeholder="Ex.: FALCAO-001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
+          <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>somente números</i></span><input className="budget-text-input" type="text" inputMode="numeric" pattern="[0-9]*" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value.replace(/\D/g, "") })); }} placeholder="Ex.: 1001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div><button className="add-plate-button" onClick={addPlate}><Plus size={14} /> Adicionar placa</button></div>
           <div className="plates-list">{input.plateCosts.map((cost, index) => <div className="plate-row" key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="number" inputMode="decimal" min="0" step="0.01" value={cost} onChange={(event) => updatePlate(index, event.target.value)} /></div></label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
