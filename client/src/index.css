@@ -261,3 +261,108 @@ button:not(:disabled), a[href], select { cursor: pointer; }
 @media (max-width: 480px) { .profile-avatar { display: none; }.topbar-actions { gap: 7px; }.metrics-grid { grid-template-columns: 1fr 1fr; gap: 8px; }.metric-card { min-height: 83px; padding: 12px 10px; gap: 8px; }.metric-icon { width: 29px; height: 29px; }.metric-value { font-size: 15px; }.metric-label { font-size: 8px; }.metric-hint { font-size: 7px; }.hero-copy h1 { font-size: 27px; }.hero-copy > p { max-width: 250px; font-size: 10px; }.hero-banner { border-radius: 18px; }.printer-card { padding: 15px; }.printer-card-main { gap: 14px; padding-right: 0; }.progress-ring { width: 87px; height: 87px; }.progress-ring-inner { width: 71px; height: 71px; }.progress-ring-inner span { font-size: 17px; }.job-summary h4 { max-width: 155px; font-size: 9px; }.printer-stats strong { font-size: 10px; }.printer-stats span { font-size: 7px; }.lower-grid { gap: 10px; }.panel { padding: 15px; }.chart-legend span { display: none; }.chart-legend select { font-size: 7px; }.panel-heading h3 { font-size: 13px; }.settings-card { padding: 16px; }.settings-card-heading > .status-pill { display: none; } }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+
+/* Brand dark theme: #461B6B base, violet #7609E8, magenta #F000A8, cyan #00D8F5 */
+:root {
+  --primary: #9b5cff;
+  --primary-foreground: #160a25;
+  --sidebar-primary: #b276ff;
+  --sidebar-primary-foreground: #180b27;
+  --background: #160a24;
+  --foreground: #f7f1ff;
+  --card: #211038;
+  --card-foreground: #f7f1ff;
+  --popover: #25103f;
+  --popover-foreground: #f7f1ff;
+  --secondary: #301650;
+  --secondary-foreground: #e7d7ff;
+  --muted: #28123f;
+  --muted-foreground: #ac9bc4;
+  --accent: #321650;
+  --accent-foreground: #f5eaff;
+  --destructive: #ff5d9b;
+  --destructive-foreground: #19091f;
+  --border: #3e2057;
+  --input: #472461;
+  --ring: #bf76ff;
+  --sidebar: #1c0c2e;
+  --sidebar-foreground: #ddd0ef;
+  --sidebar-accent: #321650;
+  --sidebar-accent-foreground: #f6eaff;
+  --sidebar-border: #321946;
+  --sidebar-ring: #a85cff;
+}
+
+html, body { background: #160a24; color: #f7f1ff; }
+.app-shell { background: #160a24; }
+.app-sidebar { background: linear-gradient(180deg, #1d0d30 0%, #1a0b2a 100%); border-right-color: #321946; }
+.brand strong { color: #fbf7ff; }
+.brand strong span { color: #d488ff; }
+.brand small { color: #a88dc4; }
+.brand-mark { background: linear-gradient(145deg, #6f00e8 0%, #c600ff 50%, #00d8f5 100%); box-shadow: 0 8px 22px rgba(143, 0, 232, .34); }
+.workspace-switcher { border-color: #3b2052; background: #241039; color: #eadfff; }
+.workspace-switcher small { color: #a88fc1; }
+.workspace-switcher > svg { color: #ad8dc9; }
+.workspace-avatar { color: #f2dfff; background: #512275; }
+.nav-label, .eyebrow { color: #a98abd; }
+.nav-item { color: #ab9abc; }
+.nav-item:hover { color: #e9caff; background: #2b1245; }
+.nav-item.active { color: #f5e8ff; background: linear-gradient(90deg, #4a1d68, #311447); box-shadow: inset 3px 0 0 #c06bff; }
+.nav-item.active svg { color: #d27bff; }
+.nav-count { color: #f2d8ff; background: #572378; }
+.agent-card { border-color: #402254; background: linear-gradient(135deg, #29123f, #211034); }
+.agent-icon { color: #e39cff; background: #4b1d69; }
+.agent-card strong { color: #ded0ec; }
+.agent-card span { color: #a28bb7; }
+.agent-card span i { background: #f1b544; }
+.sidebar-footer { color: #9d86b5; }
+.help-icon { background: #2b1540; }
+.topbar { background: rgba(22,10,36,.9); border-bottom-color: #321946; }
+.breadcrumb { color: #9f8cad; }
+.breadcrumb svg { color: #6c4b85; }
+.breadcrumb strong { color: #eee3fa; }
+.sync-status { color: #a793b9; }
+.refresh-button { color: #c4afd3; border-color: #432557; background: #241039; }
+.refresh-button:hover { color: #e39cff; background: #32154a; box-shadow: 0 5px 15px rgba(0,0,0,.22); }
+.profile-avatar { background: linear-gradient(135deg,#bd47ff,#f000a8); box-shadow: 0 7px 16px rgba(240,0,168,.25); }
+.hero-banner { background: radial-gradient(circle at 80% 46%, rgba(240,0,168,.36), transparent 22%), radial-gradient(circle at 62% 80%, rgba(0,216,245,.13), transparent 27%), linear-gradient(115deg, #3d1760 0%, #461b6b 48%, #26113f 100%); box-shadow: 0 17px 34px rgba(0,0,0,.18); }
+.hero-banner::after { opacity: .13; }
+.hero-eyebrow { color: #e3aeff; }
+.hero-copy h1 { color: #fff8ff; }
+.hero-copy h1 span { color: #b798ca; }
+.hero-copy h1 em { color: #eb88ff; }
+.hero-copy > p { color: #d0bddd; }
+.hero-note { color: #caa1e2; }
+.hero-orbit { border-color: rgba(205,119,255,.3); }
+.orbit-b { border-color: rgba(240,0,168,.32); }
+.orb-one { background: #ef1cb0; opacity: .42; }
+.orb-two { background: #00cfe9; opacity: .3; }
+.hero-printer { border-color: rgba(200,114,255,.56); background: rgba(20,5,33,.38); box-shadow: 13px 15px 30px rgba(0,0,0,.25), inset 0 0 0 3px rgba(255,255,255,.08); }
+.hero-printer::before { border-color: rgba(207,113,255,.34); }
+.hero-printer-top { background: rgba(177,73,255,.27); }
+.hero-printer-top span { background: rgba(0,216,245,.7); }
+.hero-printer-bed { background: rgba(0,216,245,.65); }
+.hero-nozzle, .hero-nozzle::after { background: #f000a8; }
+.hero-float-card { border-color: rgba(255,255,255,.16); background: rgba(38,13,58,.7); box-shadow: 0 8px 22px rgba(0,0,0,.2); }
+.hero-float-card svg { color: #00d8f5; }
+.hero-float-card span { color: #b8a5c7; }.hero-float-card strong { color: #fff0ff; }
+.overview-heading h2, .section-heading h2 { color: #f1e7fb; }
+.outline-button, .secondary-button { color: #ddadff; border-color: #583170; background: #26113b; }
+.outline-button:hover, .secondary-button:hover { color: #f2d5ff; background: #35164e; box-shadow: 0 6px 16px rgba(0,0,0,.22); }
+.metric-card, .printer-card, .panel, .settings-card { border-color: #3b2052; background: #211038; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+.metric-icon.purple { color: #df9cff; background: #4b1d68; }.metric-icon.blue { color: #79e5ff; background: #123f55; }.metric-icon.pink { color: #ff8bd0; background: #55163e; }.metric-icon.green { color: #70e5b0; background: #164c40; }
+.metric-label, .metric-hint { color: #a996b8; }.metric-value { color: #fff6ff; }
+.printer-card::before { opacity: .26; }.printer-card-violet::before { background: #692298; }.printer-card-blue::before { background: #0b5f7a; }
+.printer-mark-violet { color: #e09eff; background: #4b1d68; }.printer-mark-blue { color: #73e6ff; background: #123f55; }
+.printer-name-row h3 { color: #f3e9fb; }.model-tag { color: #b9a5c5; background: #321a46; }
+.printer-meta { color: #a896b6; }.printer-meta svg { color: #25cee9; }.icon-button { color: #a892b4; }.icon-button:hover { color: #ed9dff; background: #3a1954; }
+.progress-ring-inner { background: #211038; }.progress-ring-inner span { color: #fff3ff; }.progress-ring-inner small { color: #a996b6; }.progress-ring { background: conic-gradient(from -30deg, var(--ring-color) var(--progress), #432656 0); }.progress-ring-violet { --ring-color: #bd66ff; }.progress-ring-blue { --ring-color: #00d8f5; }
+.status-printing { color: #e3b1ff; background: #4a1d67; }.status-printing .status-dot { background: #cd72ff; }.status-idle { color: #86f1c0; background: #164d3f; }.status-idle .status-dot { background: #5bdba9; }.status-offline { color: #ff99bd; background: #541b3b; }.status-offline .status-dot { background: #ff6b9f; }
+.job-time, .job-summary > p { color: #a996b8; }.job-summary h4 { color: #e8dafa; }.text-action { color: #d18bff; }.text-action:hover { color: #f2b0ff; }
+.printer-stats, .printer-stats > div { border-color: #39204d; }.printer-stats span { color: #aa98b7; }.printer-stats span svg { color: #9d7ec3; }.printer-stats strong { color: #efe2f7; }
+.panel-heading h3 { color: #eee3f7; }.chart-legend { color: #ab99b8; }.chart-legend select { color: #c6b5d3; border-color: #432557; background: #29133f; }.chart-grid { stroke: #442653; }.chart-y-labels, .chart-x-labels { color: #a18cb2; }.panel-link { color: #d497ff; }
+.activity-item { border-color: #38204c; }.activity-icon.violet { color: #df9cff; background: #4b1d68; }.activity-icon.green { color: #70e5b0; background: #164c40; }.activity-icon.blue { color: #79e5ff; background: #123f55; }.activity-icon.pink { color: #ff91d1; background: #55163e; }.activity-copy strong { color: #e9dbf3; }.activity-copy span, .activity-item time { color: #a692b5; }
+.local-note { border-color: #55306f; background: linear-gradient(90deg, #28123e, #351338); }.local-note-icon { color: #e2a4ff; background: #4c1d69; }.local-note strong { color: #f0ddfb; }.local-note span { color: #b39fbc; }.local-note button { color: #dfa2ff; }
+.settings-card-heading h3 { color: #f2e6fa; }.settings-card-heading p { color: #aa98b6; }.settings-symbol.purple { color: #e09eff; background: #4b1d68; }.settings-symbol.blue { color: #79e5ff; background: #123f55; }.bridge-step { border-color: #3a204e; }.bridge-step > span { color: #bda9c7; border-color: #5a376a; }.bridge-step.done > span { color: #1d0c2d; border-color: #c268ff; background: #c268ff; }.bridge-step strong { color: #e8daf2; }.bridge-step p { color: #a795b4; }.bridge-step > svg { color: #80658f; }.bridge-step.done > svg { color: #66e3ae; }.setting-row { border-color: #3a204e; }.setting-row strong { color: #e8dbf1; }.setting-row p { color: #aa98b6; }.setting-row select { color: #e2d3eb; border-color: #573067; background: #29123f; }.privacy-note { color: #ae9ab8; background: #28123d; }.privacy-note svg { color: #df91ff; }
+
+@media (max-width: 780px) { .topbar { background: rgba(22,10,36,.96); } }
