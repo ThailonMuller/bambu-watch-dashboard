@@ -366,3 +366,52 @@ html, body { background: #160a24; color: #f7f1ff; }
 .settings-card-heading h3 { color: #f2e6fa; }.settings-card-heading p { color: #aa98b6; }.settings-symbol.purple { color: #e09eff; background: #4b1d68; }.settings-symbol.blue { color: #79e5ff; background: #123f55; }.bridge-step { border-color: #3a204e; }.bridge-step > span { color: #bda9c7; border-color: #5a376a; }.bridge-step.done > span { color: #1d0c2d; border-color: #c268ff; background: #c268ff; }.bridge-step strong { color: #e8daf2; }.bridge-step p { color: #a795b4; }.bridge-step > svg { color: #80658f; }.bridge-step.done > svg { color: #66e3ae; }.setting-row { border-color: #3a204e; }.setting-row strong { color: #e8dbf1; }.setting-row p { color: #aa98b6; }.setting-row select { color: #e2d3eb; border-color: #573067; background: #29123f; }.privacy-note { color: #ae9ab8; background: #28123d; }.privacy-note svg { color: #df91ff; }
 
 @media (max-width: 780px) { .topbar { background: rgba(22,10,36,.96); } }
+
+/* Budget simulator */
+.budget-view { padding-top: 3px; }
+.budget-heading { align-items: flex-start; margin-bottom: 22px; }
+.budget-heading h2 { font-size: 22px; }
+.budget-safe-note { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; color: #78e8d4; border: 1px solid #245e62; border-radius: 8px; background: #123b43; font-size: 9px; font-weight: 700; }
+.budget-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr); align-items: start; gap: 16px; }
+.budget-form-card, .budget-result-card { border: 1px solid #3b2052; border-radius: 17px; background: #211038; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+.budget-form-card { padding: 23px; }
+.budget-result-card { position: sticky; top: 20px; padding: 23px; overflow: hidden; background: radial-gradient(circle at 90% 0%, rgba(240,0,168,.17), transparent 28%), linear-gradient(145deg,#27113e,#1e0c32); }
+.budget-card-title, .budget-result-head { display: flex; align-items: center; gap: 11px; }
+.budget-card-title > div:nth-child(2) { flex: 1; }
+.budget-card-title h3, .budget-result-head h3 { margin: 0; color: #f2e6fa; font-size: 13px; }
+.budget-card-title p { margin: 4px 0 0; color: #aa98b6; font-size: 9px; }
+.budget-card-title.compact { margin-top: 20px; }
+.budget-field { display: block; min-width: 0; }
+.budget-field > span { display: block; margin-bottom: 7px; color: #b9a8c3; font-size: 9px; font-weight: 700; }
+.budget-product-field { margin: 23px 0 15px; }
+.budget-product-field > input, .budget-input-wrap { width: 100%; height: 39px; border: 1px solid #573067; border-radius: 9px; background: #29123f; transition: border-color .18s ease, box-shadow .18s ease; }
+.budget-product-field > input { padding: 0 12px; color: #f4eafe; outline: 0; font-size: 10px; }
+.budget-product-field > input::placeholder { color: #806a90; }
+.budget-product-field > input:focus, .budget-input-wrap:focus-within { border-color: #b468ff; box-shadow: 0 0 0 3px rgba(180,104,255,.12); }
+.budget-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 13px 12px; margin-top: 15px; }
+.budget-input-wrap { display: flex; align-items: center; gap: 6px; padding: 0 10px; }
+.budget-input-wrap b { flex: 0 0 auto; color: #ad7ec8; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+.budget-input-wrap input { min-width: 0; width: 100%; height: 100%; padding: 0; border: 0; outline: 0; color: #f7edff; background: transparent; font-family: 'DM Mono', monospace; font-size: 11px; }
+.budget-input-wrap input::-webkit-inner-spin-button, .budget-input-wrap input::-webkit-outer-spin-button { opacity: .45; }
+.budget-plates-note { display: flex; align-items: center; gap: 7px; padding: 10px 11px; margin-top: 14px; color: #87dbeb; border-radius: 9px; background: #123845; font-size: 8px; line-height: 1.4; }
+.budget-plates-note svg { flex: 0 0 auto; color: #00d8f5; }
+.budget-divider { height: 1px; margin: 22px 0 3px; background: #3a204e; }
+.budget-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 25px; }
+.budget-actions .secondary-button { min-height: 38px; }
+.budget-calculate-button { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 15px; color: #fff; border-radius: 9px; background: linear-gradient(135deg,#7d1ce7,#e100ac); box-shadow: 0 8px 18px rgba(171,0,222,.22); font-size: 10px; font-weight: 800; transition: transform .18s ease, box-shadow .18s ease; }
+.budget-calculate-button:hover { transform: translateY(-1px); box-shadow: 0 11px 22px rgba(171,0,222,.32); }
+.budget-calculate-button:active, .budget-actions .secondary-button:active { transform: scale(.97); }
+.budget-result-head { justify-content: space-between; }
+.budget-result-head h3 { max-width: 235px; margin-top: 6px; overflow: hidden; color: #fff0ff; text-overflow: ellipsis; white-space: nowrap; }
+.budget-result-icon { display: grid; place-items: center; width: 37px; height: 37px; color: #ff9ad7; border-radius: 11px; background: #5a1648; }
+.suggested-price { padding: 23px 0 20px; margin-top: 18px; border-top: 1px solid #4c245d; border-bottom: 1px solid #4c245d; }
+.suggested-price span, .suggested-price small { display: block; color: #bba6c5; font-size: 9px; }
+.suggested-price strong { display: block; margin: 7px 0 4px; color: #fff5ff; font-size: 34px; letter-spacing: -.055em; line-height: 1; }
+.suggested-price small { color: #78e8d4; font-size: 8px; }
+.budget-breakdown { margin-top: 16px; }
+.budget-breakdown > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+.budget-breakdown span { color: #b5a1bf; font-size: 9px; }.budget-breakdown strong { color: #eee1f6; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }.budget-breakdown .pink-value { color: #ff8bcf; }
+.budget-breakdown-divider { height: 1px; padding: 0 !important; margin: 4px 0; background: #432253; }
+.budget-formula { display: flex; align-items: flex-start; gap: 7px; padding: 10px; margin-top: 19px; color: #bf9dd3; border-radius: 8px; background: #2a123e; font-size: 8px; line-height: 1.45; }.budget-formula svg { flex: 0 0 auto; color: #d990ff; }
+@media (max-width: 980px) { .budget-layout { grid-template-columns: 1fr; }.budget-result-card { position: static; }.budget-result-head h3 { max-width: none; } }
+@media (max-width: 480px) { .budget-form-card, .budget-result-card { padding: 16px; }.budget-heading { flex-direction: column; }.budget-fields-grid { grid-template-columns: 1fr; }.budget-actions { flex-direction: column-reverse; }.budget-actions button { justify-content: center; width: 100%; }.suggested-price strong { font-size: 30px; } }
