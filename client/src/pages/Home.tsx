@@ -267,7 +267,10 @@ function BudgetView() {
     window.localStorage.setItem("falcaorosa3d-spreadsheet", JSON.stringify(spreadsheet));
   }, [spreadsheet]);
 
-  const plateTotal = input.plateCosts.reduce((total, cost) => total + Math.max(0, Number.isFinite(cost) ? cost : 0), 0);
+  const plateTotal = input.plateCosts.reduce<number>((total, cost) => {
+    const numericCost = Number(cost);
+    return total + (Number.isFinite(numericCost) ? Math.max(0, numericCost) : 0);
+  }, 0);
 
   const updateNumber = (field: Exclude<keyof BudgetInput, "productId" | "productName" | "plateCosts">, value: string) => {
     const parsed = Number(value.replace(",", "."));
@@ -275,8 +278,7 @@ function BudgetView() {
   };
 
   const updatePlate = (index: number, value: string) => {
-    const parsed = Number(value.replace(",", "."));
-    setInput((current) => ({ ...current, plateCosts: current.plateCosts.map((cost, plateIndex) => plateIndex === index ? (Number.isFinite(parsed) ? parsed : 0) : cost) }));
+    setInput((current) => ({ ...current, plateCosts: current.plateCosts.map((cost, plateIndex) => plateIndex === index ? value : cost) }));
   };
 
   const addPlate = () => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts, 0] }));
@@ -367,7 +369,7 @@ function BudgetView() {
           <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>O ID e o nome identificam o item no controle de vendas.</p></div></div>
           <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>somente números</i></span><input className="budget-text-input" type="text" inputMode="numeric" pattern="[0-9]*" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value.replace(/\D/g, "") })); }} placeholder="Ex.: 1001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div></div>
-          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className="plate-row" key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="number" inputMode="decimal" min="0" step="0.01" value={cost} onChange={(event) => updatePlate(index, event.target.value)} /></div></label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
+          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className="plate-row" key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="number" inputMode="decimal" min="0" step="0.01" value={String(cost)} onChange={(event) => updatePlate(index, event.target.value)} /></div></label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
           <div className="plate-add-row"><button className="add-plate-button" onClick={addPlate}><Plus size={14} /> Adicionar placa</button></div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
           <div className="budget-plates-note"><ReceiptText size={15} /><span>Exemplo: placa 1 R$ 2,50 + placa 2 R$ 2,40 = R$ 4,90 no custo do Orca.</span></div>

@@ -14,7 +14,7 @@ export const DEFAULT_BUDGET_INPUT = {
 export type BudgetInput = {
   productId: string;
   productName: string;
-  plateCosts: readonly number[];
+  plateCosts: readonly (number | string)[];
   otherCosts: number;
   mkp: number;
   lossPercentage: number;
@@ -48,7 +48,10 @@ const money = (value: number) => Math.round(((Number.isFinite(value) ? value : 0
 const percentage = (value: number) => Math.max(0, Number.isFinite(value) ? value : 0) / 100;
 
 export function calculateBudget(input: BudgetInput): BudgetResult {
-  const materialCost = money(input.plateCosts.reduce((total, cost) => total + Math.max(0, Number.isFinite(cost) ? cost : 0), 0));
+  const materialCost = money(input.plateCosts.reduce<number>((total, cost) => {
+    const numericCost = Number(cost);
+    return total + (Number.isFinite(numericCost) ? Math.max(0, numericCost) : 0);
+  }, 0));
   const costWithOtherExpenses = money(materialCost + Math.max(0, input.otherCosts));
   const lossCost = money(costWithOtherExpenses * percentage(input.lossPercentage));
   const depreciationCost = money(costWithOtherExpenses * percentage(input.depreciationPercentage));
