@@ -1,4 +1,5 @@
 export const DEFAULT_BUDGET_INPUT = {
+  productId: "FALCAO-001",
   productName: "Vaso orgânico v3",
   plateCosts: [18.9],
   otherCosts: 3.44,
@@ -11,6 +12,7 @@ export const DEFAULT_BUDGET_INPUT = {
 } as const;
 
 export type BudgetInput = {
+  productId: string;
   productName: string;
   plateCosts: readonly number[];
   otherCosts: number;

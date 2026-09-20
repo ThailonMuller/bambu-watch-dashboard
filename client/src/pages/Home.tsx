@@ -241,14 +241,35 @@ function BudgetField({ label, value, onChange, prefix, suffix, step = "0.01", mi
   );
 }
 
+type SpreadsheetItem = {
+  productId: string;
+  productName: string;
+  cost: number;
+  salePrice: number;
+  addedAt: string;
+};
+
 function BudgetView() {
   const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
   const [hasCalculated, setHasCalculated] = useState(false);
+  const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>([]);
+  const [spreadsheetError, setSpreadsheetError] = useState("");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("falcaorosa3d-spreadsheet");
+    if (saved) {
+      try { setSpreadsheet(JSON.parse(saved) as SpreadsheetItem[]); } catch { /* ignore invalid local spreadsheet */ }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("falcaorosa3d-spreadsheet", JSON.stringify(spreadsheet));
+  }, [spreadsheet]);
 
   const plateTotal = input.plateCosts.reduce((total, cost) => total + Math.max(0, Number.isFinite(cost) ? cost : 0), 0);
 
-  const updateNumber = (field: Exclude<keyof BudgetInput, "productName" | "plateCosts">, value: string) => {
+  const updateNumber = (field: Exclude<keyof BudgetInput, "productId" | "productName" | "plateCosts">, value: string) => {
     const parsed = Number(value.replace(",", "."));
     setInput((current) => ({ ...current, [field]: Number.isFinite(parsed) ? parsed : 0 }));
   };
@@ -273,16 +294,68 @@ function BudgetView() {
     setInput(defaults);
     setResult(calculateBudget(defaults));
     setHasCalculated(false);
+    setSpreadsheetError("");
     toast.info("Valores padrão restaurados");
+  };
+
+  const addToSpreadsheet = () => {
+    const productId = input.productId.trim();
+    const productName = input.productName.trim();
+    if (!productId) {
+      setSpreadsheetError("Informe o ID do produto antes de adicionar à planilha.");
+      toast.error("ID do produto obrigatório");
+      return;
+    }
+    if (!productName) {
+      setSpreadsheetError("Informe o nome do produto antes de adicionar à planilha.");
+      toast.error("Nome do produto obrigatório");
+      return;
+    }
+    setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.suggestedPrice, addedAt: new Date().toLocaleDateString("pt-BR") }]);
+    setSpreadsheetError("");
+    toast.success("Produto adicionado à planilha", { description: `${productName} está pronto para controle interno.` });
+  };
+
+  const removeSpreadsheetItem = (index: number) => setSpreadsheet((current) => current.filter((_, itemIndex) => itemIndex !== index));
+
+  const newSpreadsheet = () => {
+    if (spreadsheet.length > 0) window.localStorage.setItem("falcaorosa3d-last-spreadsheet", JSON.stringify(spreadsheet));
+    setSpreadsheet([]);
+    setSpreadsheetError("");
+    toast.info("Nova planilha criada", { description: "A planilha atual foi guardada para restauração." });
+  };
+
+  const restoreLastSpreadsheet = () => {
+    const saved = window.localStorage.getItem("falcaorosa3d-last-spreadsheet");
+    if (!saved) { toast.info("Nenhuma planilha anterior encontrada"); return; }
+    try {
+      setSpreadsheet(JSON.parse(saved) as SpreadsheetItem[]);
+      setSpreadsheetError("");
+      toast.success("Última planilha restaurada");
+    } catch { toast.error("Não foi possível restaurar a última planilha"); }
+  };
+
+  const downloadSpreadsheet = () => {
+    if (spreadsheet.length === 0) { toast.info("Adicione pelo menos um produto antes de baixar"); return; }
+    const rows = [["ID do produto", "Nome do produto", "Custo operacional", "Valor de venda", "Adicionado em"], ...spreadsheet.map((item) => [item.productId, item.productName, item.cost.toFixed(2).replace(".", ","), item.salePrice.toFixed(2).replace(".", ","), item.addedAt])];
+    const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(";" )).join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "planilha-falcao-rosa3d.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Download iniciado");
   };
 
   return (
     <div className="budget-view">
-      <div className="section-heading budget-heading"><div><p className="eyebrow">PRECIFICAÇÃO</p><h2>Simulador de orçamento</h2><p>Monte um preço de venda com base no custo real de cada placa e nas taxas do marketplace.</p></div><div className="budget-safe-note"><Calculator size={16} /> cálculo local</div></div>
+      <div className="section-heading budget-heading"><div><p className="eyebrow">PRECIFICAÇÃO</p><h2>Simulador de orçamento</h2><p>Monte um preço de venda e adicione o produto à planilha de controle interno.</p></div><div className="budget-safe-note"><Calculator size={16} /> cálculo local</div></div>
       <div className="budget-layout">
         <section className="budget-form-card">
-          <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>Informe os custos individuais vindos do OrcaSlicer.</p></div></div>
-          <label className="budget-field budget-product-field"><span>Identificação do produto</span><input type="text" value={input.productName} onChange={(event) => setInput((current) => ({ ...current, productName: event.target.value }))} placeholder="Ex.: suporte de fone" /></label>
+          <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>O ID e o nome identificam o item no controle de vendas.</p></div></div>
+          <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value })); }} placeholder="Ex.: FALCAO-001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div><button className="add-plate-button" onClick={addPlate}><Plus size={14} /> Adicionar placa</button></div>
           <div className="plates-list">{input.plateCosts.map((cost, index) => <div className="plate-row" key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="number" inputMode="decimal" min="0" step="0.01" value={cost} onChange={(event) => updatePlate(index, event.target.value)} /></div></label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
@@ -298,8 +371,13 @@ function BudgetView() {
           <div className="suggested-price"><span>Preço sugerido de venda</span><strong>{currency(result.suggestedPrice)}</strong><small>{hasCalculated ? "calculado agora" : "com os valores padrão"}</small></div>
           <div className="budget-breakdown"><div><span>Custo das placas ({input.plateCosts.length})</span><strong>{currency(result.materialCost)}</strong></div><div><span>Outros custos</span><strong>{currency(input.otherCosts)}</strong></div><div><span>Perda + depreciação + manutenção</span><strong>{currency(result.lossCost + result.depreciationCost + result.maintenanceCost)}</strong></div><div><span>Custo operacional</span><strong>{currency(result.operationalCost)}</strong></div><div className="budget-breakdown-divider" /><div><span>Preço com MKP {input.mkp.toLocaleString("pt-BR")}x</span><strong>{currency(result.priceBeforeShopee)}</strong></div><div><span>Taxa Shopee + R$ {input.shopeeFixedFee.toFixed(2).replace(".", ",")}</span><strong className="pink-value">{currency(result.shopeeFee)}</strong></div></div>
           <div className="budget-formula"><Percent size={14} /><span>Fórmula: soma das placas + custos × percentuais → MKP → taxa Shopee</span></div>
+          <div className="budget-result-actions"><button className="spreadsheet-add-button" onClick={addToSpreadsheet}><Plus size={16} /> Adicionar à planilha</button>{spreadsheetError && <p className="spreadsheet-error" role="alert">{spreadsheetError}</p>}</div>
         </aside>
       </div>
+      <section className="spreadsheet-card">
+        <div className="spreadsheet-heading"><div><p className="eyebrow">CONTROLE INTERNO</p><h3>Planilha de produtos</h3><p>Estrutura pronta para exportar e levar ao seu fluxo do Odoo.</p></div><div className="spreadsheet-actions"><button className="sheet-button" onClick={downloadSpreadsheet}><Cloud size={14} /> Download</button><button className="sheet-button" onClick={restoreLastSpreadsheet}><RotateCcw size={14} /> Restaurar última</button><button className="sheet-button sheet-button-danger" onClick={newSpreadsheet}><Plus size={14} /> Nova planilha</button></div></div>
+        {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Custo</th><th>Valor de venda</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
+      </section>
     </div>
   );
 }
@@ -388,4 +466,3 @@ export default function Home() {
     </div>
   );
 }
-

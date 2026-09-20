@@ -17,4 +17,9 @@ describe("budget calculator", () => {
     expect(result.materialCost).toBe(4.9);
     expect(result.suggestedPrice).toBe(8.9);
   });
+
+  it("keeps product identity available for the spreadsheet record", () => {
+    expect(DEFAULT_BUDGET_INPUT.productId).toBe("FALCAO-001");
+    expect(DEFAULT_BUDGET_INPUT.productName).toBe("Vaso orgânico v3");
+  });
 });
