@@ -1,7 +1,6 @@
 export const DEFAULT_BUDGET_INPUT = {
   productName: "Vaso orgânico v3",
-  orcaPieceCost: 18.9,
-  plateCount: 1,
+  plateCosts: [18.9],
   otherCosts: 3.44,
   mkp: 2.5,
   lossPercentage: 10,
@@ -13,8 +12,7 @@ export const DEFAULT_BUDGET_INPUT = {
 
 export type BudgetInput = {
   productName: string;
-  orcaPieceCost: number;
-  plateCount: number;
+  plateCosts: readonly number[];
   otherCosts: number;
   mkp: number;
   lossPercentage: number;
@@ -40,7 +38,7 @@ const money = (value: number) => Math.round(((Number.isFinite(value) ? value : 0
 const percentage = (value: number) => Math.max(0, Number.isFinite(value) ? value : 0) / 100;
 
 export function calculateBudget(input: BudgetInput): BudgetResult {
-  const materialCost = money(Math.max(0, input.orcaPieceCost) * Math.max(1, Math.floor(input.plateCount)));
+  const materialCost = money(input.plateCosts.reduce((total, cost) => total + Math.max(0, Number.isFinite(cost) ? cost : 0), 0));
   const costWithOtherExpenses = money(materialCost + Math.max(0, input.otherCosts));
   const lossCost = money(costWithOtherExpenses * percentage(input.lossPercentage));
   const depreciationCost = money(costWithOtherExpenses * percentage(input.depreciationPercentage));

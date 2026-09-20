@@ -242,52 +242,62 @@ function BudgetField({ label, value, onChange, prefix, suffix, step = "0.01", mi
 }
 
 function BudgetView() {
-  const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT });
+  const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
   const [hasCalculated, setHasCalculated] = useState(false);
 
-  const update = (field: keyof BudgetInput, value: string) => {
-    if (field === "productName") {
-      setInput((current) => ({ ...current, productName: value }));
-      return;
-    }
+  const plateTotal = input.plateCosts.reduce((total, cost) => total + Math.max(0, Number.isFinite(cost) ? cost : 0), 0);
+
+  const updateNumber = (field: Exclude<keyof BudgetInput, "productName" | "plateCosts">, value: string) => {
     const parsed = Number(value.replace(",", "."));
     setInput((current) => ({ ...current, [field]: Number.isFinite(parsed) ? parsed : 0 }));
   };
 
+  const updatePlate = (index: number, value: string) => {
+    const parsed = Number(value.replace(",", "."));
+    setInput((current) => ({ ...current, plateCosts: current.plateCosts.map((cost, plateIndex) => plateIndex === index ? (Number.isFinite(parsed) ? parsed : 0) : cost) }));
+  };
+
+  const addPlate = () => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts, 0] }));
+  const removePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: current.plateCosts.length > 1 ? current.plateCosts.filter((_, plateIndex) => plateIndex !== index) : current.plateCosts }));
+
   const calculate = () => {
-    setResult(calculateBudget(input));
+    const nextResult = calculateBudget(input);
+    setResult(nextResult);
     setHasCalculated(true);
-    toast.success("Orçamento calculado", { description: `Preço sugerido: ${currency(calculateBudget(input).suggestedPrice)}` });
+    toast.success("Orçamento calculado", { description: `Preço sugerido: ${currency(nextResult.suggestedPrice)}` });
   };
 
   const restoreDefaults = () => {
-    setInput({ ...DEFAULT_BUDGET_INPUT });
-    setResult(calculateBudget(DEFAULT_BUDGET_INPUT));
+    const defaults = { ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] };
+    setInput(defaults);
+    setResult(calculateBudget(defaults));
     setHasCalculated(false);
     toast.info("Valores padrão restaurados");
   };
 
   return (
     <div className="budget-view">
-      <div className="section-heading budget-heading"><div><p className="eyebrow">PRECIFICAÇÃO</p><h2>Simulador de orçamento</h2><p>Monte um preço de venda com base no custo real da peça e nas taxas do marketplace.</p></div><div className="budget-safe-note"><Calculator size={16} /> cálculo local</div></div>
+      <div className="section-heading budget-heading"><div><p className="eyebrow">PRECIFICAÇÃO</p><h2>Simulador de orçamento</h2><p>Monte um preço de venda com base no custo real de cada placa e nas taxas do marketplace.</p></div><div className="budget-safe-note"><Calculator size={16} /> cálculo local</div></div>
       <div className="budget-layout">
         <section className="budget-form-card">
-          <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>Informe os custos que vêm do OrcaSlicer.</p></div></div>
-          <label className="budget-field budget-product-field"><span>Identificação do produto</span><input type="text" value={input.productName} onChange={(event) => update("productName", event.target.value)} placeholder="Ex.: suporte de fone" /></label>
-          <div className="budget-fields-grid"><BudgetField label="Custo da peça do Orca" value={input.orcaPieceCost} prefix="R$" onChange={(value) => update("orcaPieceCost", value)} /><BudgetField label="Quantidade de placas" value={input.plateCount} suffix="placas" step="1" min="1" onChange={(value) => update("plateCount", value)} /></div>
-          <div className="budget-plates-note"><ReceiptText size={15} /><span>Mais placas aumentam automaticamente o custo do Orca na mesma proporção.</span></div>
-          <BudgetField label="Outros custos" value={input.otherCosts} prefix="R$" onChange={(value) => update("otherCosts", value)} />
+          <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>Informe os custos individuais vindos do OrcaSlicer.</p></div></div>
+          <label className="budget-field budget-product-field"><span>Identificação do produto</span><input type="text" value={input.productName} onChange={(event) => setInput((current) => ({ ...current, productName: event.target.value }))} placeholder="Ex.: suporte de fone" /></label>
+          <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div><button className="add-plate-button" onClick={addPlate}><Plus size={14} /> Adicionar placa</button></div>
+          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className="plate-row" key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="number" inputMode="decimal" min="0" step="0.01" value={cost} onChange={(event) => updatePlate(index, event.target.value)} /></div></label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
+          <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
+          <div className="budget-plates-note"><ReceiptText size={15} /><span>Exemplo: placa 1 R$ 2,50 + placa 2 R$ 2,40 = R$ 4,90 no custo do Orca.</span></div>
+          <BudgetField label="Outros custos" value={input.otherCosts} prefix="R$" onChange={(value) => updateNumber("otherCosts", value)} />
           <div className="budget-divider" />
           <div className="budget-card-title compact"><div className="settings-symbol blue"><SlidersHorizontal size={19} /></div><div><h3>Parâmetros de preço</h3><p>Todos os valores ficam disponíveis para alteração.</p></div></div>
-          <div className="budget-fields-grid"><BudgetField label="MKP (multiplicador)" value={input.mkp} suffix="x" onChange={(value) => update("mkp", value)} /><BudgetField label="Perda" value={input.lossPercentage} suffix="%" onChange={(value) => update("lossPercentage", value)} /><BudgetField label="Depreciação" value={input.depreciationPercentage} suffix="%" onChange={(value) => update("depreciationPercentage", value)} /><BudgetField label="Manutenção" value={input.maintenancePercentage} suffix="%" onChange={(value) => update("maintenancePercentage", value)} /><BudgetField label="Taxa da Shopee" value={input.shopeePercentage} suffix="%" onChange={(value) => update("shopeePercentage", value)} /><BudgetField label="Tarifa fixa Shopee" value={input.shopeeFixedFee} prefix="R$" onChange={(value) => update("shopeeFixedFee", value)} /></div>
+          <div className="budget-fields-grid"><BudgetField label="MKP (multiplicador)" value={input.mkp} suffix="x" onChange={(value) => updateNumber("mkp", value)} /><BudgetField label="Perda" value={input.lossPercentage} suffix="%" onChange={(value) => updateNumber("lossPercentage", value)} /><BudgetField label="Depreciação" value={input.depreciationPercentage} suffix="%" onChange={(value) => updateNumber("depreciationPercentage", value)} /><BudgetField label="Manutenção" value={input.maintenancePercentage} suffix="%" onChange={(value) => updateNumber("maintenancePercentage", value)} /><BudgetField label="Taxa da Shopee" value={input.shopeePercentage} suffix="%" onChange={(value) => updateNumber("shopeePercentage", value)} /><BudgetField label="Tarifa fixa Shopee" value={input.shopeeFixedFee} prefix="R$" onChange={(value) => updateNumber("shopeeFixedFee", value)} /></div>
           <div className="budget-actions"><button className="secondary-button" onClick={restoreDefaults}><RotateCcw size={15} /> Restaurar padrão</button><button className="budget-calculate-button" onClick={calculate}><Calculator size={16} /> Calcular orçamento</button></div>
         </section>
         <aside className="budget-result-card">
           <div className="budget-result-head"><div><p className="eyebrow">RESULTADO DO SIMULADOR</p><h3>{input.productName || "Produto sem identificação"}</h3></div><div className="budget-result-icon"><DollarSign size={19} /></div></div>
           <div className="suggested-price"><span>Preço sugerido de venda</span><strong>{currency(result.suggestedPrice)}</strong><small>{hasCalculated ? "calculado agora" : "com os valores padrão"}</small></div>
-          <div className="budget-breakdown"><div><span>Custo material + placas</span><strong>{currency(result.materialCost)}</strong></div><div><span>Outros custos</span><strong>{currency(input.otherCosts)}</strong></div><div><span>Perda + depreciação + manutenção</span><strong>{currency(result.lossCost + result.depreciationCost + result.maintenanceCost)}</strong></div><div><span>Custo operacional</span><strong>{currency(result.operationalCost)}</strong></div><div className="budget-breakdown-divider" /><div><span>Preço com MKP {input.mkp.toLocaleString("pt-BR")}x</span><strong>{currency(result.priceBeforeShopee)}</strong></div><div><span>Taxa Shopee + R$ {input.shopeeFixedFee.toFixed(2).replace(".", ",")}</span><strong className="pink-value">{currency(result.shopeeFee)}</strong></div></div>
-          <div className="budget-formula"><Percent size={14} /><span>Fórmula: material + custos × percentuais → MKP → taxa Shopee</span></div>
+          <div className="budget-breakdown"><div><span>Custo das placas ({input.plateCosts.length})</span><strong>{currency(result.materialCost)}</strong></div><div><span>Outros custos</span><strong>{currency(input.otherCosts)}</strong></div><div><span>Perda + depreciação + manutenção</span><strong>{currency(result.lossCost + result.depreciationCost + result.maintenanceCost)}</strong></div><div><span>Custo operacional</span><strong>{currency(result.operationalCost)}</strong></div><div className="budget-breakdown-divider" /><div><span>Preço com MKP {input.mkp.toLocaleString("pt-BR")}x</span><strong>{currency(result.priceBeforeShopee)}</strong></div><div><span>Taxa Shopee + R$ {input.shopeeFixedFee.toFixed(2).replace(".", ",")}</span><strong className="pink-value">{currency(result.shopeeFee)}</strong></div></div>
+          <div className="budget-formula"><Percent size={14} /><span>Fórmula: soma das placas + custos × percentuais → MKP → taxa Shopee</span></div>
         </aside>
       </div>
     </div>
@@ -361,7 +371,7 @@ export default function Home() {
 
         <div className="page-content">
           {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : <>
-            <section className="hero-banner"><div className="hero-orb orb-one" /><div className="hero-orb orb-two" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Olá, Lucas <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara do que está acontecendo na sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-visual"><div className="hero-orbit orbit-a" /><div className="hero-orbit orbit-b" /><div className="hero-printer"><div className="hero-printer-top"><span /><span /><span /></div><div className="hero-printer-bed" /><div className="hero-nozzle" /></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></div></section>
+            <section className="hero-banner"><div className="hero-orb orb-one" /><div className="hero-orb orb-two" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Olá, Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara do que está acontecendo na sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-visual"><div className="hero-orbit orbit-a" /><div className="hero-orbit orbit-b" /><div className="hero-printer"><div className="hero-printer-top"><span /><span /><span /></div><div className="hero-printer-bed" /><div className="hero-nozzle" /></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></div></section>
 
             <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
             <section className="metrics-grid"><Metric icon={Printer} label="Impressoras ativas" value={`${activePrinters} / 2`} hint="todas respondendo" tone="purple" /><Metric icon={PlayCircle} label="Em impressão" value={`${busyPrinters}`} hint="A1 em andamento" tone="blue" /><Metric icon={Clock3} label="Tempo estimado" value="00h 38m" hint="para o próximo fim" tone="pink" /><Metric icon={Activity} label="Disponibilidade" value="98,4%" hint="nas últimas 24h" tone="green" /></section>

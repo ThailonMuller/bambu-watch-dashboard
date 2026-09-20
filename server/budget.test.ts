@@ -12,9 +12,9 @@ describe("budget calculator", () => {
     expect(result.suggestedPrice).toBe(84.44);
   });
 
-  it("multiplies Orca cost by the number of plates", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCount: 3, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 4 });
-    expect(result.materialCost).toBe(56.7);
-    expect(result.suggestedPrice).toBe(60.7);
+  it("sums each Orca plate independently", () => {
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [2.5, 2.4], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 4 });
+    expect(result.materialCost).toBe(4.9);
+    expect(result.suggestedPrice).toBe(8.9);
   });
 });
