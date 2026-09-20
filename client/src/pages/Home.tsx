@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CircleGauge,
   CircleHelp,
+  Copy,
   DollarSign,
   Package,
   Percent,
@@ -40,9 +41,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateBudget, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
+import { debitStock, isLowStock } from "../../../shared/filament";
 
 type PrinterState = "printing" | "idle" | "offline";
-type View = "overview" | "printers" | "settings" | "budget";
+type View = "overview" | "printers" | "settings" | "budget" | "filaments";
 
 type PrinterData = {
   id: string;
@@ -105,6 +107,7 @@ const navItems: { id: View; label: string; icon: typeof CircleGauge }[] = [
   { id: "printers", label: "Impressoras", icon: Printer },
   { id: "settings", label: "Configuração", icon: Settings2 },
   { id: "budget", label: "Orçamentos", icon: Calculator },
+  { id: "filaments", label: "Filamentos", icon: Layers3 },
 ];
 
 function statusLabel(state: PrinterState) {
@@ -249,10 +252,89 @@ type SpreadsheetItem = {
   addedAt: string;
 };
 
+type FilamentItem = {
+  id: number;
+  name: string;
+  material: string;
+  color: string;
+  grams: number;
+  lowThreshold: number;
+};
+
+type FilamentDebit = {
+  id: number;
+  piece: string;
+  grams: number;
+  color: string;
+  status: "pending" | "approved" | "rejected";
+};
+
+const initialFilaments: FilamentItem[] = [
+  { id: 1, name: "PLA Silk Violeta", material: "PLA", color: "#9b4dff", grams: 820, lowThreshold: 200 },
+  { id: 2, name: "PLA Ciano", material: "PLA", color: "#00d8f5", grams: 145, lowThreshold: 200 },
+];
+
+const initialDebits: FilamentDebit[] = [
+  { id: 1, piece: "suporte-fone-final.3mf", grams: 38, color: "#9b4dff", status: "pending" },
+  { id: 2, piece: "vaso-organico-v3.3mf", grams: 76, color: "#00d8f5", status: "pending" },
+];
+
+function FilamentsView() {
+  const [filaments, setFilaments] = useState<FilamentItem[]>(() => {
+    try { return JSON.parse(window.localStorage.getItem("falcaorosa3d-filaments") || "null") || initialFilaments; } catch { return initialFilaments; }
+  });
+  const [debits, setDebits] = useState<FilamentDebit[]>(() => {
+    try { return JSON.parse(window.localStorage.getItem("falcaorosa3d-filament-debits") || "null") || initialDebits; } catch { return initialDebits; }
+  });
+  const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", color: "#9b4dff", grams: "", lowThreshold: "200" });
+  const [newDebit, setNewDebit] = useState({ piece: "", grams: "", color: "#9b4dff" });
+
+  useEffect(() => { window.localStorage.setItem("falcaorosa3d-filaments", JSON.stringify(filaments)); }, [filaments]);
+  useEffect(() => { window.localStorage.setItem("falcaorosa3d-filament-debits", JSON.stringify(debits)); }, [debits]);
+
+  const addFilament = () => {
+    const grams = Number(newFilament.grams);
+    const lowThreshold = Number(newFilament.lowThreshold);
+    if (!newFilament.name.trim() || !Number.isFinite(grams) || grams < 0) { toast.error("Informe o nome e uma quantidade válida em gramas"); return; }
+    setFilaments((current) => [...current, { id: Date.now(), name: newFilament.name.trim(), material: newFilament.material, color: newFilament.color, grams, lowThreshold: Number.isFinite(lowThreshold) && lowThreshold >= 0 ? lowThreshold : 0 }]);
+    setNewFilament({ name: "", material: "PLA", color: "#9b4dff", grams: "", lowThreshold: "200" });
+    toast.success("Filamento adicionado ao estoque");
+  };
+
+  const addDebit = () => {
+    const grams = Number(newDebit.grams);
+    if (!newDebit.piece.trim() || !Number.isFinite(grams) || grams <= 0) { toast.error("Informe a peça e uma quantidade de débito maior que zero"); return; }
+    setDebits((current) => [...current, { id: Date.now(), piece: newDebit.piece.trim(), grams, color: newDebit.color, status: "pending" }]);
+    setNewDebit({ piece: "", grams: "", color: "#9b4dff" });
+    toast.info("Débito aguardando confirmação");
+  };
+
+  const updateFilament = (id: number, patch: Partial<FilamentItem>) => setFilaments((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item));
+  const approveDebit = (debit: FilamentDebit) => {
+    setFilaments((current) => {
+      const matchingIndex = current.findIndex((item) => item.color.toLowerCase() === debit.color.toLowerCase());
+      if (matchingIndex < 0) return current;
+      return current.map((item, index) => index === matchingIndex ? { ...item, grams: debitStock(item.grams, debit.grams) } : item);
+    });
+    setDebits((current) => current.map((item) => item.id === debit.id ? { ...item, status: "approved" } : item));
+    toast.success("Débito aprovado", { description: `${debit.grams} g descontados do estoque compatível para ${debit.piece}.` });
+  };
+  const rejectDebit = (id: number) => { setDebits((current) => current.map((item) => item.id === id ? { ...item, status: "rejected" } : item)); toast.info("Débito rejeitado"); };
+  const pendingDebits = debits.filter((item) => item.status === "pending");
+
+  return <div className="filaments-view">
+    <div className="section-heading"><div><p className="eyebrow">MATERIAIS</p><h2>Consumo de filamentos</h2><p>Controle seu estoque em gramas e confirme os débitos gerados pelas impressões.</p></div><div className="budget-safe-note"><LockKeyhole size={16} /> controle local</div></div>
+    <section className="filament-add-card"><div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><div><h3>Adicionar filamento</h3><p>Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p></div></div><div className="filament-form-grid"><label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label><label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label><label className="budget-field"><span>Quantidade (g)</span><input className="budget-text-input" type="number" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label><label className="budget-field"><span>Avisar abaixo de (g)</span><input className="budget-text-input" type="number" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label><label className="budget-field color-field"><span>Cor da bobina</span><div className="color-input-wrap"><input type="color" value={newFilament.color} onChange={(event) => setNewFilament((current) => ({ ...current, color: event.target.value }))} /><code>{newFilament.color.toUpperCase()}</code></div></label><button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button></div></section>
+    <div className="filament-stock-grid">{filaments.map((item) => { const low = isLowStock(item.grams, item.lowThreshold); return <article className={`filament-spool-card ${low ? "is-low" : ""}`} key={item.id}><div className="spool-top"><div className="spool-disc" style={{ background: `linear-gradient(135deg, ${item.color}, #241035)` }}><span /></div><div className="spool-copy"><div><span className="filament-material">{item.material}</span>{low && <span className="low-badge"><AlertCircle size={11} /> Filamento baixo</span>}</div><h3>{item.name}</h3><p>Limite de aviso: {item.lowThreshold} g</p></div><input className="inline-color-input" type="color" value={item.color} onChange={(event) => updateFilament(item.id, { color: event.target.value })} aria-label={`Editar cor de ${item.name}`} /></div><div className="spool-amount"><strong>{item.grams} g</strong><span>disponíveis</span></div><div className="stock-progress"><span style={{ width: `${Math.min(100, Math.max(4, item.grams / Math.max(item.lowThreshold * 5, 1) * 100))}%`, background: item.color }} /></div><div className="spool-edit-row"><label>Estoque (g)<input type="number" min="0" value={item.grams} onChange={(event) => updateFilament(item.id, { grams: Math.max(0, Number(event.target.value) || 0) })} /></label><label>Aviso (g)<input type="number" min="0" value={item.lowThreshold} onChange={(event) => updateFilament(item.id, { lowThreshold: Math.max(0, Number(event.target.value) || 0) })} /></label></div></article>; })}</div>
+    <section className="debit-card"><div className="filament-card-heading"><div className="settings-symbol pink"><ReceiptText size={19} /></div><div><h3>Débitos de filamentos</h3><p>Confirme ou rejeite o material usado por cada impressão.</p></div><span className="pending-count">{pendingDebits.length} aguardando</span></div><div className="debit-add-row"><input className="budget-text-input" value={newDebit.piece} onChange={(event) => setNewDebit((current) => ({ ...current, piece: event.target.value }))} placeholder="Nome da peça / arquivo" /><input className="budget-text-input grams-input" type="number" min="0" step="1" value={newDebit.grams} onChange={(event) => setNewDebit((current) => ({ ...current, grams: event.target.value }))} placeholder="g" /><input className="debit-color" type="color" value={newDebit.color} onChange={(event) => setNewDebit((current) => ({ ...current, color: event.target.value }))} aria-label="Cor do débito" /><button className="filament-primary-button" onClick={addDebit}><Plus size={15} /> Adicionar débito</button></div><div className="debit-list">{debits.map((debit) => <div className={`debit-row debit-${debit.status}`} key={debit.id}><span className="debit-color-dot" style={{ background: debit.color }} /><div className="debit-copy"><strong>{debit.piece}</strong><span>{debit.grams} g · {debit.status === "pending" ? "aguardando confirmação" : debit.status === "approved" ? "aprovado" : "rejeitado"}</span></div>{debit.status === "pending" ? <div className="debit-actions"><button className="approve-button" onClick={() => approveDebit(debit)}><Check size={14} /> Aprovar</button><button className="reject-button" onClick={() => rejectDebit(debit.id)}><X size={14} /> Rejeitar</button></div> : <span className="debit-status-label">{debit.status === "approved" ? "Confirmado" : "Rejeitado"}</span>}</div>)}</div></section>
+  </div>;
+}
+
 function BudgetView() {
   const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
   const [hasCalculated, setHasCalculated] = useState(false);
+  const [calculationNotice, setCalculationNotice] = useState("");
   const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>([]);
   const [spreadsheetError, setSpreadsheetError] = useState("");
   const [focusedPlateIndex, setFocusedPlateIndex] = useState<number | null>(null);
@@ -298,12 +380,14 @@ function BudgetView() {
   };
 
   const addPlate = () => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts, 0] }));
+  const duplicatePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts.slice(0, index + 1), current.plateCosts[index] ?? 0, ...current.plateCosts.slice(index + 1)] }));
   const removePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: current.plateCosts.length > 1 ? current.plateCosts.filter((_, plateIndex) => plateIndex !== index) : current.plateCosts }));
 
   const calculate = () => {
     const nextResult = calculateBudget(input);
     setResult(nextResult);
     setHasCalculated(true);
+    setCalculationNotice(`Orçamento recalculado com ${input.plateCosts.length} ${input.plateCosts.length === 1 ? "placa" : "placas"}.`);
     toast.success("Orçamento calculado", { description: `Preço sugerido: ${currency(nextResult.suggestedPrice)}` });
   };
 
@@ -385,7 +469,7 @@ function BudgetView() {
           <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>O ID e o nome identificam o item no controle de vendas.</p></div></div>
           <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>somente números</i></span><input className="budget-text-input" type="text" inputMode="numeric" pattern="[0-9]*" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value.replace(/\D/g, "") })); }} placeholder="Ex.: 1001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div></div>
-          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div>)}</div>
+          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><div className="plate-actions"><button className="duplicate-plate-button" onClick={() => duplicatePlate(index)} aria-label={`Duplicar placa ${index + 1}`}><Copy size={14} /></button><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div></div>)}</div>
           <div className="plate-add-row"><button className="add-plate-button" onClick={addPlate}><Plus size={14} /> Adicionar placa</button></div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
           <div className="budget-plates-note"><ReceiptText size={15} /><span>Exemplo: placa 1 R$ 2,50 + placa 2 R$ 2,40 = R$ 4,90 no custo do Orca.</span></div>
@@ -394,6 +478,7 @@ function BudgetView() {
           <div className="budget-card-title compact"><div className="settings-symbol blue"><SlidersHorizontal size={19} /></div><div><h3>Parâmetros de preço</h3><p>Todos os valores ficam disponíveis para alteração.</p></div></div>
           <div className="budget-fields-grid"><BudgetField label="MKP (multiplicador)" value={input.mkp} suffix="x" onChange={(value) => updateNumber("mkp", value)} /><BudgetField label="Perda" value={input.lossPercentage} suffix="%" onChange={(value) => updateNumber("lossPercentage", value)} /><BudgetField label="Depreciação" value={input.depreciationPercentage} suffix="%" onChange={(value) => updateNumber("depreciationPercentage", value)} /><BudgetField label="Manutenção" value={input.maintenancePercentage} suffix="%" onChange={(value) => updateNumber("maintenancePercentage", value)} /><BudgetField label="Taxa da Shopee" value={input.shopeePercentage} suffix="%" onChange={(value) => updateNumber("shopeePercentage", value)} /><BudgetField label="Tarifa fixa Shopee" value={input.shopeeFixedFee} prefix="R$" onChange={(value) => updateNumber("shopeeFixedFee", value)} /></div>
           <div className="budget-actions"><button className="secondary-button" onClick={restoreDefaults}><RotateCcw size={15} /> Restaurar padrão</button><button className="budget-calculate-button" onClick={calculate}><Calculator size={16} /> Calcular orçamento</button></div>
+          {calculationNotice && <div className="calculation-notice" role="status"><CheckCircle2 size={15} /><span>{calculationNotice}</span></div>}
         </section>
         <aside className="budget-result-card">
           <div className="budget-result-head"><div><p className="eyebrow">RESULTADO DO SIMULADOR</p><h3>{input.productName || "Produto sem identificação"}</h3></div><div className="budget-result-icon"><DollarSign size={19} /></div></div>
@@ -477,7 +562,7 @@ export default function Home() {
         <header className="topbar"><button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={20} /></button><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></header>
 
         <div className="page-content">
-          {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : <>
+          {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
             <section className="hero-banner"><div className="hero-orb orb-one" /><div className="hero-orb orb-two" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Olá, Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara do que está acontecendo na sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-visual"><div className="hero-orbit orbit-a" /><div className="hero-orbit orbit-b" /><div className="hero-printer"><div className="hero-printer-top"><span /><span /><span /></div><div className="hero-printer-bed" /><div className="hero-nozzle" /></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></div></section>
 
             <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
