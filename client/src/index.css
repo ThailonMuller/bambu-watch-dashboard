@@ -420,6 +420,7 @@ html, body { background: #160a24; color: #f7f1ff; }
 .plates-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:21px 0 12px; }
 .budget-section-label { display:block; color:#f2e6fa; font-size:10px; font-weight:800; }
 .plates-header small { display:block; margin-top:4px; color:#9f8aac; font-size:8px; }
+.plate-add-row { display:flex; justify-content:flex-start; margin-top:10px; }
 .add-plate-button { display:inline-flex; align-items:center; gap:6px; min-height:31px; padding:0 10px; color:#eab8ff; border:1px solid #633b7f; border-radius:8px; background:#32144d; font-size:9px; font-weight:800; white-space:nowrap; transition:background .18s ease, border-color .18s ease, transform .18s ease; }
 .add-plate-button:hover { border-color:#b468ff; background:#40145f; }.add-plate-button:active { transform:scale(.97); }
 .plates-list { display:grid; gap:9px; }

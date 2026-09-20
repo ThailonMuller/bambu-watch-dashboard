@@ -4,12 +4,12 @@ import { calculateBudget, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidPr
 describe("budget calculator", () => {
   it("calculates the default quote and includes the fixed Shopee fee", () => {
     const result = calculateBudget(DEFAULT_BUDGET_INPUT);
-    expect(result.materialCost).toBe(18.9);
-    expect(result.costWithOtherExpenses).toBe(22.34);
-    expect(result.operationalCost).toBe(26.81);
-    expect(result.priceBeforeShopee).toBe(67.03);
-    expect(result.shopeeFee).toBe(17.41);
-    expect(result.suggestedPrice).toBe(84.44);
+    expect(result.materialCost).toBe(0);
+    expect(result.costWithOtherExpenses).toBe(3.44);
+    expect(result.operationalCost).toBe(4.12);
+    expect(result.priceBeforeShopee).toBe(10.3);
+    expect(result.shopeeFee).toBe(6.06);
+    expect(result.suggestedPrice).toBe(16.36);
   });
 
   it("sums each Orca plate independently", () => {

@@ -1,7 +1,7 @@
 export const DEFAULT_BUDGET_INPUT = {
   productId: "1001",
   productName: "Vaso orgânico v3",
-  plateCosts: [18.9],
+  plateCosts: [0],
   otherCosts: 3.44,
   mkp: 2.5,
   lossPercentage: 10,
