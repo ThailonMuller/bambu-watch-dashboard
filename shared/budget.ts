@@ -3,7 +3,7 @@ export const DEFAULT_BUDGET_INPUT = {
   productName: "Vaso orgânico v3",
   plateCosts: [0],
   otherCosts: 3.44,
-  mkp: 2.5,
+  mkp: 130,
   lossPercentage: 10,
   depreciationPercentage: 5,
   maintenancePercentage: 5,
@@ -57,7 +57,7 @@ export function calculateBudget(input: BudgetInput): BudgetResult {
   const depreciationCost = money(costWithOtherExpenses * percentage(input.depreciationPercentage));
   const maintenanceCost = money(costWithOtherExpenses * percentage(input.maintenancePercentage));
   const operationalCost = money(costWithOtherExpenses + lossCost + depreciationCost + maintenanceCost);
-  const priceBeforeShopee = money(operationalCost * Math.max(0, input.mkp));
+  const priceBeforeShopee = money(operationalCost * percentage(input.mkp));
   const shopeeFee = money(priceBeforeShopee * percentage(input.shopeePercentage) + Math.max(0, input.shopeeFixedFee));
 
   return {

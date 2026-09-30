@@ -7,25 +7,25 @@ describe("budget calculator", () => {
     expect(result.materialCost).toBe(0);
     expect(result.costWithOtherExpenses).toBe(3.44);
     expect(result.operationalCost).toBe(4.12);
-    expect(result.priceBeforeShopee).toBe(10.3);
-    expect(result.shopeeFee).toBe(6.06);
-    expect(result.suggestedPrice).toBe(16.36);
+    expect(result.priceBeforeShopee).toBe(5.36);
+    expect(result.shopeeFee).toBe(5.07);
+    expect(result.suggestedPrice).toBe(10.43);
   });
 
   it("sums each Orca plate independently", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [2.5, 2.4], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 4 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [2.5, 2.4], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 4 });
     expect(result.materialCost).toBe(4.9);
     expect(result.suggestedPrice).toBe(8.9);
   });
 
   it("treats an empty plate field as zero while accepting typed decimals", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["", "2.50"], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 0 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["", "2.50"], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
     expect(result.materialCost).toBe(2.5);
     expect(result.suggestedPrice).toBe(2.5);
   });
 
   it("does not include negative plate values in the material cost", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 1, shopeePercentage: 0, shopeeFixedFee: 0 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
     expect(result.materialCost).toBe(2);
   });
 

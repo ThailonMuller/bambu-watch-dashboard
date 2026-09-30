@@ -466,3 +466,20 @@ html, body { background: #160a24; color: #f7f1ff; }
 /* Compact debit controls: color, grams and add action stay on one line */
 .debit-add-controls { grid-template-columns:39px minmax(100px, 190px) auto; justify-content:start; }.debit-add-controls .grams-input { width:100%; }.debit-add-controls .filament-primary-button { white-space:nowrap; }
 @media (max-width:600px) { .debit-add-controls { grid-template-columns:39px minmax(0, 1fr) auto; }.debit-add-controls .filament-primary-button { grid-column:auto; width:auto; } }
+
+/* Accessibility/readability and themed form controls */
+body { font-size:15px; }
+.app-shell p, .app-shell span, .app-shell label, .app-shell button, .app-shell input, .app-shell select, .app-shell small { font-size:max(12px, 1em); }
+.app-shell .eyebrow, .app-shell .metric-label, .app-shell .metric-hint, .app-shell .printer-meta, .app-shell .budget-field > span i { font-size:12px; }
+.app-shell input, .app-shell select { min-height:36px; }
+input[type="number"] { color-scheme:dark; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { opacity:1; filter: invert(72%) sepia(58%) saturate(784%) hue-rotate(220deg) brightness(96%) contrast(92%); }
+input[type="number"] { appearance:auto; }
+select { color-scheme:dark; }
+.debit-add-controls { grid-template-columns:minmax(190px,1.5fr) 39px minmax(105px,190px) auto; justify-content:start; }
+.debit-spool-select { width:100%; height:39px; padding:0 10px; color:#f4eafe; border:1px solid #65418a; border-radius:9px; outline:0; background:#29123f; }
+.debit-spool-select:focus { border-color:#b468ff; box-shadow:0 0 0 2px rgba(180,104,255,.14); }
+.stock-warning { display:flex; align-items:center; gap:8px; margin-top:9px; padding:10px 12px; color:#ffc0d9; border:1px solid #a64d78; border-radius:9px; background:#411a3c; font-size:12px; font-weight:700; }
+.stock-warning svg { flex:0 0 auto; color:#ff82b5; }
+@media (max-width:1000px) { .debit-add-controls { grid-template-columns:minmax(160px,1.4fr) 39px minmax(100px,170px) auto; } }
+@media (max-width:600px) { .debit-add-controls { grid-template-columns:minmax(0,1fr) 39px minmax(100px,1fr) auto; }.debit-add-controls .filament-primary-button { grid-column:auto; width:auto; padding:0 9px; }.debit-spool-select { grid-column:1 / -1; } }
