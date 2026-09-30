@@ -483,3 +483,11 @@ select { color-scheme:dark; }
 .stock-warning svg { flex:0 0 auto; color:#ff82b5; }
 @media (max-width:1000px) { .debit-add-controls { grid-template-columns:minmax(160px,1.4fr) 39px minmax(100px,170px) auto; } }
 @media (max-width:600px) { .debit-add-controls { grid-template-columns:minmax(0,1fr) 39px minmax(100px,1fr) auto; }.debit-add-controls .filament-primary-button { grid-column:auto; width:auto; padding:0 9px; }.debit-spool-select { grid-column:1 / -1; } }
+
+/* Debit stock visibility and history spool editing */
+.debit-stock-remaining { display:block; margin-top:4px; color:#b99bc8; font-size:11px; line-height:1.4; }
+.debit-stock-remaining b { color:#f2dfff; font-family:'DM Mono',monospace; }
+.history-edit-spool { min-width:180px; min-height:34px; padding:0 8px; color:#f4eafe; border:1px solid #65418a; border-radius:8px; background:#29123f; }
+.history-edit-spool:focus { border-color:#b468ff; outline:0; box-shadow:0 0 0 2px rgba(180,104,255,.14); }
+.history-edit-row { align-items:center; }
+@media (max-width:700px) { .debit-stock-remaining { font-size:10px; }.history-edit-spool { width:100%; order:5; }.history-edit-row .history-save-button, .history-edit-row .history-cancel-button { order:6; } }

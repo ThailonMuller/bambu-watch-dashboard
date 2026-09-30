@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { debitStock, isLowStock } from "../shared/filament";
+import { debitStock, isLowStock, remainingAfterDebit } from "../shared/filament";
 
 describe("filament inventory", () => {
   it("flags stock at or below the configured threshold", () => {
@@ -10,5 +10,10 @@ describe("filament inventory", () => {
   it("never makes stock negative when approving a debit", () => {
     expect(debitStock(145, 38)).toBe(107);
     expect(debitStock(20, 50)).toBe(0);
+  });
+
+  it("shows the remaining stock after a pending debit", () => {
+    expect(remainingAfterDebit(145, 38)).toBe(107);
+    expect(remainingAfterDebit(20, 50)).toBe(0);
   });
 });
