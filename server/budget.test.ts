@@ -1,15 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId } from "../shared/budget";
+import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("calculates the default quote and includes the fixed Shopee fee", () => {
     const result = calculateBudget(DEFAULT_BUDGET_INPUT);
     expect(result.materialCost).toBe(0);
     expect(result.costWithOtherExpenses).toBe(3.44);
-    expect(result.operationalCost).toBe(4.12);
-    expect(result.priceBeforeShopee).toBe(5.36);
-    expect(result.shopeeFee).toBe(5.07);
-    expect(result.suggestedPrice).toBe(10.43);
+    expect(result.operationalCost).toBe(3.95);
+    expect(result.priceBeforeShopee).toBe(5.14);
+    expect(result.shopeeFee).toBe(4.72);
+    expect(result.suggestedPrice).toBe(9.86);
+  });
+
+  it("keeps the store defaults aligned with the requested rates", () => {
+    expect(DEFAULT_BUDGET_INPUT).toMatchObject({ mkp: 130, lossPercentage: 10, depreciationPercentage: 3, maintenancePercentage: 2, shopeePercentage: 14, shopeeFixedFee: 4 });
+  });
+
+  it("keeps the custom defaults aligned with the requested rates", () => {
+    expect(CUSTOM_BUDGET_INPUT).toMatchObject({ mkp: 150, lossPercentage: 30, depreciationPercentage: 3, maintenancePercentage: 2, shopeePercentage: 14, shopeeFixedFee: 4 });
+  });
+
+  it("calculates the custom quote with its own defaults", () => {
+    const result = calculateBudget(CUSTOM_BUDGET_INPUT);
+    expect(result.operationalCost).toBe(4.64);
+    expect(result.priceBeforeShopee).toBe(6.96);
+    expect(result.shopeeFee).toBe(4.97);
+    expect(result.suggestedPrice).toBe(11.93);
   });
 
   it("sums each Orca plate independently", () => {

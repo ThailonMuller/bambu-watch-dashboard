@@ -1,15 +1,26 @@
-export const DEFAULT_BUDGET_INPUT = {
+export const STORE_BUDGET_INPUT = {
   productId: "1001",
   productName: "Vaso orgânico v3",
   plateCosts: [0],
   otherCosts: 3.44,
   mkp: 130,
   lossPercentage: 10,
-  depreciationPercentage: 5,
-  maintenancePercentage: 5,
-  shopeePercentage: 20,
+  depreciationPercentage: 3,
+  maintenancePercentage: 2,
+  shopeePercentage: 14,
   shopeeFixedFee: 4,
 } as const;
+
+export const CUSTOM_BUDGET_INPUT = {
+  ...STORE_BUDGET_INPUT,
+  mkp: 150,
+  lossPercentage: 30,
+  depreciationPercentage: 3,
+  maintenancePercentage: 2,
+  shopeePercentage: 14,
+} as const;
+
+export const DEFAULT_BUDGET_INPUT = STORE_BUDGET_INPUT;
 
 export type BudgetInput = {
   productId: string;

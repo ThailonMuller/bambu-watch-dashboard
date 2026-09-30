@@ -491,3 +491,11 @@ select { color-scheme:dark; }
 .history-edit-spool:focus { border-color:#b468ff; outline:0; box-shadow:0 0 0 2px rgba(180,104,255,.14); }
 .history-edit-row { align-items:center; }
 @media (max-width:700px) { .debit-stock-remaining { font-size:10px; }.history-edit-spool { width:100%; order:5; }.history-edit-row .history-save-button, .history-edit-row .history-cancel-button { order:6; } }
+
+/* Budget mode switch */
+.budget-mode-switch { display:flex; align-items:center; gap:8px; margin:0 0 16px; padding:5px; border:1px solid #432557; border-radius:11px; background:#211038; }
+.budget-mode-switch button { min-height:34px; padding:0 15px; color:#bda7ca; border:1px solid transparent; border-radius:8px; background:transparent; font-size:12px; font-weight:800; cursor:pointer; transition:background .18s ease, color .18s ease, border-color .18s ease; }
+.budget-mode-switch button:hover { color:#f4dcff; background:#32164a; }
+.budget-mode-switch button.is-active { color:#fff5ff; border-color:#9451c6; background:linear-gradient(135deg,#5e2580,#9b35a8); box-shadow:0 5px 14px rgba(155,53,168,.22); }
+.budget-mode-switch span { margin-left:auto; padding-right:10px; color:#a98bb9; font-size:11px; }
+@media (max-width:700px) { .budget-mode-switch { align-items:stretch; flex-wrap:wrap; }.budget-mode-switch button { flex:1; }.budget-mode-switch span { width:100%; margin:2px 4px 5px; padding:0; text-align:center; } }
