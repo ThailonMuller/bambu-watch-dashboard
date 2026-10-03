@@ -449,8 +449,8 @@ function BudgetView() {
     const nextResult = calculateBudget(input);
     setResult(nextResult);
     setHasCalculated(true);
-    setCalculationNotice(`Orçamento recalculado com ${input.plateCosts.length} ${input.plateCosts.length === 1 ? "placa" : "placas"}.`);
-    toast.success("Orçamento calculado", { description: `Preço sugerido: ${currency(nextResult.suggestedPrice)}` });
+    setCalculationNotice(`Custo total: ${currency(nextResult.operationalCost)} · Venda direta: ${currency(nextResult.priceBeforeShopee)} · Shopee: ${currency(nextResult.suggestedPrice)}`);
+    toast.success("Orçamento calculado", { description: `Venda direta: ${currency(nextResult.priceBeforeShopee)} · Shopee: ${currency(nextResult.suggestedPrice)}` });
   };
 
   const switchBudgetMode = (nextMode: BudgetMode) => {
@@ -556,8 +556,8 @@ function BudgetView() {
         <aside className="budget-result-card">
           <div className="budget-result-head"><div><p className="eyebrow">RESULTADO DO SIMULADOR</p><h3>{input.productName || "Produto sem identificação"}</h3></div><div className="budget-result-icon"><DollarSign size={19} /></div></div>
           <div className="suggested-price"><span>Preço de venda direta</span><strong>{currency(result.priceBeforeShopee)}</strong><small className="suggested-cost-subtitle">Custo total: {currency(result.operationalCost)} · {hasCalculated ? "calculado agora" : "com os valores padrão"}</small></div>
+          <div className="shopee-price-highlight"><span>Preço Shopee</span><strong>{currency(result.suggestedPrice)}</strong><small className="suggested-cost-subtitle">Custo total: {currency(result.operationalCost)} · Taxa {input.shopeePercentage}% + {currency(input.shopeeFixedFee)}</small></div>
           <div className="budget-breakdown"><div><span>Peças ({input.plateCosts.length})</span><strong>{currency(result.materialCost)}</strong></div><div><span>Embalagem</span><strong>{currency(input.packagingCost)}</strong></div>{budgetMode === "store" && <div><span>Outros custos</span><strong>{currency(input.otherCosts)}</strong></div>}<div><span>Perda + depreciação + manutenção</span><strong>{currency(result.lossCost)}</strong></div><div><span>Custo total</span><strong>{currency(result.operationalCost)}</strong></div><div className="budget-breakdown-divider" /><div><span>Preço fora · MKP +{input.mkp.toLocaleString("pt-BR")}%</span><strong>{currency(result.priceBeforeShopee)}</strong></div><div><span>Lucro fora</span><strong className="pink-value">{currency(result.directProfit)}</strong></div><div><span>Preço Shopee · {input.shopeePercentage}% + R$ {input.shopeeFixedFee.toFixed(2).replace(".", ",")}</span><strong className="pink-value">{currency(result.suggestedPrice)}</strong></div><div><span>Lucro Shopee</span><strong className="pink-value">{currency(result.shopeeProfit)}</strong></div></div>
-          <div className="budget-formula"><Percent size={14} /><span>Sequência: peças + embalagem + outros → (1 + depreciação + manutenção) ÷ (1 − perda) → preço fora × (1 + MKP) → (preço fora + tarifa fixa) ÷ (1 − Shopee).</span></div>
           <div className="budget-result-actions"><button className="spreadsheet-add-button" onClick={addToSpreadsheet}><Plus size={16} /> Adicionar à planilha</button>{spreadsheetError && <p className="spreadsheet-error" role="alert">{spreadsheetError}</p>}</div>
         </aside>
       </div>
