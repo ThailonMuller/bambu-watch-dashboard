@@ -551,3 +551,90 @@ body { font-size: 17px; }
   .nav-item { font-size: 14px !important; }
   .brand strong { font-size: 16px; }
 }
+
+
+/* Theme switcher */
+.theme-toggle { display:grid; place-items:center; width:36px; height:36px; color:#ffd76a; border:1px solid #5a376f; border-radius:9px; background:#2b123f; transition:color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease; }
+.theme-toggle:hover { color:#fff1a8; border-color:#b468ff; background:#3b1853; transform:translateY(-1px); }
+.theme-toggle:active { transform:scale(.96); }
+
+/* Accessible light theme: the FR3D purple/magenta/cyan accents remain visible on white. */
+html.light, html.light body { background:#f7f5fb; color:#26213d; }
+html.light .app-shell { background:#f7f5fb; }
+html.light .app-sidebar { background:linear-gradient(180deg,#ffffff 0%,#f7f4fc 100%); border-right-color:#e5dff0; }
+html.light .brand-mark { background:#461b6b; box-shadow:0 8px 20px rgba(70,27,107,.22); }
+html.light .brand strong { color:#29213c; }
+html.light .brand strong span { color:#7b25bb; }
+html.light .brand small { color:#756786; }
+html.light .workspace-switcher { border-color:#e5dff0; background:#fbfaff; color:#3d3154; }
+html.light .workspace-switcher small { color:#887a99; }
+html.light .workspace-switcher > svg { color:#8b6ba6; }
+html.light .workspace-avatar { color:#6721a1; background:#eee5fa; }
+html.light .nav-label, html.light .eyebrow { color:#766184; }
+html.light .nav-item { color:#655875; }
+html.light .nav-item:hover { color:#6923a0; background:#f4edfb; }
+html.light .nav-item.active { color:#59208c; background:#eee3fa; box-shadow:inset 3px 0 0 #9b45d1; }
+html.light .nav-item.active svg { color:#7e2bb6; }
+html.light .nav-count { color:#64209e; background:#e7d8f7; }
+html.light .agent-card { border-color:#e4dcef; background:linear-gradient(135deg,#fff,#f8f3fc); }
+html.light .agent-icon { color:#7a2caf; background:#eee2fb; }
+html.light .agent-card strong { color:#4c3d5e; }
+html.light .agent-card span { color:#8a7b98; }
+html.light .sidebar-footer { color:#776986; }
+html.light .help-icon { background:#eee6f5; }
+html.light .topbar { background:rgba(247,245,251,.92); border-bottom-color:#e5dff0; }
+html.light .breadcrumb { color:#806f91; }
+html.light .breadcrumb svg { color:#ad9cbd; }
+html.light .breadcrumb strong { color:#39294e; }
+html.light .sync-status { color:#766984; }
+html.light .refresh-button, html.light .theme-toggle { color:#63208f; border-color:#ded0eb; background:#fff; }
+html.light .refresh-button:hover, html.light .theme-toggle:hover { color:#7d28b5; background:#f5edfb; border-color:#b98bda; }
+html.light .theme-toggle { color:#6840c4; }
+html.light .profile-avatar { box-shadow:0 7px 16px rgba(180,34,170,.2); }
+html.light .overview-heading h2, html.light .section-heading h2 { color:#302540; }
+html.light .outline-button, html.light .secondary-button { color:#6e27a3; border-color:#d7c2e8; background:#fff; }
+html.light .outline-button:hover, html.light .secondary-button:hover { color:#54207e; background:#f6effb; }
+html.light .metric-card, html.light .printer-card, html.light .panel, html.light .settings-card { border-color:#e3d9ed; background:#fff; box-shadow:0 8px 24px rgba(56,28,79,.07); }
+html.light .metric-label, html.light .metric-hint, html.light .printer-meta, html.light .job-time, html.light .job-summary > p { color:#756a83; }
+html.light .metric-value { color:#30243d; }
+html.light .printer-name-row h3, html.light .panel-heading h3 { color:#342542; }
+html.light .model-tag { color:#725d80; background:#f0e7f5; }
+html.light .printer-meta svg { color:#008eaa; }
+html.light .icon-button { color:#806b8e; }
+html.light .icon-button:hover { color:#7e28b8; background:#f4eafa; }
+html.light .progress-ring-inner { background:#fff; }
+html.light .progress-ring-inner span { color:#352443; }
+html.light .progress-ring-inner small { color:#796d86; }
+html.light .progress-ring { background:conic-gradient(from -30deg,var(--ring-color) var(--progress),#eadff0 0); }
+html.light .job-summary h4 { color:#4a3558; }
+html.light .printer-stats, html.light .printer-stats > div, html.light .activity-item { border-color:#eee6f2; }
+html.light .printer-stats span, html.light .chart-legend, html.light .chart-y-labels, html.light .chart-x-labels { color:#82738c; }
+html.light .printer-stats strong, html.light .activity-copy strong { color:#4c3659; }
+html.light .chart-legend select { color:#5f4d6c; border-color:#ded2e6; background:#fff; }
+html.light .chart-grid { stroke:#e8ddea; }
+html.light .activity-copy span, html.light .activity-item time { color:#897994; }
+html.light .local-note { border-color:#e4d4ee; background:linear-gradient(90deg,#fff,#fcf4fb); }
+html.light .local-note strong { color:#4b315a; }
+html.light .local-note span { color:#76687f; }
+html.light .local-note button { color:#752aae; }
+html.light .budget-form-card, html.light .budget-result-card, html.light .spreadsheet-card, html.light .filament-add-card, html.light .debit-card, html.light .history-card { border-color:#e1d5e9; background:#fff; box-shadow:0 8px 24px rgba(56,28,79,.07); }
+html.light .budget-text-input, html.light .budget-input, html.light .budget-field input, html.light .filament-form-grid select, html.light .spool-edit-row input, html.light .debit-spool-select, html.light .history-edit-spool, html.light .history-filters select, html.light .history-edit-input, html.light .history-edit-grams, html.light .history-edit-status { color:#342542; border-color:#d9c8e4; background:#fff; }
+html.light .budget-text-input:focus, html.light .budget-input:focus, html.light .debit-spool-select:focus { border-color:#9c4ed0; box-shadow:0 0 0 3px rgba(156,78,208,.14); }
+html.light .budget-heading h2, html.light .budget-card-title h3, html.light .spreadsheet-heading h3, html.light .filament-card-heading h3, html.light .spool-copy h3 { color:#342542; }
+html.light .budget-card-title p, html.light .filament-card-heading p, html.light .spreadsheet-heading p:not(.eyebrow), html.light .plates-header small { color:#786887; }
+html.light .plates-total, html.light .history-summary div, html.light .consumption-chart, html.light .debit-row, html.light .filament-spool-card { border-color:#e3d7eb; background:#fbf8fd; }
+html.light .spreadsheet-table th { color:#826d8e; }
+html.light .spreadsheet-table td { color:#4c3857; border-top-color:#eee5f1; }
+html.light .spreadsheet-table td:nth-child(2) strong, html.light .spreadsheet-empty strong { color:#40304b; }
+html.light .spreadsheet-table td:nth-child(2) small, html.light .spreadsheet-empty span { color:#897892; }
+html.light .spool-copy p, html.light .spool-amount span, html.light .debit-copy span, html.light .history-copy span, html.light .history-summary span, html.light .chart-label { color:#816f89; }
+html.light .spool-amount strong, html.light .history-summary strong { color:#382647; }
+html.light .budget-mode-switch { border-color:#e0d1e9; background:#faf6fc; }
+html.light .budget-mode-switch button { color:#745c82; }
+html.light .budget-mode-switch button:hover { color:#5d218d; background:#f2e8f8; }
+html.light .budget-mode-switch button.is-active { color:#fff; }
+html.light .budget-mode-switch span { color:#806c8d; }
+html.light .calculation-notice { color:#176e61; border-color:#a9ded3; background:#eaf9f5; }
+html.light .stock-warning { color:#9e315f; border-color:#e6acc3; background:#fff0f5; }
+html.light .mobile-menu { color:#6a4d79; }
+@media (max-width:520px) { .theme-toggle { width:34px; height:34px; } }

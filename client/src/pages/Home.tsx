@@ -28,6 +28,7 @@ import {
   Layers3,
   LockKeyhole,
   Menu,
+  Moon,
   MoreHorizontal,
   PlayCircle,
   Plus,
@@ -38,6 +39,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Sun,
   Thermometer,
   Trash2,
   Wifi,
@@ -47,6 +49,7 @@ import {
 import { toast } from "sonner";
 import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
+import { useTheme } from "../contexts/ThemeContext";
 
 type PrinterState = "printing" | "idle" | "offline";
 type View = "overview" | "printers" | "settings" | "budget" | "filaments";
@@ -570,6 +573,7 @@ function BudgetView() {
 }
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
   const [view, setView] = useState<View>("overview");
   const [printers, setPrinters] = useState(initialPrinters);
   const [simulationMode, setSimulationMode] = useState(true);
@@ -632,7 +636,7 @@ export default function Home() {
       </aside>
 
       <main className="main-content">
-        <header className="topbar"><button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={20} /></button><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></header>
+        <header className="topbar"><button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={20} /></button><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></header>
 
         <div className="page-content">
           {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
