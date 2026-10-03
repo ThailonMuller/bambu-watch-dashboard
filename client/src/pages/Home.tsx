@@ -255,6 +255,7 @@ type SpreadsheetItem = {
   cost: number;
   salePrice: number;
   addedAt: string;
+  budgetMode?: BudgetMode;
 };
 
 type FilamentItem = {
@@ -495,7 +496,7 @@ function BudgetView() {
       toast.error("ID duplicado");
       return;
     }
-    setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.suggestedPrice, addedAt: new Date().toLocaleDateString("pt-BR") }]);
+    setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.suggestedPrice, addedAt: new Date().toLocaleDateString("pt-BR"), budgetMode }]);
     setSpreadsheetError("");
     toast.success("Produto adicionado à planilha", { description: `${productName} está pronto para controle interno.` });
   };
@@ -521,7 +522,7 @@ function BudgetView() {
 
   const downloadSpreadsheet = () => {
     if (spreadsheet.length === 0) { toast.info("Adicione pelo menos um produto antes de baixar"); return; }
-    const rows = [["ID do produto", "Nome do produto", "Custo operacional", "Valor de venda", "Adicionado em"], ...spreadsheet.map((item) => [item.productId, item.productName, item.cost.toFixed(2).replace(".", ","), item.salePrice.toFixed(2).replace(".", ","), item.addedAt])];
+    const rows = [["ID do produto", "Nome do produto", "Tipo de orçamento", "Custo operacional", "Valor de venda", "Adicionado em"], ...spreadsheet.map((item) => [item.productId, item.productName, item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja", item.cost.toFixed(2).replace(".", ","), item.salePrice.toFixed(2).replace(".", ","), item.addedAt])];
     const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(";" )).join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -538,7 +539,7 @@ function BudgetView() {
       <div className="section-heading budget-heading"><div><p className="eyebrow">PRECIFICAÇÃO</p><h2>Simulador de orçamento</h2><p>Monte um preço de venda e adicione o produto à planilha de controle interno.</p></div><div className="budget-safe-note"><Calculator size={16} /> cálculo local</div></div><div className="budget-mode-switch" role="tablist" aria-label="Tipo de orçamento"><button className={budgetMode === "store" ? "is-active" : ""} onClick={() => switchBudgetMode("store")} role="tab" aria-selected={budgetMode === "store"}>Produto de Loja</button><button className={budgetMode === "custom" ? "is-active" : ""} onClick={() => switchBudgetMode("custom")} role="tab" aria-selected={budgetMode === "custom"}>Personalizado</button><span>{budgetMode === "store" ? "Preço padrão para produtos de loja · MKP 130% · perda 10% · taxa Shopee 14%" : "Encomenda especial · margem diferenciada · MKP 150% · perda 30% · taxa Shopee 14%"}</span></div>
       <div className="budget-layout">
         <section className="budget-form-card">
-          <div className="budget-card-title"><div className="settings-symbol purple"><Package size={19} /></div><div><h3>Dados do produto</h3><p>O ID e o nome identificam o item no controle de vendas.</p></div></div>
+          <div className={`budget-card-title ${budgetMode === "custom" ? "custom-budget-title" : ""}`}><div className={`settings-symbol ${budgetMode === "custom" ? "custom-budget-symbol" : "purple"}`}>{budgetMode === "custom" ? <Sparkles size={19} /> : <Package size={19} />}</div><div><h3>Dados do produto {budgetMode === "custom" && <span className="custom-mode-chip">Personalizado</span>}</h3><p>{budgetMode === "custom" ? "Encomenda especial · margem diferenciada e acompanhamento sob medida." : "O ID e o nome identificam o item no controle de vendas."}</p></div></div>
           <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>somente números</i></span><input className="budget-text-input" type="text" inputMode="numeric" pattern="[0-9]*" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value.replace(/\D/g, "") })); }} placeholder="Ex.: 1001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div></div>
           <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><span className="plate-number">{index + 1}</span><label className="budget-field"><span>Placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><div className="plate-actions"><button className="duplicate-plate-button" onClick={() => duplicatePlate(index)} aria-label={`Duplicar placa ${index + 1}`}><Copy size={14} /></button><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div></div>)}</div>
@@ -562,7 +563,7 @@ function BudgetView() {
       </div>
       <section className="spreadsheet-card">
         <div className="spreadsheet-heading"><div><p className="eyebrow">CONTROLE INTERNO</p><h3>Planilha de produtos</h3><p>Estrutura pronta para exportar e levar ao seu fluxo do Odoo.</p></div><div className="spreadsheet-actions"><button className="sheet-button" onClick={downloadSpreadsheet}><Cloud size={14} /> Download</button><button className="sheet-button" onClick={restoreLastSpreadsheet}><RotateCcw size={14} /> Restaurar última</button><button className="sheet-button sheet-button-danger" onClick={newSpreadsheet}><Plus size={14} /> Nova planilha</button></div></div>
-        {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Custo</th><th>Valor de venda</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
+        {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Tipo</th><th>Custo</th><th>Valor de venda</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td><span className={`budget-type-badge ${item.budgetMode === "custom" ? "is-custom" : "is-store"}`}>{item.budgetMode === "custom" ? <Sparkles size={11} /> : <Package size={11} />}{item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja"}</span></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
       </section>
     </div>
   );
