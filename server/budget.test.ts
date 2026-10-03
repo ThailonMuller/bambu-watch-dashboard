@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId } from "../shared/budget";
 
 describe("budget calculator", () => {
-  it("calculates the default quote and includes the fixed Shopee fee", () => {
+  it("replicates the store sequence and includes the fixed Shopee fee", () => {
     const result = calculateBudget(DEFAULT_BUDGET_INPUT);
     expect(result.materialCost).toBe(0);
     expect(result.costWithOtherExpenses).toBe(3.44);
-    expect(result.operationalCost).toBe(3.95);
-    expect(result.priceBeforeShopee).toBe(5.14);
-    expect(result.shopeeFee).toBe(4.72);
-    expect(result.suggestedPrice).toBe(9.86);
+    expect(result.operationalCost).toBeCloseTo(4.0133333333, 8);
+    expect(result.priceBeforeShopee).toBeCloseTo(9.2306666667, 8);
+    expect(result.shopeeFee).toBeCloseTo(6.1538294574, 8);
+    expect(result.suggestedPrice).toBeCloseTo(15.3844961248, 8);
   });
 
   it("keeps the store defaults aligned with the requested rates", () => {
@@ -22,26 +22,27 @@ describe("budget calculator", () => {
 
   it("calculates the custom quote with its own defaults", () => {
     const result = calculateBudget(CUSTOM_BUDGET_INPUT);
-    expect(result.operationalCost).toBe(4.64);
-    expect(result.priceBeforeShopee).toBe(6.96);
-    expect(result.shopeeFee).toBe(4.97);
-    expect(result.suggestedPrice).toBe(11.93);
+    expect(result.operationalCost).toBeCloseTo(5.16, 8);
+    expect(result.priceBeforeShopee).toBeCloseTo(12.9, 8);
+    expect(result.shopeeFee).toBeCloseTo(6.7511627907, 8);
+    expect(result.suggestedPrice).toBeCloseTo(19.6511627907, 8);
   });
 
   it("sums each Orca plate independently", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [2.5, 2.4], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 4 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [2.5, 2.4], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 4 });
     expect(result.materialCost).toBe(4.9);
-    expect(result.suggestedPrice).toBe(8.9);
+    expect(result.suggestedPrice).toBeCloseTo(13.8, 8);
   });
 
   it("treats an empty plate field as zero while accepting typed decimals", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["", "2.50"], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["", "2.50"], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
     expect(result.materialCost).toBe(2.5);
-    expect(result.suggestedPrice).toBe(2.5);
+    expect(result.costWithOtherExpenses).toBe(2.5);
+    expect(result.suggestedPrice).toBeCloseTo(5, 8);
   });
 
   it("does not include negative plate values in the material cost", () => {
-    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
     expect(result.materialCost).toBe(2);
   });
 
