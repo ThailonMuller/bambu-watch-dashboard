@@ -413,6 +413,8 @@ html, body { background: #160a24; color: #f7f1ff; }
 .suggested-price span, .suggested-price small { display: block; color: #bba6c5; font-size: 9px; }
 .suggested-price strong { display: block; margin: 7px 0 4px; color: #fff5ff; font-size: 34px; letter-spacing: -.055em; line-height: 1; }
 .suggested-price small { color: #78e8d4; font-size: 8px; }
+.suggested-price > span { color: #e2c8ed; font-size: 10px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.suggested-price .suggested-cost-subtitle { color: #bca6c8; font-size: 9px; }
 .budget-breakdown { margin-top: 16px; }
 .budget-breakdown > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
 .budget-breakdown span { color: #b5a1bf; font-size: 9px; }.budget-breakdown strong { color: #eee1f6; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }.budget-breakdown .pink-value { color: #ff8bcf; }
