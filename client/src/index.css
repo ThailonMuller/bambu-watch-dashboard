@@ -509,3 +509,10 @@ select { color-scheme:dark; }
 .budget-mode-switch button.is-active { color:#fff5ff; border-color:#9451c6; background:linear-gradient(135deg,#5e2580,#9b35a8); box-shadow:0 5px 14px rgba(155,53,168,.22); }
 .budget-mode-switch span { margin-left:auto; padding-right:10px; color:#a98bb9; font-size:11px; }
 @media (max-width:700px) { .budget-mode-switch { align-items:stretch; flex-wrap:wrap; }.budget-mode-switch button { flex:1; }.budget-mode-switch span { width:100%; margin:2px 4px 5px; padding:0; text-align:center; } }
+
+/* Global readability standard: keep secondary text legible across every page. */
+body { font-size: 16px; }
+.app-shell p, .app-shell span, .app-shell label, .app-shell small, .app-shell td, .app-shell th, .app-shell code { font-size: max(13px, 1em) !important; }
+.app-shell button, .app-shell input, .app-shell select, .app-shell textarea { font-size: 14px !important; }
+.app-shell .eyebrow, .app-shell .nav-label { font-size: 12px !important; }
+.app-shell .budget-breakdown strong, .app-shell .chart-heading strong, .app-shell .chart-label strong, .app-shell .debit-copy strong, .app-shell .history-copy strong { font-size: 14px !important; }
