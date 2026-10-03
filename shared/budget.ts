@@ -63,11 +63,14 @@ export function hasDuplicateProductId(items: readonly { productId: string }[], p
 // A referência mantém a precisão interna e arredonda apenas na formatação monetária.
 const money = (value: number) => Number.isFinite(value) ? value : 0;
 const percentage = (value: number) => Math.max(0, Number.isFinite(value) ? value : 0) / 100;
+const numeric = (value: number | string) => {
+  const parsed = typeof value === "string" ? Number(value.trim().replace(",", ".")) : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 export function calculateBudget(input: BudgetInput): BudgetResult {
   const materialCost = money(input.plateCosts.reduce<number>((total, cost) => {
-    const numericCost = Number(cost);
-    return total + (Number.isFinite(numericCost) ? Math.max(0, numericCost) : 0);
+    return total + Math.max(0, numeric(cost));
   }, 0));
   const costWithOtherExpenses = money(materialCost + Math.max(0, input.packagingCost) + Math.max(0, input.otherCosts));
   // Réplica do simulador: depreciação/manutenção aumentam a base; a perda é

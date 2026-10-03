@@ -413,7 +413,7 @@ function BudgetView() {
   }, [spreadsheet]);
 
   const plateTotal = input.plateCosts.reduce<number>((total, cost) => {
-    const numericCost = Number(cost);
+    const numericCost = typeof cost === "string" ? Number(cost.trim().replace(",", ".")) : Number(cost);
     return total + (Number.isFinite(numericCost) ? Math.max(0, numericCost) : 0);
   }, 0);
 

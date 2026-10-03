@@ -41,6 +41,13 @@ describe("budget calculator", () => {
     expect(result.suggestedPrice).toBeCloseTo(5, 8);
   });
 
+  it("accepts Brazilian comma decimals exactly like the visible plate field", () => {
+    const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["2,50", "2,40"], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 4 });
+    expect(result.materialCost).toBe(4.9);
+    expect(result.priceBeforeShopee).toBe(9.8);
+    expect(result.suggestedPrice).toBe(13.8);
+  });
+
   it("does not include negative plate values in the material cost", () => {
     const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
     expect(result.materialCost).toBe(2);
