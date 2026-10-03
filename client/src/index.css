@@ -511,8 +511,43 @@ select { color-scheme:dark; }
 @media (max-width:700px) { .budget-mode-switch { align-items:stretch; flex-wrap:wrap; }.budget-mode-switch button { flex:1; }.budget-mode-switch span { width:100%; margin:2px 4px 5px; padding:0; text-align:center; } }
 
 /* Global readability standard: keep secondary text legible across every page. */
-body { font-size: 16px; }
-.app-shell p, .app-shell span, .app-shell label, .app-shell small, .app-shell td, .app-shell th, .app-shell code { font-size: max(13px, 1em) !important; }
-.app-shell button, .app-shell input, .app-shell select, .app-shell textarea { font-size: 14px !important; }
-.app-shell .eyebrow, .app-shell .nav-label { font-size: 12px !important; }
+body { font-size: 17px; }
+.app-shell p, .app-shell span, .app-shell label, .app-shell small, .app-shell td, .app-shell th, .app-shell code { font-size: max(14px, 1em) !important; }
+.app-shell button, .app-shell input, .app-shell select, .app-shell textarea { font-size: 15px !important; }
+.app-shell .eyebrow, .app-shell .nav-label { font-size: 13px !important; }
 .app-shell .budget-breakdown strong, .app-shell .chart-heading strong, .app-shell .chart-label strong, .app-shell .debit-copy strong, .app-shell .history-copy strong { font-size: 14px !important; }
+
+/* FR3D identity and larger brand lockup. */
+.brand { gap: 12px; }
+.brand-mark { width: 44px; height: 44px; flex: 0 0 44px; overflow: hidden; border-radius: 13px; background: #461b6b; }
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.brand strong { font-size: 17px; letter-spacing: -.035em; }
+.brand small { font-size: 12px !important; }
+.budget-card-title p, .filament-card-heading p, .spreadsheet-heading p:not(.eyebrow), .section-heading > div > p:not(.eyebrow), .hero-copy > p, .local-note span { font-size: 14px !important; line-height: 1.5; }
+.budget-field > span, .budget-section-label, .plates-header small { font-size: 13px !important; }
+
+@media (max-width: 1120px) {
+  .page-content { padding-left: 30px; padding-right: 30px; }
+  .hero-banner { padding-left: 34px; padding-right: 34px; }
+}
+@media (max-width: 780px) {
+  .page-content { padding: 24px 20px 34px; }
+  .hero-banner { min-height: 340px; padding: 30px 26px; }
+  .hero-copy h1 { font-size: 38px; }
+  .hero-copy > p { font-size: 15px !important; max-width: 410px; }
+  .hero-visual { top: 135px; transform: scale(.72); }
+}
+@media (max-width: 520px) {
+  .page-content { padding: 20px 14px 30px; }
+  .topbar { padding-left: 14px; padding-right: 14px; }
+  .hero-banner { min-height: 360px; padding: 24px 20px; }
+  .hero-copy h1 { font-size: 32px; line-height: 1.08; }
+  .hero-copy > p { font-size: 14px !important; max-width: 300px; }
+  .hero-visual { top: 148px; right: -35px; transform: scale(.58); }
+  .metrics-grid { gap: 10px; }
+  .metric-card { min-height: 98px; padding: 14px 11px; }
+  .metric-label { font-size: 12px !important; }
+  .metric-hint { font-size: 11px !important; }
+  .nav-item { font-size: 14px !important; }
+  .brand strong { font-size: 16px; }
+}
