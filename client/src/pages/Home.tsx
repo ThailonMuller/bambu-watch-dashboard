@@ -218,14 +218,29 @@ function MiniChart() {
 }
 
 function SettingsView({ simulationMode, setSimulationMode, polling, setPolling }: { simulationMode: boolean; setSimulationMode: (value: boolean) => void; polling: string; setPolling: (value: string) => void }) {
+  const [bridgeStatus, setBridgeStatus] = useState<"waiting" | "offline">("waiting");
+  const [lastCheck, setLastCheck] = useState("Ainda não verificado");
+  const [telemetryErrors, setTelemetryErrors] = useState([
+    { id: 1, title: "Bridge local não conectado", detail: "Nenhuma mensagem MQTT/TLS foi recebida nesta sessão.", time: "Agora", tone: "warning" },
+    { id: 2, title: "Telemetria em modo demonstração", detail: "Os dados exibidos no painel são simulados até o bridge ser configurado.", time: "Sessão atual", tone: "info" },
+  ]);
+
+  const checkBridge = () => {
+    setBridgeStatus("offline");
+    setLastCheck(formatSync(new Date()));
+    setTelemetryErrors((current) => current.some((error) => error.id === 1) ? current : [{ id: 1, title: "Bridge local não conectado", detail: "A verificação terminou sem receber resposta MQTT/TLS.", time: "Agora", tone: "warning" }, ...current]);
+    toast.info("Verificação concluída", { description: "O bridge ainda não respondeu. O painel permanece em modo demonstração." });
+  };
+
   return (
     <div className="settings-view">
       <div className="section-heading"><div><p className="eyebrow">CONTROLE LOCAL</p><h2>Configuração do monitoramento</h2><p>Defina como o painel deve receber e apresentar a telemetria das suas máquinas.</p></div><div className="secure-badge"><ShieldCheck size={16} /> Dados locais</div></div>
       <div className="settings-grid">
         <section className="settings-card featured-settings">
-          <div className="settings-card-heading"><div className="settings-symbol purple"><Cable size={19} /></div><div><h3>Bridge local</h3><p>Conector seguro entre sua rede e o dashboard.</p></div><span className="status-pill status-idle"><span className="status-dot" /> Aguardando</span></div>
+          <div className="settings-card-heading"><div className="settings-symbol purple"><Cable size={19} /></div><div><h3>Bridge local</h3><p>Conector seguro entre sua rede e o dashboard.</p></div><span className={`status-pill ${bridgeStatus === "offline" ? "status-offline" : "status-idle"}`}><span className="status-dot" /> {bridgeStatus === "offline" ? "Sem resposta" : "Aguardando"}</span></div>
+          <div className="bridge-health-grid"><div><span>Status da conexão</span><strong className={bridgeStatus === "offline" ? "health-danger" : "health-waiting"}>{bridgeStatus === "offline" ? "Bridge offline" : "Aguardando bridge"}</strong></div><div><span>Última verificação</span><strong>{lastCheck}</strong></div><div><span>Última telemetria</span><strong>Nenhuma recebida</strong></div><div><span>Latência MQTT</span><strong>—</strong></div></div>
           <div className="bridge-steps"><div className="bridge-step done"><span>1</span><div><strong>Instale o bridge na mesma rede</strong><p>O processo local fala com as impressoras via MQTT TLS.</p></div><CheckCircle2 size={18} /></div><div className="bridge-step"><span>2</span><div><strong>Cadastre IP e código de acesso</strong><p>As credenciais ficam somente no dispositivo local.</p></div><CircleHelp size={18} /></div><div className="bridge-step"><span>3</span><div><strong>Envie telemetria resumida</strong><p>O painel recebe apenas status, progresso e temperaturas.</p></div><CircleHelp size={18} /></div></div>
-          <button className="secondary-button" onClick={() => toast.info("O pacote do bridge será disponibilizado na próxima etapa do projeto.")}><ExternalLink size={15} /> Ver guia de instalação</button>
+          <div className="bridge-actions"><button className="secondary-button" onClick={checkBridge}><RefreshCw size={15} /> Testar conexão</button><button className="secondary-button" onClick={() => toast.info("O pacote do bridge será disponibilizado na próxima etapa do projeto.")}><ExternalLink size={15} /> Ver guia de instalação</button></div>
         </section>
         <section className="settings-card">
           <div className="settings-card-heading"><div className="settings-symbol blue"><SlidersHorizontal size={19} /></div><div><h3>Preferências</h3><p>Comportamento desta interface.</p></div></div>
@@ -234,6 +249,7 @@ function SettingsView({ simulationMode, setSimulationMode, polling, setPolling }
           <div className="privacy-note"><LockKeyhole size={15} /><span>Nenhuma credencial ou imagem é enviada para o Bambu Handy por esta aplicação.</span></div>
         </section>
       </div>
+      <section className="telemetry-errors-card"><div className="telemetry-errors-heading"><div><p className="eyebrow">DIAGNÓSTICO</p><h3>Erros de telemetria</h3><p>Alertas recebidos durante a comunicação com o bridge e as impressoras.</p></div><div className="error-count-badge"><AlertCircle size={15} /> {telemetryErrors.length} {telemetryErrors.length === 1 ? "alerta" : "alertas"}</div></div>{telemetryErrors.length === 0 ? <div className="telemetry-empty"><CheckCircle2 size={18} /><span>Nenhum erro registrado nesta sessão.</span></div> : <div className="telemetry-error-list">{telemetryErrors.map((error) => <div className={`telemetry-error-row ${error.tone}`} key={error.id}><div className="telemetry-error-icon"><AlertCircle size={17} /></div><div className="telemetry-error-copy"><strong>{error.title}</strong><span>{error.detail}</span></div><time>{error.time}</time><button className="telemetry-dismiss" onClick={() => setTelemetryErrors((current) => current.filter((item) => item.id !== error.id))} aria-label={`Dispensar alerta: ${error.title}`}><X size={15} /></button></div>)}</div>}<div className="telemetry-errors-footer"><span>Os alertas são locais e não contêm credenciais.</span><button className="text-action" onClick={() => setTelemetryErrors([])} disabled={telemetryErrors.length === 0}>Limpar alertas</button></div></section>
     </div>
   );
 }
