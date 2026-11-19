@@ -47,7 +47,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
+import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -432,8 +432,8 @@ function BudgetView() {
   }, [spreadsheet]);
 
   const plateTotal = input.plateCosts.reduce<number>((total, cost) => {
-    const numericCost = typeof cost === "string" ? Number(cost.trim().replace(",", ".")) : Number(cost);
-    return total + (Number.isFinite(numericCost) ? Math.max(0, numericCost) : 0);
+    const numericCost = typeof cost === "string" ? Number.parseFloat(cost.trim().replace(",", ".")) : Number(cost);
+    return total + (Number.isFinite(numericCost) ? numericCost : 0);
   }, 0);
 
   const updateNumber = (field: Exclude<keyof BudgetInput, "productId" | "productName" | "plateCosts">, value: string) => {
@@ -465,6 +465,11 @@ function BudgetView() {
   const removePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: current.plateCosts.length > 1 ? current.plateCosts.filter((_, plateIndex) => plateIndex !== index) : current.plateCosts }));
 
   const calculate = () => {
+    if (hasInvalidBudgetPercentages(input)) {
+      setCalculationNotice("");
+      toast.error("Percentuais inválidos", { description: "Perda e taxa Shopee precisam ser menores que 100%." });
+      return;
+    }
     const nextResult = calculateBudget(input);
     setResult(nextResult);
     setHasCalculated(true);

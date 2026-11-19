@@ -61,26 +61,30 @@ export function hasDuplicateProductId(items: readonly { productId: string }[], p
 }
 
 // A referência mantém a precisão interna e arredonda apenas na formatação monetária.
+// Os valores são convertidos como parseFloat no simulador original: percentuais e
+// custos digitados são usados na fórmula sem arredondamento ou clamp intermediário.
 const money = (value: number) => Number.isFinite(value) ? value : 0;
-const percentage = (value: number) => Math.max(0, Number.isFinite(value) ? value : 0) / 100;
+const percentage = (value: number) => (Number.isFinite(value) ? value : 0) / 100;
 const numeric = (value: number | string) => {
-  const parsed = typeof value === "string" ? Number(value.trim().replace(",", ".")) : Number(value);
+  const parsed = typeof value === "string" ? Number.parseFloat(value.trim().replace(",", ".")) : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+export function hasInvalidBudgetPercentages(input: Pick<BudgetInput, "lossPercentage" | "shopeePercentage">) {
+  return percentage(input.lossPercentage) >= 1 || percentage(input.shopeePercentage) >= 1;
+}
+
 export function calculateBudget(input: BudgetInput): BudgetResult {
-  const materialCost = money(input.plateCosts.reduce<number>((total, cost) => {
-    return total + Math.max(0, numeric(cost));
-  }, 0));
-  const costWithOtherExpenses = money(materialCost + Math.max(0, input.packagingCost) + Math.max(0, input.otherCosts));
+  const materialCost = money(input.plateCosts.reduce<number>((total, cost) => total + numeric(cost), 0));
+  const costWithOtherExpenses = money(materialCost + numeric(input.packagingCost) + numeric(input.otherCosts));
   // Réplica do simulador: depreciação/manutenção aumentam a base; a perda é
   // recuperada dividindo por (1 - perda), antes do markup.
-  const operationalCost = money(costWithOtherExpenses * (1 + percentage(input.depreciationPercentage) + percentage(input.maintenancePercentage)) / Math.max(0.000001, 1 - percentage(input.lossPercentage)));
+  const operationalCost = money(costWithOtherExpenses * (1 + percentage(input.depreciationPercentage) + percentage(input.maintenancePercentage)) / (1 - percentage(input.lossPercentage)));
   const lossCost = money(operationalCost - costWithOtherExpenses);
   const depreciationCost = money(costWithOtherExpenses * percentage(input.depreciationPercentage));
   const maintenanceCost = money(costWithOtherExpenses * percentage(input.maintenancePercentage));
   const priceBeforeShopee = money(operationalCost * (1 + percentage(input.mkp)));
-  const shopeePrice = money((priceBeforeShopee + Math.max(0, input.shopeeFixedFee)) / Math.max(0.000001, 1 - percentage(input.shopeePercentage)));
+  const shopeePrice = money((priceBeforeShopee + numeric(input.shopeeFixedFee)) / (1 - percentage(input.shopeePercentage)));
   const shopeeFee = money(shopeePrice - priceBeforeShopee);
 
   return {

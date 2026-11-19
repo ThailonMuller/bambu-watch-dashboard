@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, isValidProductId } from "../shared/budget";
+import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("replicates the store sequence and includes the fixed Shopee fee", () => {
@@ -48,9 +48,16 @@ describe("budget calculator", () => {
     expect(result.suggestedPrice).toBe(13.8);
   });
 
-  it("does not include negative plate values in the material cost", () => {
+  it("keeps the reference parseFloat sequence for signed numeric plate values", () => {
     const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: ["-5", 2], packagingCost: 0, otherCosts: 0, lossPercentage: 0, depreciationPercentage: 0, maintenancePercentage: 0, mkp: 100, shopeePercentage: 0, shopeeFixedFee: 0 });
-    expect(result.materialCost).toBe(2);
+    expect(result.materialCost).toBe(-3);
+    expect(result.suggestedPrice).toBe(-6);
+  });
+
+  it("rejects loss and Shopee rates at or above 100% like the reference UI", () => {
+    expect(hasInvalidBudgetPercentages({ lossPercentage: 100, shopeePercentage: 14 })).toBe(true);
+    expect(hasInvalidBudgetPercentages({ lossPercentage: 10, shopeePercentage: 100 })).toBe(true);
+    expect(hasInvalidBudgetPercentages({ lossPercentage: 99.99, shopeePercentage: 14 })).toBe(false);
   });
 
   it("keeps product identity available for the spreadsheet record", () => {
