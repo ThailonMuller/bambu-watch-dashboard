@@ -750,3 +750,15 @@ html.light .app-shell { background:#f7f5fb; } html.light .app-topnav { border-bo
 
 
 @media (max-width:1400px) and (min-width:761px) { .topnav-tools .sync-status { display:none; } }
+
+
+/* Four-column price parameter grid and FR3D numeric controls */
+.budget-parameters-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.budget-parameters-grid .budget-field > span { white-space:nowrap; }
+.budget-parameters-grid .budget-input-wrap input[type="number"] { color-scheme:dark; padding-right:3px; accent-color:#b468ff; }
+.budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-inner-spin-button, .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-outer-spin-button { width:18px; height:28px; margin-right:-4px; opacity:1; cursor:pointer; filter:invert(67%) sepia(48%) saturate(1180%) hue-rotate(235deg) brightness(103%) contrast(101%); }
+.budget-parameters-grid .budget-input-wrap:focus-within input[type="number"]::-webkit-inner-spin-button { filter:invert(82%) sepia(49%) saturate(1020%) hue-rotate(145deg) brightness(105%) contrast(103%); }
+html.light .budget-parameters-grid .budget-input-wrap input[type="number"] { color-scheme:light; accent-color:#7e2bb6; }
+html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-inner-spin-button, html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-outer-spin-button { filter:invert(28%) sepia(37%) saturate(2661%) hue-rotate(260deg) brightness(85%) contrast(90%); }
+@media (max-width:900px) { .budget-parameters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:480px) { .budget-parameters-grid { grid-template-columns:1fr; } }
