@@ -759,6 +759,21 @@ html.light .app-shell { background:#f7f5fb; } html.light .app-topnav { border-bo
 .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-inner-spin-button, .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-outer-spin-button { width:18px; height:28px; margin-right:-4px; opacity:1; cursor:pointer; filter:invert(67%) sepia(48%) saturate(1180%) hue-rotate(235deg) brightness(103%) contrast(101%); }
 .budget-parameters-grid .budget-input-wrap:focus-within input[type="number"]::-webkit-inner-spin-button { filter:invert(82%) sepia(49%) saturate(1020%) hue-rotate(145deg) brightness(105%) contrast(103%); }
 html.light .budget-parameters-grid .budget-input-wrap input[type="number"] { color-scheme:light; accent-color:#7e2bb6; }
+
+/* FR3D numeric field finish: suffix beside the value, spinner contained at the right edge */
+.budget-input-wrap { overflow:hidden; }
+.budget-input-prefix { flex:0 0 auto; }
+.budget-number-control { position:relative; min-width:0; flex:1 1 auto; height:100%; }
+.budget-number-control input[type="number"] { width:100%; min-width:0; height:100%; padding:0 45px 0 0 !important; color-scheme:dark; }
+.budget-input-suffix { position:absolute; top:50%; right:24px; z-index:1; margin:0; color:#8ff5ff !important; font-family:'DM Mono',monospace; font-size:12px !important; font-weight:800 !important; line-height:1; pointer-events:none; transform:translateY(-50%); }
+.budget-number-control input[type="number"]::-webkit-inner-spin-button { width:20px; height:100%; margin:0 -1px 0 0; padding:0; opacity:1; cursor:pointer; border-left:1px solid rgba(0,216,245,.34); background:linear-gradient(180deg,rgba(180,104,255,.22),rgba(0,216,245,.12)); filter:invert(78%) sepia(72%) saturate(1035%) hue-rotate(142deg) brightness(104%) contrast(101%); }
+.budget-number-control input[type="number"]::-webkit-outer-spin-button { display:none; }
+.budget-number-control input[type="number"]:hover::-webkit-inner-spin-button, .budget-number-control input[type="number"]:focus::-webkit-inner-spin-button { border-left-color:rgba(143,245,255,.72); background:linear-gradient(180deg,rgba(180,104,255,.38),rgba(0,216,245,.24)); filter:invert(86%) sepia(37%) saturate(1042%) hue-rotate(143deg) brightness(108%) contrast(103%); }
+.budget-input-wrap:focus-within { border-color:#00d8f5; box-shadow:0 0 0 3px rgba(0,216,245,.14), inset 0 0 0 1px rgba(0,216,245,.16); }
+html.light .budget-input-suffix { color:#147892 !important; }
+html.light .budget-number-control input[type="number"] { color-scheme:light; }
+html.light .budget-number-control input[type="number"]::-webkit-inner-spin-button { border-left-color:rgba(20,120,146,.28); background:linear-gradient(180deg,rgba(126,43,182,.16),rgba(0,167,189,.12)); filter:invert(39%) sepia(40%) saturate(1100%) hue-rotate(158deg) brightness(85%) contrast(92%); }
+html.light .budget-number-control input[type="number"]:hover::-webkit-inner-spin-button, html.light .budget-number-control input[type="number"]:focus::-webkit-inner-spin-button { border-left-color:rgba(20,120,146,.6); background:linear-gradient(180deg,rgba(126,43,182,.24),rgba(0,167,189,.2)); }
 html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-inner-spin-button, html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-outer-spin-button { filter:invert(28%) sepia(37%) saturate(2661%) hue-rotate(260deg) brightness(85%) contrast(90%); }
 @media (max-width:900px) { .budget-parameters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:480px) { .budget-parameters-grid { grid-template-columns:1fr; } }

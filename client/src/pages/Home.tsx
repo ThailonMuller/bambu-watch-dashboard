@@ -263,7 +263,7 @@ function BudgetField({ label, value, onChange, prefix, suffix, step = "1", min =
   return (
     <label className="budget-field">
       <span>{label}</span>
-      <div className="budget-input-wrap">{prefix && <b>{prefix}</b>}<input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />{suffix && <b>{suffix}</b>}</div>
+      <div className={`budget-input-wrap ${suffix ? "has-suffix" : ""}`}>{prefix && <b className="budget-input-prefix">{prefix}</b>}<div className="budget-number-control"><input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />{suffix && <b className="budget-input-suffix">{suffix}</b>}</div></div>
     </label>
   );
 }
