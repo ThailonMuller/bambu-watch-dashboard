@@ -886,3 +886,34 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 /* Keep the accent as a contour only: no filled strip inside the card */
 .metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { width:18px; border:0; border-left:5px solid #4ceeff; border-top:5px solid #8fffff; border-bottom:5px solid #35bfff; border-radius:18px 0 0 18px; background:transparent; box-shadow:0 0 15px rgba(82,239,255,.52); }
 html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { border-left-color:#55e5f1; border-top-color:#c4ffff; border-bottom-color:#42adff; background:transparent; box-shadow:0 0 15px rgba(45,190,255,.34); }
+
+
+/* Falcão Rosa3D identity refresh: official wordmark and supplied neon banner */
+.topnav-brand .brand { display:flex; align-items:center; min-width:0; }
+.brand-wordmark { display:block; width:196px; height:60px; object-fit:contain; object-position:left center; border-radius:10px; }
+.hero-banner { min-height:300px; padding:36px 42px; border:1px solid rgba(162,76,255,.35); background:#09051c; box-shadow:0 18px 38px rgba(0,0,0,.28); }
+.hero-banner::before { position:absolute; inset:0; z-index:-3; background-image:url('/manus-storage/fr3d-hero-banner_ba71637b.png'); background-position:center; background-size:cover; content:''; }
+.hero-banner::after { z-index:-2; opacity:1; background:linear-gradient(90deg,rgba(8,4,27,.94) 0%,rgba(10,4,31,.82) 31%,rgba(17,5,46,.38) 61%,rgba(8,4,27,.12) 100%); background-image:linear-gradient(90deg,rgba(8,4,27,.94) 0%,rgba(10,4,31,.82) 31%,rgba(17,5,46,.38) 61%,rgba(8,4,27,.12) 100%); }
+.hero-banner-image { position:absolute; inset:0; z-index:-3; background-image:url('/manus-storage/fr3d-hero-banner_ba71637b.png'); background-position:center; background-size:cover; }
+.hero-copy { max-width:520px; }
+.hero-eyebrow { color:#73f4ff; }
+.hero-copy h1 { color:#fff7ff; text-shadow:0 3px 22px rgba(0,0,0,.35); }
+.hero-copy h1 span { color:#b8a7d7; }
+.hero-copy h1 em { color:#ff70d4; }
+.hero-copy > p { color:#e0cce9; }
+.hero-note { color:#8fefff; }
+.hero-float-card { border-color:rgba(108,240,255,.5); background:rgba(18,7,45,.64); box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 18px rgba(0,212,255,.12); }
+.hero-float-card svg { color:#67f2ff; }
+.hero-float-card span { color:#c7b6d8; }
+.hero-float-card strong { color:#fff; }
+@media (max-width:780px) {
+  .brand-wordmark { width:172px; height:52px; }
+  .hero-banner { min-height:340px; padding:30px 26px; }
+  .hero-banner::after { background-image:linear-gradient(180deg,rgba(8,4,27,.94) 0%,rgba(10,4,31,.78) 40%,rgba(8,4,27,.18) 100%); }
+  .hero-banner-image { background-position:58% center; }
+}
+@media (max-width:520px) {
+  .brand-wordmark { width:160px; height:48px; }
+  .hero-banner { min-height:360px; padding:24px 20px; }
+  .hero-banner-image { background-position:59% center; }
+}
