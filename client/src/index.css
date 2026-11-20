@@ -1016,3 +1016,6 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 html.light .budget-input-suffix { color:#147892 !important; }
 html.light .budget-stepper { border-left-color:rgba(20,120,146,.38) !important; background:linear-gradient(180deg,rgba(0,167,189,.16),rgba(126,43,182,.18)) !important; }
 html.light .budget-step-button { color:#147892 !important; }
+
+/* The input wrapper has horizontal padding; extend the stepper through it so it touches the box edge. */
+.budget-stepper { top:-1px !important; right:-10px !important; bottom:-1px !important; width:25px !important; border-radius:0 8px 8px 0 !important; }
