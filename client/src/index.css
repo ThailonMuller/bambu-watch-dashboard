@@ -676,3 +676,10 @@ html.light .shopee-toggle-button { color:#15758a; border-color:#a6d9e2; backgrou
 html.light .plate-row { border-color:#e3d7eb; background:#fbf8fd; } html.light .plate-add-tile { border-color:#c6a7d9; background:#fcf7ff; }
 @media (max-width:980px) { .plates-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:560px) { .plates-list { grid-template-columns:1fr; gap:8px; }.plate-row { grid-template-columns:34px minmax(0,1fr) 58px; }.plate-number { width:34px; }.plate-validation-message { grid-column:2 / -1; } }
+
+
+/* Floating Orca plate labels: only the top edge carries the accent */
+.plate-row .budget-field { position:relative; padding-top:6px; }
+.plate-row .budget-field > span { position:absolute; top:0; left:9px; z-index:1; margin:0; padding:0 5px; color:#f5d8ff; border-top:2px solid #c45cff; background:#28123e; font-size:8px; font-weight:800; line-height:1.1; letter-spacing:.02em; text-transform:uppercase; transform:translateY(-1px); }
+.plate-row.is-focused .budget-field > span { color:#d4fbff; border-top-color:#00d8f5; background:#1f304b; }
+html.light .plate-row .budget-field > span { color:#72279a; border-top-color:#a54bcc; background:#fbf8fd; } html.light .plate-row.is-focused .budget-field > span { color:#086a7a; border-top-color:#00a7bd; background:#eefbfd; }
