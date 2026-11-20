@@ -950,3 +950,14 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 .topnav-brand .brand-mark { width:59px; height:59px; flex-basis:59px; border-radius:16px; }
 .topnav-brand .brand-mark img { object-fit:contain; }
 @media (max-width:760px) { .topnav-brand .brand-mark { width:53px; height:53px; flex-basis:53px; border-radius:15px; } }
+
+
+/* New supplied wallpaper: centered emblem focus, aspect-safe cover framing */
+.hero-banner::before, .hero-banner-image { background-image:url('/manus-storage/fr3d-wallpaper-banner_139dbe28.png'); background-size:cover; background-position:center 42%; background-repeat:no-repeat; }
+.hero-banner::after { background-image:linear-gradient(90deg,rgba(8,3,27,.9) 0%,rgba(10,3,32,.68) 30%,rgba(12,4,42,.2) 62%,rgba(8,3,27,.08) 100%); }
+@media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:cover; background-position:center 42%; } .hero-banner::after { background-image:linear-gradient(180deg,rgba(8,3,27,.88) 0%,rgba(10,3,32,.66) 42%,rgba(8,3,27,.14) 100%); } }
+
+
+/* Keep the emblem in focus inside the wide desktop crop */
+.hero-banner::before, .hero-banner-image { background-position:center 24%; }
+@media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-position:center 42%; } }
