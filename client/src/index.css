@@ -705,3 +705,14 @@ html.light .plate-row { border-color:#c9a7d8; background:#faf5fd; } html.light .
 
 
 .plate-card-body .plate-value-field { position:relative; }.plate-card-body .plate-validation-message { position:static; display:block; margin-top:4px; color:#ffe0ed; font-size:7px; line-height:1.1; white-space:nowrap; }.plate-card-body .has-invalid-value { position:relative; }
+
+
+/* Keep the reference shape, but use the original FR3D card palette */
+.plate-row { border-color:#4b2860; background:#24123b; }
+.plate-card-header { color:#ead8f4; border-bottom:1px solid #4b2860; background:linear-gradient(180deg,#3a1b52,#321546); }
+.plate-card-body { background:linear-gradient(145deg,#28123e,#321650 58%,#3b1b50); }
+.plate-value-field .budget-input-wrap { border-color:#65418a; background:rgba(25,12,39,.58); }.plate-value-field .budget-input-wrap:focus-within { border-color:#00d8f5; box-shadow:0 0 0 3px rgba(0,216,245,.13); }.plate-value-field .budget-input-wrap b { color:#ad7ec8; }.plate-value-field .budget-input-wrap input { color:#f7edff; }
+.plate-card-body .duplicate-plate-button, .plate-card-body .remove-plate-button { border-color:#65418a; background:#29143e; }.plate-card-body .duplicate-plate-button { color:#84e9f6; }.plate-card-body .remove-plate-button { color:#bda7ca; }
+.plate-row.is-focused { border-color:#00d8f5; box-shadow:0 0 0 2px rgba(0,216,245,.13),0 8px 20px rgba(0,0,0,.18); }.plate-row.is-focused .plate-card-header { color:#e8ffff; border-bottom-color:#315d7c; background:linear-gradient(180deg,#16455d,#321650); }
+.plate-add-tile { border-color:#65418a; background:#24123b; }.plate-add-tile .add-plate-button { color:#eab8ff; background:linear-gradient(145deg,#321650,#44205f); }.plate-add-tile .add-plate-button:hover { background:linear-gradient(145deg,#40145f,#54236e); }
+html.light .plate-row { border-color:#dfd0e8; background:#fbf8fd; } html.light .plate-card-header { color:#4e3160; border-bottom-color:#dfd0e8; background:linear-gradient(180deg,#eee4f4,#e5d6ed); } html.light .plate-card-body { background:linear-gradient(145deg,#f4edf8,#eee5f5 58%,#e8dcef); } html.light .plate-value-field .budget-input-wrap { border-color:#c8afd6; background:rgba(255,255,255,.72); } html.light .plate-card-body .duplicate-plate-button, html.light .plate-card-body .remove-plate-button { border-color:#c8afd6; background:#f5eef9; } html.light .plate-add-tile { border-color:#c8afd6; background:#fbf8fd; } html.light .plate-add-tile .add-plate-button { color:#63307e; background:#f0e5f7; }
