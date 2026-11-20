@@ -944,3 +944,9 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 .brand-copy small { display:block; margin-top:4px; color:#bca8c8; font-size:11px !important; white-space:nowrap; }
 @media (max-width:1200px) { .app-topnav { min-height:92px; } }
 @media (max-width:760px) { .app-topnav { min-height:auto; padding-top:12px; padding-bottom:0; } .topnav-brand .brand-mark { width:50px; height:50px; flex-basis:50px; } .brand-copy strong { font-size:14px; } .brand-copy small { font-size:10px !important; } }
+
+
+/* Official menu-logo reference: preserve its turquoise ring and enlarge by 3px */
+.topnav-brand .brand-mark { width:59px; height:59px; flex-basis:59px; border-radius:16px; }
+.topnav-brand .brand-mark img { object-fit:contain; }
+@media (max-width:760px) { .topnav-brand .brand-mark { width:53px; height:53px; flex-basis:53px; border-radius:15px; } }
