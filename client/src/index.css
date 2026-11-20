@@ -812,3 +812,14 @@ html.light .plate-row.plate-add-animation::after { border-color:#08a8c0; } html.
 .plates-list, .plate-row, .plate-add-tile { min-width:0; width:100%; }
 @media (max-width:560px) { .plates-list { grid-template-columns:minmax(0,1fr); width:100%; }.plate-row, .plate-add-tile { max-width:100%; }.plate-card-body { min-width:0; padding:11px 8px 9px; }.plate-card-body .budget-input-wrap { min-width:0; }.plate-card-body .plate-actions { flex:0 0 58px; } }
 @media (prefers-reduced-motion:reduce) { .plate-row.plate-add-animation, .plate-row.plate-remove-animation { animation:none; opacity:1; filter:none; } }
+
+
+/* Large desktop only: keep the simulator result visible without changing tablet/mobile flow */
+@media (min-width:1200px) and (min-height:720px) {
+  .budget-layout { align-items:start; }
+  .budget-result-card { top:24px; height:calc(100vh - 48px); max-height:calc(100vh - 48px); display:flex; flex-direction:column; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scrollbar-color:#7845a0 #241034; scrollbar-width:thin; }
+  .budget-result-card::-webkit-scrollbar { width:7px; }
+  .budget-result-card::-webkit-scrollbar-track { background:#241034; border-radius:99px; }
+  .budget-result-card::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#00c8dd,#9d3ed0,#e000a7); border-radius:99px; }
+  .budget-result-actions { margin-top:auto; }
+}
