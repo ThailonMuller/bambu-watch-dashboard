@@ -27,7 +27,6 @@ import {
   PencilLine,
   Layers3,
   LockKeyhole,
-  Menu,
   Moon,
   MoreHorizontal,
   PlayCircle,
@@ -592,7 +591,6 @@ export default function Home() {
   const [polling, setPolling] = useState("10");
   const [lastSync, setLastSync] = useState(new Date());
   const [refreshing, setRefreshing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("bambu-watch-preferences");
@@ -640,15 +638,13 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      <aside className={`app-sidebar ${menuOpen ? "mobile-open" : ""}`}>
-        <div className="brand"><div className="brand-mark"><img src="/manus-storage/LogoFundoLilasFR3D_8ed9273a.png" alt="Logo FR3D" /></div><div><strong>FR3D <span>Monitoramento</span></strong><small>monitoramento pessoal</small></div><button className="mobile-close" onClick={() => setMenuOpen(false)} aria-label="Fechar menu"><X size={18} /></button></div>
-        <div className="workspace-switcher"><div className="workspace-avatar">L</div><div><span>Meu workspace</span><small>conta pessoal</small></div><ChevronRight size={15} /></div>
-        <nav className="side-nav" aria-label="Navegação principal"><p className="nav-label">PAINEL</p>{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={`nav-item ${view === id ? "active" : ""}`} onClick={() => { setView(id); setMenuOpen(false); }}><Icon size={17} /><span>{label}</span>{id === "printers" && <span className="nav-count">2</span>}</button>)}</nav>
-        <div className="sidebar-bottom"><div className="agent-card"><div className="agent-icon"><Radio size={16} /></div><div><strong>Bridge local</strong><span><i /> Aguardando conexão</span></div><button onClick={() => setView("settings")} aria-label="Abrir configuração"><Settings2 size={15} /></button></div><div className="sidebar-footer"><span className="help-icon"><CircleHelp size={15} /></span><span>Central de ajuda</span><span className="version">v0.1</span></div></div>
-      </aside>
-
+      <header className="app-topnav">
+        <div className="topnav-brand"><div className="brand"><div className="brand-mark"><img src="/manus-storage/LogoFundoLilasFR3D_8ed9273a.png" alt="Logo FR3D" /></div><div><strong>FR3D <span>Monitoramento</span></strong><small>monitoramento pessoal</small></div></div><div className="workspace-switcher"><div className="workspace-avatar">L</div><div><span>Meu workspace</span><small>conta pessoal</small></div><ChevronRight size={15} /></div></div>
+        <nav className="topnav-menu" aria-label="Navegação principal">{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={`nav-item ${view === id ? "active" : ""}`} onClick={() => setView(id)}><Icon size={17} /><span>{label}</span>{id === "printers" && <span className="nav-count">2</span>}</button>)}</nav>
+        <div className="topnav-tools"><div className="agent-card"><div className="agent-icon"><Radio size={15} /></div><div><strong>Bridge local</strong><span><i /> Aguardando conexão</span></div><button onClick={() => setView("settings")} aria-label="Abrir configuração"><Settings2 size={15} /></button></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></div>
+      </header>
       <main className="main-content">
-        <header className="topbar"><button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={20} /></button><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></header>
+        <div className="context-bar"><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="context-status"><span className="mini-live" /> Área ativa</div></div>
 
         <div className="page-content">
           {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
