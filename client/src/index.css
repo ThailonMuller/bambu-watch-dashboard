@@ -1003,3 +1003,16 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 .topnav-brand .brand-mark { width:68px; height:68px; flex-basis:68px; border-radius:50%; background:transparent; box-shadow:0 0 18px rgba(0,216,245,.16); }
 .topnav-brand .brand-mark img { width:100%; height:100%; object-fit:contain; }
 @media (max-width:760px) { .app-topnav { background:rgba(10,7,20,.56); } .topnav-brand .brand-mark { width:56px; height:56px; flex-basis:56px; } }
+
+/* Definitive cross-browser numeric control override */
+.budget-number-control { position:relative; min-width:0; flex:1 1 auto; height:100%; }
+.budget-number-control input[type="number"] { appearance:textfield !important; -moz-appearance:textfield !important; -webkit-appearance:none !important; width:100%; height:100%; min-width:0; padding:0 52px 0 0 !important; }
+.budget-number-control input[type="number"]::-webkit-inner-spin-button, .budget-number-control input[type="number"]::-webkit-outer-spin-button { display:none !important; appearance:none !important; -webkit-appearance:none !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; opacity:0 !important; background:none !important; border:0 !important; }
+.budget-input-suffix { right:27px !important; color:#8ff5ff !important; font-size:12px !important; font-weight:800 !important; }
+.budget-stepper { right:1px !important; top:1px !important; bottom:1px !important; width:23px !important; border-left:1px solid rgba(0,216,245,.46) !important; border-radius:0 7px 7px 0 !important; background:linear-gradient(180deg,rgba(0,216,245,.2),rgba(74,81,220,.24)) !important; }
+.budget-step-button { display:grid !important; width:100% !important; height:100% !important; min-height:0 !important; color:#8ff5ff !important; background:transparent !important; font-size:15px !important; line-height:1 !important; }
+.budget-step-up { border-bottom:1px solid rgba(0,216,245,.28) !important; }
+.budget-step-button:hover, .budget-step-button:focus-visible { color:#ffffff !important; background:linear-gradient(180deg,rgba(0,216,245,.42),rgba(116,74,220,.34)) !important; outline:0 !important; }
+html.light .budget-input-suffix { color:#147892 !important; }
+html.light .budget-stepper { border-left-color:rgba(20,120,146,.38) !important; background:linear-gradient(180deg,rgba(0,167,189,.16),rgba(126,43,182,.18)) !important; }
+html.light .budget-step-button { color:#147892 !important; }
