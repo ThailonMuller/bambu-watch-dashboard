@@ -925,3 +925,8 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 .hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; background-repeat:no-repeat; }
 .float-card-two { right:22px; bottom:22px; left:auto; }
 @media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; } .float-card-two { right:18px; bottom:18px; left:auto; } }
+
+
+/* Preserve the supplied banner aspect ratio; never stretch it to the card bounds */
+.hero-banner::before, .hero-banner-image { background-size:contain; background-position:center; background-repeat:no-repeat; background-color:#09051c; }
+@media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:contain; background-position:center; } }
