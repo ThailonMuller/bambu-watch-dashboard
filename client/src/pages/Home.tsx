@@ -258,7 +258,7 @@ function currency(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function BudgetField({ label, value, onChange, prefix, suffix, step = "0.01", min = "0" }: { label: string; value: string | number; onChange: (value: string) => void; prefix?: string; suffix?: string; step?: string; min?: string }) {
+function BudgetField({ label, value, onChange, prefix, suffix, step = "1", min = "0" }: { label: string; value: string | number; onChange: (value: string) => void; prefix?: string; suffix?: string; step?: string; min?: string }) {
   return (
     <label className="budget-field">
       <span>{label}</span>
