@@ -260,10 +260,19 @@ function currency(value: number) {
 }
 
 function BudgetField({ label, value, onChange, prefix, suffix, step = "1", min = "0" }: { label: string; value: string | number; onChange: (value: string) => void; prefix?: string; suffix?: string; step?: string; min?: string }) {
+  const adjustValue = (direction: 1 | -1) => {
+    const numericValue = Number(value);
+    const numericStep = Number(step) || 1;
+    const minimum = Number(min) || 0;
+    const nextValue = Math.max(minimum, (Number.isFinite(numericValue) ? numericValue : minimum) + direction * numericStep);
+    const decimals = Math.max(0, (step.split(".")[1] || "").length);
+    onChange(decimals ? nextValue.toFixed(decimals) : String(nextValue));
+  };
+
   return (
     <label className="budget-field">
       <span>{label}</span>
-      <div className={`budget-input-wrap ${suffix ? "has-suffix" : ""}`}>{prefix && <b className="budget-input-prefix">{prefix}</b>}<div className="budget-number-control"><input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />{suffix && <b className="budget-input-suffix">{suffix}</b>}</div></div>
+      <div className={`budget-input-wrap ${suffix ? "has-suffix" : ""}`}>{prefix && <b className="budget-input-prefix">{prefix}</b>}<div className="budget-number-control"><input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />{suffix && <b className="budget-input-suffix">{suffix}</b>}<span className="budget-stepper" aria-label={`Ajustar ${label}`}><button type="button" className="budget-step-button budget-step-up" onClick={() => adjustValue(1)} aria-label={`Aumentar ${label}`}>+</button><button type="button" className="budget-step-button budget-step-down" onClick={() => adjustValue(-1)} aria-label={`Diminuir ${label}`}>−</button></span></div></div>
     </label>
   );
 }
