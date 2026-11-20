@@ -961,3 +961,10 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 /* Keep the emblem in focus inside the wide desktop crop */
 .hero-banner::before, .hero-banner-image { background-position:center 24%; }
 @media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-position:center 42%; } }
+
+
+/* Transparent circular logo lockup: approximately 80% of the topbar height */
+.app-topnav { min-height:92px; padding-top:9px; padding-bottom:9px; }
+.topnav-brand .brand-mark { width:74px; height:74px; flex-basis:74px; border-radius:0; background:transparent; box-shadow:none; }
+.topnav-brand .brand-mark img { object-fit:contain; }
+@media (max-width:760px) { .app-topnav { padding-top:8px; padding-bottom:0; } .topnav-brand .brand-mark { width:60px; height:60px; flex-basis:60px; } }
