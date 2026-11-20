@@ -846,3 +846,13 @@ html.light .plate-row.plate-add-animation::after { border-color:#08a8c0; } html.
 }
 html.light .app-topnav { background:rgba(255,255,255,.84); border-bottom-color:rgba(185,139,214,.34); }
 html.light .topnav-menu { background:rgba(255,255,255,.64); border-color:rgba(185,139,214,.28); box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 8px 24px rgba(56,28,79,.08); }
+
+
+/* Static interaction treatment for the three primary budget actions */
+.budget-calculate-button, .spreadsheet-add-button, .shopee-toggle-button { transform:none !important; transition:color .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease, filter .18s ease; }
+.budget-calculate-button { border:1px solid rgba(255,255,255,.08); }
+.budget-calculate-button:hover, .spreadsheet-add-button:hover, .shopee-toggle-button:hover { transform:none !important; filter:brightness(1.13) saturate(1.12); box-shadow:0 0 0 2px rgba(70,232,255,.16), 0 10px 24px rgba(171,0,222,.28); }
+.budget-calculate-button:active, .spreadsheet-add-button:active, .shopee-toggle-button:active { transform:none !important; filter:brightness(1.2) saturate(1.18); box-shadow:inset 0 0 0 2px rgba(255,255,255,.22), 0 0 0 3px rgba(70,232,255,.2); }
+.budget-calculate-button:focus-visible, .spreadsheet-add-button:focus-visible, .shopee-toggle-button:focus-visible { outline:2px solid #46e8ff; outline-offset:3px; }
+html.light .budget-calculate-button:hover, html.light .spreadsheet-add-button:hover, html.light .shopee-toggle-button:hover { box-shadow:0 0 0 2px rgba(126,43,182,.18), 0 10px 24px rgba(126,43,182,.2); }
+html.light .budget-calculate-button:active, html.light .spreadsheet-add-button:active, html.light .shopee-toggle-button:active { box-shadow:inset 0 0 0 2px rgba(255,255,255,.48), 0 0 0 3px rgba(126,43,182,.2); }
