@@ -762,3 +762,9 @@ html.light .budget-parameters-grid .budget-input-wrap input[type="number"] { col
 html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-inner-spin-button, html.light .budget-parameters-grid .budget-input-wrap input[type="number"]::-webkit-outer-spin-button { filter:invert(28%) sepia(37%) saturate(2661%) hue-rotate(260deg) brightness(85%) contrast(90%); }
 @media (max-width:900px) { .budget-parameters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:480px) { .budget-parameters-grid { grid-template-columns:1fr; } }
+
+
+/* Strong FR3D blue emphasis for plate total and direct profit */
+.plates-total { min-height:50px; color:#cdb4dc; }.plates-total svg { color:#46e8ff; width:18px; height:18px; }.plates-total span { color:#d9c5e6; font-size:14px !important; font-weight:700; }.plates-total strong { color:#46e8ff; font-size:17px; text-shadow:0 0 14px rgba(70,232,255,.18); }
+.budget-breakdown .direct-profit-value { color:#46e8ff; font-weight:800; text-shadow:0 0 12px rgba(70,232,255,.16); }
+html.light .plates-total span { color:#5b426b; } html.light .plates-total strong, html.light .budget-breakdown .direct-profit-value { color:#087f9b; text-shadow:none; }
