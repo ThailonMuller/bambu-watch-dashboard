@@ -823,3 +823,8 @@ html.light .plate-row.plate-add-animation::after { border-color:#08a8c0; } html.
   .budget-result-card::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#00c8dd,#9d3ed0,#e000a7); border-radius:99px; }
   .budget-result-actions { margin-top:auto; }
 }
+
+
+@media (min-width:1200px) and (min-height:720px) {
+  .custom-budget-result-card { position:sticky; top:24px; height:calc(100vh - 48px); max-height:calc(100vh - 48px); }
+}
