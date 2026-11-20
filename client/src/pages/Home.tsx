@@ -52,6 +52,7 @@ import { useTheme } from "../contexts/ThemeContext";
 
 type PrinterState = "printing" | "idle" | "offline";
 type View = "overview" | "printers" | "settings" | "budget" | "filaments";
+type PlateAnimation = { type: "add" | "remove"; index: number } | null;
 
 type PrinterData = {
   id: string;
@@ -415,6 +416,7 @@ function BudgetView() {
   const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>([]);
   const [spreadsheetError, setSpreadsheetError] = useState("");
   const [focusedPlateIndex, setFocusedPlateIndex] = useState<number | null>(null);
+  const [plateAnimation, setPlateAnimation] = useState<PlateAnimation>(null);
   const [showShopeePrice, setShowShopeePrice] = useState(false);
   const modeDefaults = budgetMode === "store" ? DEFAULT_BUDGET_INPUT : CUSTOM_BUDGET_INPUT;
 
@@ -458,9 +460,28 @@ function BudgetView() {
     return Number.isFinite(numericCost) ? numericCost.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
   };
 
-  const addPlate = () => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts, 0] }));
-  const duplicatePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: [...current.plateCosts.slice(0, index + 1), current.plateCosts[index] ?? 0, ...current.plateCosts.slice(index + 1)] }));
-  const removePlate = (index: number) => setInput((current) => ({ ...current, plateCosts: current.plateCosts.length > 1 ? current.plateCosts.filter((_, plateIndex) => plateIndex !== index) : current.plateCosts }));
+  const addPlate = () => {
+    if (plateAnimation) return;
+    const index = input.plateCosts.length;
+    setInput((current) => ({ ...current, plateCosts: [...current.plateCosts, 0] }));
+    setPlateAnimation({ type: "add", index });
+    window.setTimeout(() => setPlateAnimation(null), 460);
+  };
+  const duplicatePlate = (index: number) => {
+    if (plateAnimation) return;
+    const nextIndex = index + 1;
+    setInput((current) => ({ ...current, plateCosts: [...current.plateCosts.slice(0, nextIndex), current.plateCosts[index] ?? 0, ...current.plateCosts.slice(nextIndex)] }));
+    setPlateAnimation({ type: "add", index: nextIndex });
+    window.setTimeout(() => setPlateAnimation(null), 460);
+  };
+  const removePlate = (index: number) => {
+    if (plateAnimation || input.plateCosts.length <= 1) return;
+    setPlateAnimation({ type: "remove", index });
+    window.setTimeout(() => {
+      setInput((current) => ({ ...current, plateCosts: current.plateCosts.length > 1 ? current.plateCosts.filter((_, plateIndex) => plateIndex !== index) : current.plateCosts }));
+      setPlateAnimation(null);
+    }, 260);
+  };
 
   const calculate = () => {
     if (hasInvalidBudgetPercentages(input)) {
@@ -558,7 +579,7 @@ function BudgetView() {
           <div className={`budget-card-title ${budgetMode === "custom" ? "custom-budget-title" : ""}`}><div className={`settings-symbol ${budgetMode === "custom" ? "custom-budget-symbol" : "purple"}`}>{budgetMode === "custom" ? <Sparkles size={19} /> : <Package size={19} />}</div><div><h3>Dados do produto {budgetMode === "custom" && <span className="custom-mode-chip">Personalizado</span>}</h3><p>{budgetMode === "custom" ? "Encomenda especial · margem diferenciada e acompanhamento sob medida." : "O ID e o nome identificam o item no controle de vendas."}</p></div></div>
           <div className="budget-fields-grid budget-identity-grid"><label className="budget-field"><span>ID do produto <i>somente números</i></span><input className="budget-text-input" type="text" inputMode="numeric" pattern="[0-9]*" value={input.productId} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productId: event.target.value.replace(/\D/g, "") })); }} placeholder="Ex.: 1001" /></label><label className="budget-field"><span>Nome do produto <i>obrigatório</i></span><input className="budget-text-input" type="text" value={input.productName} onChange={(event) => { setSpreadsheetError(""); setInput((current) => ({ ...current, productName: event.target.value })); }} placeholder="Ex.: suporte de fone" /></label></div>
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div></div>
-          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><div className="plate-card-header"><span>Placa {index + 1}</span></div><div className="plate-card-body"><label className="budget-field plate-value-field"><span className="plate-field-label">Valor da placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><div className="plate-actions"><button className="duplicate-plate-button" onClick={() => duplicatePlate(index)} aria-label={`Duplicar placa ${index + 1}`}><Copy size={14} /></button><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div></div></div>)}<div className="plate-add-tile"><button className="add-plate-button" onClick={addPlate}><Plus size={16} /> Adicionar placa</button></div></div>
+          <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${plateAnimation?.index === index ? `plate-${plateAnimation.type}-animation` : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><div className="plate-card-header"><span>Placa {index + 1}</span></div><div className="plate-card-body"><label className="budget-field plate-value-field"><span className="plate-field-label">Valor da placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><div className="plate-actions"><button className="duplicate-plate-button" onClick={() => duplicatePlate(index)} disabled={Boolean(plateAnimation)} aria-label={`Duplicar placa ${index + 1}`}><Copy size={14} /></button><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1 || Boolean(plateAnimation)} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div></div></div>)}<div className={`plate-add-tile ${plateAnimation?.type === "add" && plateAnimation.index === input.plateCosts.length - 1 ? "plate-add-animation" : ""}`}><button className="add-plate-button" onClick={addPlate} disabled={Boolean(plateAnimation)}><Plus size={16} /> Adicionar placa</button></div></div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
           <div className="budget-fields-grid budget-costs-grid"><BudgetField label="Embalagem" value={input.packagingCost} prefix="R$" onChange={(value) => updateNumber("packagingCost", value)} />{budgetMode === "store" && <BudgetField label="Outros custos" value={input.otherCosts} prefix="R$" onChange={(value) => updateNumber("otherCosts", value)} />}</div>
           <div className="budget-divider" />
