@@ -930,3 +930,17 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 /* Preserve the supplied banner aspect ratio; never stretch it to the card bounds */
 .hero-banner::before, .hero-banner-image { background-size:contain; background-position:center; background-repeat:no-repeat; background-color:#09051c; }
 @media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:contain; background-position:center; } }
+
+
+/* Final identity pass: cover the banner without distortion and use the transparent FR3D lockup */
+.hero-banner::before, .hero-banner-image { background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#09051c; }
+@media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:cover; background-position:center; } }
+.app-topnav { min-height:92px; padding-top:15px; padding-bottom:15px; background:rgba(10,7,20,.72); border-bottom-color:rgba(124,85,164,.32); box-shadow:0 10px 32px rgba(4,2,12,.28); backdrop-filter:blur(24px) saturate(145%); -webkit-backdrop-filter:blur(24px) saturate(145%); }
+.topnav-brand .brand { gap:12px; }
+.topnav-brand .brand-mark { width:56px; height:56px; flex:0 0 56px; overflow:hidden; border:0; border-radius:15px; background:transparent; box-shadow:0 0 20px rgba(0,216,245,.2); }
+.topnav-brand .brand-mark img { display:block; width:100%; height:100%; object-fit:contain; }
+.brand-copy { min-width:0; }
+.brand-copy strong { display:block; color:#fff5ff; font-size:16px; font-weight:900; letter-spacing:.025em; white-space:nowrap; }
+.brand-copy small { display:block; margin-top:4px; color:#bca8c8; font-size:11px !important; white-space:nowrap; }
+@media (max-width:1200px) { .app-topnav { min-height:92px; } }
+@media (max-width:760px) { .app-topnav { min-height:auto; padding-top:12px; padding-bottom:0; } .topnav-brand .brand-mark { width:50px; height:50px; flex-basis:50px; } .brand-copy strong { font-size:14px; } .brand-copy small { font-size:10px !important; } }
