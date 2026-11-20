@@ -917,3 +917,11 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
   .hero-banner { min-height:360px; padding:24px 20px; }
   .hero-banner-image { background-position:59% center; }
 }
+
+
+/* Visual correction: contained turquoise edge, readable status card and wider banner framing */
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:3px; bottom:3px; left:0; width:5px; border:0; border-radius:12px 0 0 12px; background:linear-gradient(180deg,#a4ffff 0%,#52efff 46%,#35c4ff 100%); box-shadow:0 0 13px rgba(82,239,255,.55); }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#d1ffff 0%,#65e9f2 48%,#48b9ff 100%); box-shadow:0 0 13px rgba(45,190,255,.34); }
+.hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; background-repeat:no-repeat; }
+.float-card-two { right:22px; bottom:22px; left:auto; }
+@media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; } .float-card-two { right:18px; bottom:18px; left:auto; } }
