@@ -800,3 +800,15 @@ html.light .plate-row.plate-add-animation::after { border-color:#08a8c0; } html.
 .plate-row.plate-add-animation, .plate-row.plate-remove-animation { z-index:5; }
 .plate-row.plate-add-animation::after, .plate-row.plate-remove-animation::after { inset:2px; z-index:2; border-radius:12px; }
 .plate-add-tile { isolation:isolate; overflow:hidden; }
+
+
+/* Mobile-safe animation pass: animate only the active card's paint, never its layout box */
+@keyframes plate-isolated-in { 0% { opacity:.35; filter:brightness(1.45) saturate(1.25); } 55% { opacity:1; filter:brightness(1.15) saturate(1.1); } 100% { opacity:1; filter:none; } }
+@keyframes plate-isolated-out { 0% { opacity:1; filter:brightness(1); } 45% { opacity:1; filter:brightness(1.45) saturate(1.3); } 100% { opacity:0; filter:brightness(1.7) saturate(1.5); } }
+.plate-row.plate-add-animation { z-index:1; animation:plate-isolated-in .34s ease-out both; }
+.plate-row.plate-remove-animation { z-index:1; animation:plate-isolated-out .26s ease-in both; }
+.plate-row.plate-add-animation::after, .plate-row.plate-remove-animation::after { transform:none; animation:plate-splash-ring .34s ease-out both; }
+.plate-row.plate-remove-animation::after { animation-duration:.26s; }
+.plates-list, .plate-row, .plate-add-tile { min-width:0; width:100%; }
+@media (max-width:560px) { .plates-list { grid-template-columns:minmax(0,1fr); width:100%; }.plate-row, .plate-add-tile { max-width:100%; }.plate-card-body { min-width:0; padding:11px 8px 9px; }.plate-card-body .budget-input-wrap { min-width:0; }.plate-card-body .plate-actions { flex:0 0 58px; } }
+@media (prefers-reduced-motion:reduce) { .plate-row.plate-add-animation, .plate-row.plate-remove-animation { animation:none; opacity:1; filter:none; } }
