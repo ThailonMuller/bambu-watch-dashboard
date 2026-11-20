@@ -793,3 +793,10 @@ html.light .budget-input-wrap input[type="number"] { color-scheme:light; } html.
 .plate-add-tile .add-plate-button:not(:disabled):active { transform:scale(.96); }.plate-add-tile .add-plate-button:disabled, .plate-actions button:disabled { cursor:wait; opacity:.62; }
 html.light .plate-row.plate-add-animation::after { border-color:#08a8c0; } html.light .plate-row.plate-remove-animation::after { border-color:#c63c92; }
 @media (prefers-reduced-motion:reduce) { .plate-row.plate-add-animation, .plate-row.plate-remove-animation, .plate-row.plate-add-animation::after, .plate-row.plate-remove-animation::after, .plate-add-tile.plate-add-animation { animation:none; } }
+
+
+/* Fix animation stacking: the splash stays inside its own card and never slips behind neighbors */
+.plate-row { isolation:isolate; overflow:hidden; transform-origin:center center; }
+.plate-row.plate-add-animation, .plate-row.plate-remove-animation { z-index:5; }
+.plate-row.plate-add-animation::after, .plate-row.plate-remove-animation::after { inset:2px; z-index:2; border-radius:12px; }
+.plate-add-tile { isolation:isolate; overflow:hidden; }
