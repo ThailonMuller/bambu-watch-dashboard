@@ -413,8 +413,6 @@ function BudgetView() {
   const [budgetMode, setBudgetMode] = useState<BudgetMode>("store");
   const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
-  const [hasCalculated, setHasCalculated] = useState(false);
-  const [calculationNotice, setCalculationNotice] = useState("");
   const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>([]);
   const [spreadsheetError, setSpreadsheetError] = useState("");
   const [focusedPlateIndex, setFocusedPlateIndex] = useState<number | null>(null);
@@ -467,15 +465,12 @@ function BudgetView() {
 
   const calculate = () => {
     if (hasInvalidBudgetPercentages(input)) {
-      setCalculationNotice("");
       toast.error("Percentuais inválidos", { description: "Perda e taxa Shopee precisam ser menores que 100%." });
       return;
     }
     const nextResult = calculateBudget(input);
     setResult(nextResult);
-    setHasCalculated(true);
-    setCalculationNotice(`Custo total: ${currency(nextResult.operationalCost)} · Venda direta: ${currency(nextResult.priceBeforeShopee)} · Shopee: ${currency(nextResult.suggestedPrice)}`);
-    toast.success("Orçamento calculado", { description: `Venda direta: ${currency(nextResult.priceBeforeShopee)} · Shopee: ${currency(nextResult.suggestedPrice)}` });
+    toast.success("Orçamento calculado");
   };
 
   const switchBudgetMode = (nextMode: BudgetMode) => {
@@ -483,8 +478,6 @@ function BudgetView() {
     setBudgetMode(nextMode);
     setInput((current) => ({ ...defaults, productId: current.productId, productName: current.productName, plateCosts: [...current.plateCosts] }));
     setResult(calculateBudget(defaults));
-    setHasCalculated(false);
-    setCalculationNotice("");
     setSpreadsheetError("");
     toast.info(nextMode === "store" ? "Modo Produto de Loja selecionado" : "Modo Personalizado selecionado");
   };
@@ -493,7 +486,6 @@ function BudgetView() {
     const defaults = { ...modeDefaults, plateCosts: [...modeDefaults.plateCosts] };
     setInput(defaults);
     setResult(calculateBudget(defaults));
-    setHasCalculated(false);
     setSpreadsheetError("");
     toast.info("Valores padrão restaurados");
   };
@@ -574,11 +566,10 @@ function BudgetView() {
           <div className="budget-card-title compact"><div className="settings-symbol blue"><SlidersHorizontal size={19} /></div><div><h3>Parâmetros de preço · {budgetMode === "store" ? "Produto de Loja" : "Personalizado"}</h3><p>{budgetMode === "store" ? "Referência para itens cadastrados na loja." : "Use para encomendas especiais e projetos sob medida."}</p></div></div>
           <div className="budget-fields-grid"><BudgetField label="MKP" value={input.mkp} suffix="%" onChange={(value) => updateNumber("mkp", value)} /><BudgetField label="Perda" value={input.lossPercentage} suffix="%" onChange={(value) => updateNumber("lossPercentage", value)} /><BudgetField label="Depreciação" value={input.depreciationPercentage} suffix="%" onChange={(value) => updateNumber("depreciationPercentage", value)} /><BudgetField label="Manutenção" value={input.maintenancePercentage} suffix="%" onChange={(value) => updateNumber("maintenancePercentage", value)} /><BudgetField label="Taxa da Shopee" value={input.shopeePercentage} suffix="%" onChange={(value) => updateNumber("shopeePercentage", value)} /><BudgetField label="Tarifa fixa Shopee" value={input.shopeeFixedFee} prefix="R$" onChange={(value) => updateNumber("shopeeFixedFee", value)} /></div>
           <div className="budget-actions"><button className="secondary-button" onClick={restoreDefaults}><RotateCcw size={15} /> Restaurar padrão</button><button className="budget-calculate-button" onClick={calculate}><Calculator size={16} /> Calcular orçamento</button></div>
-          {calculationNotice && <div className="calculation-notice" role="status"><CheckCircle2 size={15} /><span>{calculationNotice}</span></div>}
         </section>
         <aside className="budget-result-card">
           <div className="budget-result-head"><div><p className="eyebrow">RESULTADO DO SIMULADOR</p><h3>{input.productName || "Produto sem identificação"}</h3></div><div className="budget-result-icon"><DollarSign size={19} /></div></div>
-          <div className="suggested-price"><span>Preço de venda direta</span><strong>{currency(result.priceBeforeShopee)}</strong><small className="suggested-cost-subtitle">Custo total: {currency(result.operationalCost)} · {hasCalculated ? "calculado agora" : "com os valores padrão"}</small></div>
+          <div className="suggested-price"><span>Preço de venda direta</span><strong>{currency(result.priceBeforeShopee)}</strong><small className="suggested-cost-subtitle">Custo total: {currency(result.operationalCost)}</small></div>
           <button className={`shopee-toggle-button ${showShopeePrice ? "is-visible" : ""}`} onClick={() => setShowShopeePrice((visible) => !visible)} aria-expanded={showShopeePrice} aria-controls="shopee-price-details">{showShopeePrice ? <><X size={15} /> Ocultar preço Shopee</> : <><Plus size={15} /> Adicionar preço Shopee</>}</button>
           {showShopeePrice && <div id="shopee-price-details" className="shopee-price-details"><div className="shopee-price-highlight"><span>Preço Shopee</span><strong>{currency(result.suggestedPrice)}</strong><small className="suggested-cost-subtitle">Custo total: {currency(result.operationalCost)} · Taxa {input.shopeePercentage}% + {currency(input.shopeeFixedFee)}</small></div><div className="shopee-breakdown"><div><span>Preço Shopee</span><strong>{currency(result.suggestedPrice)}</strong></div><div><span>Taxa percentual + tarifa fixa</span><strong>{currency(result.shopeeFee)}</strong></div><div><span>Lucro Shopee</span><strong className="pink-value">{currency(result.shopeeProfit)}</strong></div></div></div>}
           <div className="budget-breakdown"><div><span>Peças ({input.plateCosts.length})</span><strong>{currency(result.materialCost)}</strong></div><div><span>Embalagem</span><strong>{currency(input.packagingCost)}</strong></div>{budgetMode === "store" && <div><span>Outros custos</span><strong>{currency(input.otherCosts)}</strong></div>}<div><span>Perda + depreciação + manutenção</span><strong>{currency(result.lossCost)}</strong></div><div><span>Custo total</span><strong>{currency(result.operationalCost)}</strong></div><div className="budget-breakdown-divider" /><div><span>Preço fora · MKP +{input.mkp.toLocaleString("pt-BR")}%</span><strong>{currency(result.priceBeforeShopee)}</strong></div><div><span>Lucro fora</span><strong className="pink-value">{currency(result.directProfit)}</strong></div>{showShopeePrice && <><div><span>Preço Shopee · {input.shopeePercentage}% + R$ {input.shopeeFixedFee.toFixed(2).replace(".", ",")}</span><strong className="pink-value">{currency(result.suggestedPrice)}</strong></div><div><span>Lucro Shopee</span><strong className="pink-value">{currency(result.shopeeProfit)}</strong></div></>}</div>
@@ -586,7 +577,7 @@ function BudgetView() {
         </aside>
       </div>
       <section className="spreadsheet-card">
-        <div className="spreadsheet-heading"><div><p className="eyebrow">CONTROLE INTERNO</p><h3>Planilha de produtos</h3><p>Estrutura pronta para exportar e levar ao seu fluxo do Odoo.</p></div><div className="spreadsheet-actions"><button className="sheet-button" onClick={downloadSpreadsheet}><Cloud size={14} /> Download</button><button className="sheet-button" onClick={restoreLastSpreadsheet}><RotateCcw size={14} /> Restaurar última</button><button className="sheet-button sheet-button-danger" onClick={newSpreadsheet}><Plus size={14} /> Nova planilha</button></div></div>
+        <div className="spreadsheet-heading"><div><p className="eyebrow">CONTROLE INTERNO</p><h3>Planilha de produtos</h3></div><div className="spreadsheet-actions"><button className="sheet-button" onClick={downloadSpreadsheet}><Cloud size={14} /> Download</button><button className="sheet-button" onClick={restoreLastSpreadsheet}><RotateCcw size={14} /> Restaurar última</button><button className="sheet-button sheet-button-danger" onClick={newSpreadsheet}><Plus size={14} /> Nova planilha</button></div></div>
         {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Tipo</th><th>Custo</th><th>Valor de venda</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td><span className={`budget-type-badge ${item.budgetMode === "custom" ? "is-custom" : "is-store"}`}>{item.budgetMode === "custom" ? <Sparkles size={11} /> : <Package size={11} />}{item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja"}</span></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
       </section>
     </div>
