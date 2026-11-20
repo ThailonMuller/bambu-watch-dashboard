@@ -683,3 +683,11 @@ html.light .plate-row { border-color:#e3d7eb; background:#fbf8fd; } html.light .
 .plate-row .budget-field > span { position:absolute; top:0; left:9px; z-index:1; margin:0; padding:0 5px; color:#f5d8ff; border-top:2px solid #c45cff; background:#28123e; font-size:8px; font-weight:800; line-height:1.1; letter-spacing:.02em; text-transform:uppercase; transform:translateY(-1px); }
 .plate-row.is-focused .budget-field > span { color:#d4fbff; border-top-color:#00d8f5; background:#1f304b; }
 html.light .plate-row .budget-field > span { color:#72279a; border-top-color:#a54bcc; background:#fbf8fd; } html.light .plate-row.is-focused .budget-field > span { color:#086a7a; border-top-color:#00a7bd; background:#eefbfd; }
+
+
+/* Fix: keep the plate title as one label inside the thicker top border */
+.plate-row .budget-field { overflow:visible; }
+.plate-row .budget-field > span { top:-1px; left:7px; width:max-content; max-width:calc(100% - 12px); padding:0 7px 2px; border-top-width:3px; border-top-style:solid; white-space:nowrap; overflow:visible; font-size:8px; line-height:1.15; letter-spacing:.035em; transform:none; }
+.plate-row .budget-field > span::after { content:""; position:absolute; top:-3px; left:0; right:0; height:3px; background:inherit; z-index:-1; }
+.plate-row.is-focused .budget-field > span::after { background:#1f304b; }
+html.light .plate-row.is-focused .budget-field > span::after { background:#eefbfd; }
