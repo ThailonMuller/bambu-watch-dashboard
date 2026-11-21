@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
 import { useTheme } from "../contexts/ThemeContext";
+import { trpc } from "../lib/trpc";
 
 type PrinterState = "printing" | "idle" | "offline";
 type View = "overview" | "printers" | "settings" | "budget" | "filaments";
@@ -132,6 +133,13 @@ function statusClass(state: PrinterState) {
 
 function formatSync(date: Date) {
   return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatLastSeen(observedAt: number) {
+  const seconds = Math.max(0, Math.floor((Date.now() - observedAt) / 1000));
+  if (seconds < 5) return "agora";
+  if (seconds < 60) return `há ${seconds} s`;
+  return `há ${Math.floor(seconds / 60)} min`;
 }
 
 function ProgressRing({ value, tone }: { value: number; tone: "violet" | "blue" }) {
@@ -615,9 +623,10 @@ function BudgetView() {
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
+  const telemetryQuery = trpc.telemetry.a1.useQuery(undefined, { refetchInterval: 10000, retry: false });
   const [view, setView] = useState<View>("overview");
   const [printers, setPrinters] = useState(initialPrinters);
-  const [simulationMode, setSimulationMode] = useState(true);
+  const [simulationMode, setSimulationMode] = useState(false);
   const [polling, setPolling] = useState("10");
   const [lastSync, setLastSync] = useState(new Date());
   const [refreshing, setRefreshing] = useState(false);
@@ -638,6 +647,23 @@ export default function Home() {
   }, [simulationMode, polling]);
 
   useEffect(() => {
+    const telemetry = telemetryQuery.data?.telemetry;
+    if (!telemetry || simulationMode) return;
+    setPrinters((current) => current.map((printer) => printer.id !== "a1" ? printer : {
+      ...printer,
+      state: telemetry.fresh && telemetry.state !== "error" ? telemetry.state : "offline",
+      progress: telemetry.progress,
+      job: telemetry.jobName,
+      remaining: telemetry.remainingSeconds == null ? "—" : `${String(Math.floor(telemetry.remainingSeconds / 3600)).padStart(2, "0")}h ${String(Math.floor((telemetry.remainingSeconds % 3600) / 60)).padStart(2, "0")}m`,
+      nozzle: telemetry.nozzleTemperature ?? 0,
+      bed: telemetry.bedTemperature ?? 0,
+      wifi: telemetry.wifiSignal == null ? "—" : `${telemetry.wifiSignal} dBm`,
+      lastSeen: formatLastSeen(telemetry.observedAt),
+    }));
+    setLastSync(new Date());
+  }, [telemetryQuery.data, simulationMode]);
+
+  useEffect(() => {
     if (!simulationMode) return;
     const timer = window.setInterval(() => {
       setPrinters((current) => current.map((printer) => printer.id === "a1" ? { ...printer, progress: printer.progress >= 99 ? 72 : printer.progress + 1, lastSeen: "agora" } : { ...printer, lastSeen: "agora" }));
@@ -651,8 +677,9 @@ export default function Home() {
   const refresh = () => {
     setRefreshing(true);
     window.setTimeout(() => {
+      void telemetryQuery.refetch();
       setLastSync(new Date());
-      setPrinters((current) => current.map((printer) => ({ ...printer, lastSeen: "agora" })));
+      if (simulationMode) setPrinters((current) => current.map((printer) => ({ ...printer, lastSeen: "agora" })));
       setRefreshing(false);
       toast.success("Telemetria atualizada", { description: "A leitura mais recente já está refletida no painel." });
     }, 650);

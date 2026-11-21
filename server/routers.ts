@@ -2,6 +2,36 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { isFreshTelemetry, normalizePrinterTelemetry, type PrinterTelemetry } from "../shared/printerTelemetry";
+
+const TELEMETRY_URL = process.env.FR3D_TELEMETRY_WORKER_URL ?? "https://fr3d-a1-telemetry.thailonfalcon.workers.dev";
+
+function parseTelemetry(payload: unknown) {
+  if (!payload || typeof payload !== "object") return null;
+  const value = payload as Record<string, unknown>;
+  const observedAtValue = value.observedAt;
+  const observedAt = typeof observedAtValue === "number"
+    ? observedAtValue
+    : typeof observedAtValue === "string"
+      ? Date.parse(observedAtValue)
+      : NaN;
+  if (value.printerId !== "a1" || !Number.isFinite(observedAt) || observedAt <= 0) return null;
+  const telemetry: PrinterTelemetry = {
+    printerId: "a1",
+    model: "A1",
+    state: value.state === "printing" || value.state === "idle" || value.state === "error" ? value.state : "offline",
+    progress: typeof value.progress === "number" ? value.progress : null,
+    jobName: typeof value.jobName === "string" ? value.jobName : null,
+    remainingSeconds: typeof value.remainingSeconds === "number" ? value.remainingSeconds : null,
+    nozzleTemperature: typeof value.nozzleTemperature === "number" ? value.nozzleTemperature : null,
+    bedTemperature: typeof value.bedTemperature === "number" ? value.bedTemperature : null,
+    wifiSignal: typeof value.wifiSignal === "number" ? value.wifiSignal : null,
+    firmware: typeof value.firmware === "string" ? value.firmware : null,
+    observedAt,
+  };
+  const normalized = normalizePrinterTelemetry(telemetry);
+  return { ...normalized, fresh: isFreshTelemetry(observedAt) };
+}
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -14,6 +44,22 @@ export const appRouter = router({
       return {
         success: true,
       } as const;
+    }),
+  }),
+
+  telemetry: router({
+    a1: publicProcedure.query(async () => {
+      try {
+        const response = await fetch(`${TELEMETRY_URL}/v1/telemetry/a1`, {
+          headers: { "Accept": "application/json", "User-Agent": "fr3d-dashboard/1.0" },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!response.ok) return { telemetry: null, online: false, error: `worker_http_${response.status}` };
+        const telemetry = parseTelemetry(await response.json());
+        return { telemetry, online: Boolean(telemetry?.fresh), error: telemetry ? null : "invalid_telemetry" };
+      } catch {
+        return { telemetry: null, online: false, error: "worker_unreachable" };
+      }
     }),
   }),
 
