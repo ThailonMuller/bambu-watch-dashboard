@@ -1118,9 +1118,14 @@ html.light .budget-step-button { color:#147892 !important; }
   border-radius:50%;
   background:transparent;
   box-shadow:none;
+  overflow:visible;
+  position:relative;
+  z-index:2;
 }
 .topnav-brand .brand-mark img {
   display:block;
+  position:relative;
+  z-index:3;
   width:60px;
   height:60px;
   border:0;
