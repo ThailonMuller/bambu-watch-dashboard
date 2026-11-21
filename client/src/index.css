@@ -1105,3 +1105,33 @@ html.light .budget-step-button { color:#147892 !important; }
   .plate-row.plate-remove-animation,
   .plate-add-tile.plate-add-animation { opacity:1; filter:none; transform:none; }
 }
+
+/* Logo do menu: adaptação fiel da configuração visual fornecida */
+:root { --ciano: #00d8f5; }
+.topnav-brand .brand-mark {
+  display:grid;
+  place-items:center;
+  width:64px;
+  height:64px;
+  flex:0 0 64px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+}
+.topnav-brand .brand-mark img {
+  display:block;
+  width:60px;
+  height:60px;
+  border:2px solid var(--ciano);
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 0 10px color-mix(in srgb, var(--ciano) 65%, transparent);
+}
+@media (max-width:1100px) and (min-width:761px) {
+  .topnav-brand .brand-mark { width:64px; height:64px; flex-basis:64px; }
+}
+@media (max-width:760px) {
+  .topnav-brand .brand-mark { width:60px; height:60px; flex-basis:60px; }
+  .topnav-brand .brand-mark img { width:56px; height:56px; }
+}
