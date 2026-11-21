@@ -632,7 +632,7 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("bambu-watch-preferences");
+    const saved = window.localStorage.getItem("fr3d-monitoring-preferences-v2");
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as { simulationMode?: boolean; polling?: string };
@@ -643,7 +643,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("bambu-watch-preferences", JSON.stringify({ simulationMode, polling }));
+    window.localStorage.setItem("fr3d-monitoring-preferences-v2", JSON.stringify({ simulationMode, polling }));
   }, [simulationMode, polling]);
 
   useEffect(() => {

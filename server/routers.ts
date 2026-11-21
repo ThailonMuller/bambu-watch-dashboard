@@ -16,10 +16,18 @@ function parseTelemetry(payload: unknown) {
       ? Date.parse(observedAtValue)
       : NaN;
   if (value.printerId !== "a1" || !Number.isFinite(observedAt) || observedAt <= 0) return null;
+  const rawState = typeof value.state === "string" ? value.state.toLowerCase() : "offline";
+  const normalizedState = rawState === "running" || rawState === "printing"
+    ? "printing"
+    : rawState === "idle" || rawState === "finish" || rawState === "finished"
+      ? "idle"
+      : rawState === "failed" || rawState === "error" || rawState === "pause" || rawState === "paused"
+        ? "error"
+        : "offline";
   const telemetry: PrinterTelemetry = {
     printerId: "a1",
     model: "A1",
-    state: value.state === "printing" || value.state === "idle" || value.state === "error" ? value.state : "offline",
+    state: normalizedState,
     progress: typeof value.progress === "number" ? value.progress : null,
     jobName: typeof value.jobName === "string" ? value.jobName : null,
     remainingSeconds: typeof value.remainingSeconds === "number" ? value.remainingSeconds : null,
