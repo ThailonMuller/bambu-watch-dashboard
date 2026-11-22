@@ -47,6 +47,11 @@ export function isFreshTelemetry(observedAt: number, now = Date.now(), maxAgeMs 
   return Number.isFinite(observedAt) && observedAt > 0 && now - observedAt <= maxAgeMs;
 }
 
+export function estimatedCompletionAt(remainingSeconds: number | null | undefined, now = Date.now()) {
+  if (typeof remainingSeconds !== "number" || !Number.isFinite(remainingSeconds) || remainingSeconds < 0 || !Number.isFinite(now)) return null;
+  return now + Math.round(remainingSeconds) * 1000;
+}
+
 export function displayPrinterState(state: PrinterState) {
   if (state === "printing") return "Imprimindo";
   if (state === "idle") return "Disponível";

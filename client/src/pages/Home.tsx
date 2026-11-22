@@ -48,6 +48,7 @@ import {
 import { toast } from "sonner";
 import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
+import { estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
 
@@ -64,10 +65,12 @@ type PrinterData = {
   progress: number;
   job: string;
   remaining: string;
-  nozzle: number;
-  bed: number;
+  nozzle: number | null;
+  bed: number | null;
   fanSpeed: number | null;
-  layer: string;
+  layer: string | null;
+  firmware: string | null;
+  remainingSeconds: number | null;
   wifi: string;
   lastSeen: string;
 };
@@ -78,16 +81,18 @@ const initialPrinters: PrinterData[] = [
     name: "A1",
     model: "Bambu Lab A1",
     accent: "violet",
-    state: "printing",
-    progress: 72,
-    job: "vaso-organico-v3.3mf",
-    remaining: "00h 38m",
-    nozzle: 218,
-    bed: 60,
-    fanSpeed: 42,
-    layer: "128 / 176",
-    wifi: "-48 dBm",
-    lastSeen: "há 12 s",
+    state: "offline",
+    progress: 0,
+    job: "Aguardando telemetria",
+    remaining: "—",
+    nozzle: null,
+    bed: null,
+    fanSpeed: null,
+    layer: null,
+    firmware: null,
+    remainingSeconds: null,
+    wifi: "—",
+    lastSeen: "aguardando",
   },
   {
     id: "p1s",
@@ -102,6 +107,8 @@ const initialPrinters: PrinterData[] = [
     bed: 25,
     fanSpeed: 0,
     layer: "—",
+    firmware: null,
+    remainingSeconds: null,
     wifi: "-55 dBm",
     lastSeen: "há 18 s",
   },
@@ -145,6 +152,12 @@ function formatLastSeen(observedAt: number) {
   return `há ${Math.floor(seconds / 60)} min`;
 }
 
+function formatCompletionTime(remainingSeconds: number | null, state: PrinterState) {
+  if (state !== "printing") return null;
+  const completionAt = estimatedCompletionAt(remainingSeconds);
+  return completionAt == null ? null : new Date(completionAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
 function ProgressRing({ value, tone }: { value: number; tone: "violet" | "blue" }) {
   return (
     <div
@@ -175,6 +188,7 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Thermom
 
 function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: () => void }) {
   const isPrinting = printer.state === "printing";
+  const completionTime = formatCompletionTime(printer.remainingSeconds, printer.state);
   return (
     <article className={`printer-card printer-card-${printer.accent}`}>
       <div className="printer-card-topline">
@@ -193,14 +207,15 @@ function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: 
         <div className="job-summary">
           <div className="job-status-row"><span className={statusClass(printer.state)}><span className="status-dot" /> {statusLabel(printer.state)}</span>{isPrinting && <span className="job-time"><Clock3 size={13} /> {printer.remaining}</span>}</div>
           <h4>{printer.job}</h4>
-          <p>{isPrinting ? `Camada ${printer.layer}` : "Nenhuma impressão em andamento"}</p>
+          <p>{isPrinting ? (completionTime ? `Conclusão estimada às ${completionTime}` : "Conclusão estimada indisponível") : printer.firmware ? `Firmware ${printer.firmware}` : "Firmware não informado"}</p>
+          {isPrinting && <p className="printer-firmware">Firmware {printer.firmware ?? "não informado"}</p>}
           <button className="text-action" onClick={onDetails}>Ver detalhes <ArrowUpRight size={14} /></button>
         </div>
       </div>
 
       <div className="printer-stats">
-        <div><span><Thermometer size={14} /> Bico</span><strong>{printer.nozzle}°C</strong></div>
-        <div><span><Layers3 size={14} /> Mesa</span><strong>{printer.bed}°C</strong></div>
+        <div><span><Thermometer size={14} /> Bico</span><strong>{printer.nozzle == null ? "—" : `${printer.nozzle}°C`}</strong></div>
+        <div><span><Layers3 size={14} /> Mesa</span><strong>{printer.bed == null ? "—" : `${printer.bed}°C`}</strong></div>
         <div><span><Fan size={14} /> Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div>
       </div>
     </article>
@@ -658,9 +673,11 @@ export default function Home() {
       progress: telemetry.progress,
       job: telemetry.jobName,
       remaining: telemetry.remainingSeconds == null ? "—" : `${String(Math.floor(telemetry.remainingSeconds / 3600)).padStart(2, "0")}h ${String(Math.floor((telemetry.remainingSeconds % 3600) / 60)).padStart(2, "0")}m`,
-      nozzle: telemetry.nozzleTemperature ?? 0,
-      bed: telemetry.bedTemperature ?? 0,
+      remainingSeconds: telemetry.remainingSeconds,
+      nozzle: telemetry.nozzleTemperature,
+      bed: telemetry.bedTemperature,
       fanSpeed: telemetry.fanSpeed,
+      firmware: telemetry.firmware,
       wifi: telemetry.wifiSignal == null ? "—" : `${telemetry.wifiSignal} dBm`,
       lastSeen: formatLastSeen(telemetry.observedAt),
     }));
@@ -696,6 +713,7 @@ export default function Home() {
 
   const activePrinters = printers.filter((printer) => printer.state !== "offline").length;
   const busyPrinters = printers.filter((printer) => printer.state === "printing").length;
+  const a1Printer = printers.find((printer) => printer.id === "a1");
   const telemetryWarning = telemetryQuery.isFetched && !telemetryQuery.data?.online;
 
   return (
@@ -714,7 +732,7 @@ export default function Home() {
             <section className="hero-banner"><div className="hero-banner-image" role="img" aria-label="Falcão e rosa da Falcão Rosa3D em cenário neon" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara das impressoras, filamentos e orçamentos da sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></section>
 
             <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
-            <section className="metrics-grid"><Metric icon={Printer} label="Impressoras ativas" value={`${activePrinters} / 2`} hint="todas respondendo" tone="purple" /><Metric icon={PlayCircle} label="Em impressão" value={`${busyPrinters}`} hint="A1 em andamento" tone="blue" /><Metric icon={Clock3} label="Tempo estimado" value="00h 38m" hint="para o próximo fim" tone="pink" /><Metric icon={Activity} label="Disponibilidade" value="98,4%" hint="nas últimas 24h" tone="green" /></section>
+            <section className="metrics-grid"><Metric icon={Printer} label="Impressoras ativas" value={`${activePrinters} / 2`} hint="A1 real · P1S demonstração" tone="purple" /><Metric icon={PlayCircle} label="Em impressão" value={`${busyPrinters}`} hint="estado recebido da A1" tone="blue" /><Metric icon={Clock3} label="Tempo estimado" value={a1Printer?.remaining ?? "—"} hint="tempo restante real da A1" tone="pink" /><Metric icon={Activity} label="Disponibilidade" value="98,4%" hint="indicador ainda em demonstração" tone="green" /></section>
 
             <div className="section-heading printers-heading"><div><p className="eyebrow">SEU PARQUE</p><h2>{view === "printers" ? "Todas as impressoras" : "Impressoras"}</h2></div><button className="outline-button" onClick={() => toast.info("O cadastro de novas impressoras será liberado com o bridge local.")}><Plus size={15} /> Adicionar</button></div>
             <section className="printers-grid">{printers.map((printer) => <PrinterCard key={printer.id} printer={printer} onDetails={showDetails} />)}</section>

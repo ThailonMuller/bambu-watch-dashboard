@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayPrinterState, isFreshTelemetry, normalizePrinterTelemetry } from "../shared/printerTelemetry";
+import { displayPrinterState, estimatedCompletionAt, isFreshTelemetry, normalizePrinterTelemetry } from "../shared/printerTelemetry";
 
 describe("printer telemetry contract", () => {
   it("normalizes unsafe or incomplete readings without changing the printer identity", () => {
@@ -31,5 +31,13 @@ describe("printer telemetry contract", () => {
     expect(isFreshTelemetry(now - 60_000, now)).toBe(false);
     expect(displayPrinterState("printing")).toBe("Imprimindo");
     expect(displayPrinterState("offline")).toBe("Offline");
+  });
+
+  it("calculates the estimated completion timestamp from remaining seconds", () => {
+    const now = 1_700_000_000_000;
+    expect(estimatedCompletionAt(1_560, now)).toBe(now + 1_560_000);
+    expect(estimatedCompletionAt(0, now)).toBe(now);
+    expect(estimatedCompletionAt(null, now)).toBeNull();
+    expect(estimatedCompletionAt(-1, now)).toBeNull();
   });
 });
