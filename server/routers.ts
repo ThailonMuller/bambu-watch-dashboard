@@ -6,16 +6,19 @@ import { getA1TelemetryHistory, recordA1Telemetry } from "./db";
 import { isFreshTelemetry, normalizePrinterTelemetry, type PrinterTelemetry } from "../shared/printerTelemetry";
 
 const TELEMETRY_URL = process.env.FR3D_TELEMETRY_WORKER_URL ?? "https://fr3d-a1-telemetry.thailonfalcon.workers.dev";
+let telemetryConsecutiveFailures = 0;
 
 async function fetchTelemetrySnapshot() {
   let lastError: unknown = null;
+  const startedAt = Date.now();
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      return await fetch(`${TELEMETRY_URL}/v1/telemetry/a1`, {
+      const response = await fetch(`${TELEMETRY_URL}/v1/telemetry/a1`, {
         headers: { "Accept": "application/json", "User-Agent": "fr3d-dashboard/1.1" },
         cache: "no-store",
         signal: AbortSignal.timeout(attempt === 0 ? 5000 : 2500),
       });
+      return { response, responseMs: Date.now() - startedAt };
     } catch (error) {
       lastError = error;
       if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 250));
@@ -86,15 +89,22 @@ export const appRouter = router({
   telemetry: router({
     a1: publicProcedure.query(async () => {
       try {
-        const response = await fetchTelemetrySnapshot();
-        if (!response.ok) return { telemetry: null, online: false, error: `worker_http_${response.status}` };
-        const telemetry = parseTelemetry(await response.json());
+        const { response, responseMs } = await fetchTelemetrySnapshot();
+        if (!response.ok) {
+          telemetryConsecutiveFailures += 1;
+          return { telemetry: null, online: false, ageMs: null, error: `worker_http_${response.status}`, diagnostics: { responseMs, consecutiveFailures: telemetryConsecutiveFailures, fetchedAt: Date.now(), receivedAt: null } };
+        }
+        const payload = await response.json() as Record<string, unknown>;
+        const telemetry = parseTelemetry(payload);
+        if (!telemetry) telemetryConsecutiveFailures += 1;
+        else telemetryConsecutiveFailures = 0;
         if (telemetry && telemetry.fresh && process.env.NODE_ENV !== "test") {
           void recordA1Telemetry(telemetry).catch((error) => console.warn("[Telemetry] history write failed", error instanceof Error ? error.message : "unknown_error"));
         }
-        return { telemetry, online: Boolean(telemetry?.fresh), ageMs: telemetry ? Math.max(0, Date.now() - telemetry.observedAt) : null, error: telemetry ? null : "invalid_telemetry" };
+        return { telemetry, online: Boolean(telemetry?.fresh), ageMs: telemetry ? Math.max(0, Date.now() - telemetry.observedAt) : null, error: telemetry ? null : "invalid_telemetry", diagnostics: { responseMs, consecutiveFailures: telemetryConsecutiveFailures, fetchedAt: Date.now(), receivedAt: typeof payload.receivedAt === "string" ? payload.receivedAt : null } };
       } catch {
-        return { telemetry: null, online: false, ageMs: null, error: "worker_unreachable" };
+        telemetryConsecutiveFailures += 1;
+        return { telemetry: null, online: false, ageMs: null, error: "worker_unreachable", diagnostics: { responseMs: null, consecutiveFailures: telemetryConsecutiveFailures, fetchedAt: Date.now(), receivedAt: null } };
       }
     }),
     a1History: publicProcedure.query(async () => {

@@ -1189,3 +1189,7 @@ html.light .budget-step-button { color:#147892 !important; }
 .dark .telemetry-live-alert { color: #ffd5df; border-color: rgba(240, 126, 153, .35); background: linear-gradient(135deg, rgba(91, 24, 52, .58), rgba(55, 17, 45, .72)); }
 .dark .telemetry-live-alert span { color: #e1a6b5; }
 .dark .telemetry-live-alert button { color: #ffd5df; border-color: rgba(240, 126, 153, .4); background: rgba(25, 10, 30, .5); }
+
+.telemetry-diagnostics-panel { grid-column: 1 / -1; }
+.telemetry-diagnostics-note { display: block; margin-top: 14px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.telemetry-diagnostics-note.is-warning { color: #e6a2b2; }

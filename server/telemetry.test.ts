@@ -53,6 +53,8 @@ describe("telemetry.a1", () => {
       totalLayers: 176,
       fresh: true,
     });
+    expect(result.diagnostics?.responseMs).toBeGreaterThanOrEqual(0);
+    expect(result.diagnostics?.consecutiveFailures).toBe(0);
   });
 
   it("returns offline data when the Worker is unreachable", async () => {
@@ -60,7 +62,11 @@ describe("telemetry.a1", () => {
 
     const result = await appRouter.createCaller(context).telemetry.a1();
 
-    expect(result).toEqual({ telemetry: null, online: false, ageMs: null, error: "worker_unreachable" });
+    expect(result.telemetry).toBeNull();
+    expect(result.online).toBe(false);
+    expect(result.ageMs).toBeNull();
+    expect(result.error).toBe("worker_unreachable");
+    expect(result.diagnostics?.consecutiveFailures).toBeGreaterThan(0);
   });
 
   it("recovers from one transient Worker failure without marking offline", async () => {

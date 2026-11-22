@@ -259,6 +259,35 @@ function SimulationStatusPanel() {
   );
 }
 
+type TelemetryDiagnostics = {
+  responseMs: number | null;
+  consecutiveFailures: number;
+  fetchedAt: number;
+  receivedAt: string | null;
+};
+
+function formatDiagnosticAge(ageMs: number | null | undefined) {
+  if (ageMs == null || !Number.isFinite(ageMs)) return "Não disponível";
+  if (ageMs < 1000) return "menos de 1 s";
+  const seconds = Math.floor(ageMs / 1000);
+  if (seconds < 60) return `${seconds} s`;
+  return `${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+}
+
+function TelemetryDiagnosticsPanel({ data }: { data: { ageMs?: number | null; diagnostics?: TelemetryDiagnostics; error?: string | null } | undefined }) {
+  const diagnostics = data?.diagnostics;
+  const age = formatDiagnosticAge(data?.ageMs);
+  const received = diagnostics?.receivedAt ? new Date(diagnostics.receivedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "medium" }) : "Não recebido";
+  return (
+    <section className="panel telemetry-diagnostics-panel">
+      <div className="panel-heading"><div><p className="eyebrow">DIAGNÓSTICO TÉCNICO</p><h3>Fluxo da telemetria</h3></div><Activity size={16} className="panel-live-icon" /></div>
+      <p>Indicadores de passagem entre Worker, backend e interface. Nenhum Access Code ou payload MQTT é exibido.</p>
+      <div className="telemetry-status-list"><div><span>Idade do snapshot</span><strong>{age}</strong></div><div><span>Recebido pelo Worker</span><strong>{received}</strong></div><div><span>Resposta do Worker</span><strong>{diagnostics?.responseMs == null ? "Não disponível" : `${diagnostics.responseMs} ms`}</strong></div><div><span>Falhas consecutivas</span><strong>{diagnostics?.consecutiveFailures ?? "Não disponível"}</strong></div></div>
+      <span className={`telemetry-diagnostics-note ${data?.error ? "is-warning" : ""}`}>{data?.error ? `Último diagnóstico: ${data.error}` : "Worker acessível; a disponibilidade depende do frescor do snapshot."}</span>
+    </section>
+  );
+}
+
 function MiniChart() {
   return (
     <div className="chart-wrap" aria-label="Gráfico de uso das impressoras nas últimas 24 horas">
@@ -787,7 +816,7 @@ export default function Home() {
             <section className="printers-grid">{printers.map((printer) => <PrinterCard key={printer.id} printer={printer} onDetails={showDetails} />)}</section>
             {view === "printers" && a1Printer && <PrinterDetailsPanel printer={a1Printer} />}
 
-            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} historyCount={historyQuery.data?.length ?? 0} /><SimulationStatusPanel /></section>}
+            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} historyCount={historyQuery.data?.length ?? 0} /><SimulationStatusPanel /><TelemetryDiagnosticsPanel data={telemetryQuery.data} /></section>}
 
             <div className="local-note"><div className="local-note-icon"><LockKeyhole size={16} /></div><div><strong>Construído para permanecer privado.</strong><span>O painel foi desenhado para conversar com um bridge local via MQTT TLS. Ele não acessa a conta Bambu Handy, não tenta contornar proteções do fabricante e não envia comandos às impressoras.</span></div><button onClick={() => setView("settings")}><span>Entender a arquitetura</span><ArrowUpRight size={14} /></button></div>
           </>}
