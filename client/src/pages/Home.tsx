@@ -60,6 +60,7 @@ type PrinterData = {
   id: string;
   name: string;
   model: string;
+  serial: string | null;
   accent: "violet" | "blue";
   state: PrinterState;
   progress: number;
@@ -69,6 +70,8 @@ type PrinterData = {
   bed: number | null;
   fanSpeed: number | null;
   layer: string | null;
+  layerNumber: number | null;
+  totalLayers: number | null;
   firmware: string | null;
   remainingSeconds: number | null;
   wifi: string;
@@ -80,6 +83,7 @@ const initialPrinters: PrinterData[] = [
     id: "a1",
     name: "A1",
     model: "Bambu Lab A1",
+    serial: null,
     accent: "violet",
     state: "offline",
     progress: 0,
@@ -89,6 +93,8 @@ const initialPrinters: PrinterData[] = [
     bed: null,
     fanSpeed: null,
     layer: null,
+    layerNumber: null,
+    totalLayers: null,
     firmware: null,
     remainingSeconds: null,
     wifi: "—",
@@ -98,6 +104,7 @@ const initialPrinters: PrinterData[] = [
     id: "p1s",
     name: "P1S",
     model: "Bambu Lab P1S",
+    serial: null,
     accent: "blue",
     state: "idle",
     progress: 100,
@@ -107,6 +114,8 @@ const initialPrinters: PrinterData[] = [
     bed: 25,
     fanSpeed: 0,
     layer: "—",
+    layerNumber: null,
+    totalLayers: null,
     firmware: null,
     remainingSeconds: null,
     wifi: "-55 dBm",
@@ -167,7 +176,7 @@ function ProgressRing({ value, tone }: { value: number; tone: "violet" | "blue" 
     >
       <div className="progress-ring-inner">
         <span>{value}%</span>
-        <small>concluído</small>
+        <small>feito</small>
       </div>
     </div>
   );
@@ -195,7 +204,7 @@ function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: 
         <div className="printer-identity">
           <div className={`printer-mark printer-mark-${printer.accent}`}><Printer size={19} /></div>
           <div>
-            <div className="printer-name-row"><h3>{printer.name}</h3><span className="model-tag">{printer.model.replace("Bambu Lab ", "")}</span></div>
+            <div className="printer-name-row"><h3>{printer.name}</h3></div>
             <p className="printer-meta"><Wifi size={13} /> {printer.wifi} <span className="dot-separator">•</span> vista {printer.lastSeen}</p>
           </div>
         </div>
@@ -208,6 +217,7 @@ function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: 
           <div className="job-status-row"><span className={statusClass(printer.state)}><span className="status-dot" /> {statusLabel(printer.state)}</span>{isPrinting && <span className="job-time"><Clock3 size={13} /> {printer.remaining}</span>}</div>
           <h4>{printer.job}</h4>
           <p>{isPrinting ? (completionTime ? `Conclusão estimada às ${completionTime}` : "Conclusão estimada indisponível") : printer.firmware ? `Firmware ${printer.firmware}` : "Firmware não informado"}</p>
+          {isPrinting && <p className="printer-layer">{printer.layerNumber != null && printer.totalLayers != null ? `Camada ${printer.layerNumber} / ${printer.totalLayers}` : "Camada não informada"}</p>}
           {isPrinting && <p className="printer-firmware">Firmware {printer.firmware ?? "não informado"}</p>}
           <button className="text-action" onClick={onDetails}>Ver detalhes <ArrowUpRight size={14} /></button>
         </div>
@@ -219,6 +229,33 @@ function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: 
         <div><span><Fan size={14} /> Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div>
       </div>
     </article>
+  );
+}
+
+function PrinterDetailsPanel({ printer }: { printer: PrinterData }) {
+  const layer = printer.layerNumber != null && printer.totalLayers != null ? `${printer.layerNumber} / ${printer.totalLayers}` : "Não informado pelo bridge";
+  return (
+    <section className="printer-details-panel">
+      <div className="panel-heading"><div><p className="eyebrow">IDENTIDADE E TELEMETRIA</p><h3>Detalhes da {printer.name}</h3></div><span className="details-live-badge"><span className="mini-live" /> leitura protegida</span></div>
+      <div className="printer-details-grid">
+        <div><span>Serial</span><strong>{printer.serial ?? "Não informado"}</strong></div>
+        <div><span>Firmware</span><strong>{printer.firmware ?? "Não informado"}</strong></div>
+        <div><span>Camada</span><strong>{layer}</strong></div>
+        <div><span>Última leitura</span><strong>{printer.lastSeen}</strong></div>
+      </div>
+    </section>
+  );
+}
+
+function TelemetryStatusPanel({ printer }: { printer: PrinterData }) {
+  return (
+    <div className="panel telemetry-status-panel"><div className="panel-heading"><div><p className="eyebrow">FONTE REAL</p><h3>Telemetria da A1</h3></div><Radio size={16} className="panel-live-icon" /></div><p>Os dados abaixo vêm do bridge local por HTTPS autenticado. Nenhum comando é enviado à impressora.</p><div className="telemetry-status-list"><div><span>Estado</span><strong>{statusLabel(printer.state)}</strong></div><div><span>Wi-Fi</span><strong>{printer.wifi}</strong></div><div><span>Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div></div></div>
+  );
+}
+
+function SimulationStatusPanel() {
+  return (
+    <div className="panel simulation-status-panel"><div className="panel-heading"><div><p className="eyebrow">P1S</p><h3>Dados de demonstração</h3></div><Sparkles size={16} className="panel-simulation-icon" /></div><p>A P1S permanece simulada nesta etapa. Gráfico histórico, disponibilidade e atividade real serão conectados quando o bridge da P1S for implementado.</p><span className="simulation-note">Sem telemetria real da P1S</span></div>
   );
 }
 
@@ -670,6 +707,7 @@ export default function Home() {
     setPrinters((current) => current.map((printer) => printer.id !== "a1" ? printer : {
       ...printer,
       state: telemetry.fresh && telemetry.state !== "error" ? telemetry.state : "offline",
+      serial: telemetry.serial,
       progress: telemetry.progress,
       job: telemetry.jobName,
       remaining: telemetry.remainingSeconds == null ? "—" : `${String(Math.floor(telemetry.remainingSeconds / 3600)).padStart(2, "0")}h ${String(Math.floor((telemetry.remainingSeconds % 3600) / 60)).padStart(2, "0")}m`,
@@ -678,6 +716,8 @@ export default function Home() {
       bed: telemetry.bedTemperature,
       fanSpeed: telemetry.fanSpeed,
       firmware: telemetry.firmware,
+      layerNumber: telemetry.layerNumber,
+      totalLayers: telemetry.totalLayers,
       wifi: telemetry.wifiSignal == null ? "—" : `${telemetry.wifiSignal} dBm`,
       lastSeen: formatLastSeen(telemetry.observedAt),
     }));
@@ -736,8 +776,9 @@ export default function Home() {
 
             <div className="section-heading printers-heading"><div><p className="eyebrow">SEU PARQUE</p><h2>{view === "printers" ? "Todas as impressoras" : "Impressoras"}</h2></div><button className="outline-button" onClick={() => toast.info("O cadastro de novas impressoras será liberado com o bridge local.")}><Plus size={15} /> Adicionar</button></div>
             <section className="printers-grid">{printers.map((printer) => <PrinterCard key={printer.id} printer={printer} onDetails={showDetails} />)}</section>
+            {view === "printers" && a1Printer && <PrinterDetailsPanel printer={a1Printer} />}
 
-            {view === "overview" && <section className="lower-grid"><div className="panel usage-panel"><div className="panel-heading"><div><p className="eyebrow">UTILIZAÇÃO</p><h3>Ritmo de impressão</h3></div><div className="chart-legend"><span><i className="legend-dot violet" /> A1</span><span><i className="legend-dot blue" /> P1S</span><select defaultValue="24h"><option value="24h">Últimas 24h</option><option value="7d">Últimos 7 dias</option></select></div></div><MiniChart /></div><div className="panel activity-panel"><div className="panel-heading"><div><p className="eyebrow">EVENTOS</p><h3>Atividade recente</h3></div><button className="panel-link" onClick={() => toast.info("O histórico completo estará disponível após conectar o bridge.")}>Ver tudo <ArrowUpRight size={13} /></button></div><div className="activity-list">{activity.map((item) => <div className="activity-item" key={`${item.time}-${item.label}`}><div className={`activity-icon ${item.tone}`}><Check size={14} /></div><div className="activity-copy"><strong>{item.label}</strong><span>{item.detail}</span></div><time>{item.time}</time></div>)}</div></div></section>}
+            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} /><SimulationStatusPanel /></section>}
 
             <div className="local-note"><div className="local-note-icon"><LockKeyhole size={16} /></div><div><strong>Construído para permanecer privado.</strong><span>O painel foi desenhado para conversar com um bridge local via MQTT TLS. Ele não acessa a conta Bambu Handy, não tenta contornar proteções do fabricante e não envia comandos às impressoras.</span></div><button onClick={() => setView("settings")}><span>Entender a arquitetura</span><ArrowUpRight size={14} /></button></div>
           </>}

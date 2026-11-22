@@ -17,6 +17,7 @@ describe("telemetry.a1", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
       printerId: "a1",
       model: "A1",
+      serial: " 03919D4C0704536 ",
       state: "running",
       progress: 76.4,
       jobName: "  Enfermeira - Dinara_plate_5  ",
@@ -26,6 +27,8 @@ describe("telemetry.a1", () => {
       fanSpeed: 14,
       wifiSignal: -58.4,
       firmware: "  01.04.00.00 ",
+      layer_num: 128,
+      total_layer_num: 176,
       observedAt: new Date().toISOString(),
     }), { status: 200, headers: { "Content-Type": "application/json" } })));
 
@@ -35,6 +38,7 @@ describe("telemetry.a1", () => {
     expect(result.error).toBeNull();
     expect(result.telemetry).toMatchObject({
       printerId: "a1",
+      serial: "03919D4C0704536",
       state: "printing",
       progress: 76,
       jobName: "Enfermeira - Dinara_plate_5",
@@ -44,6 +48,8 @@ describe("telemetry.a1", () => {
       fanSpeed: 93,
       wifiSignal: -58,
       firmware: "01.04.00.00",
+      layerNumber: 128,
+      totalLayers: 176,
       fresh: true,
     });
   });

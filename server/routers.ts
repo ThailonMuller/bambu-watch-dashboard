@@ -33,6 +33,7 @@ function parseTelemetry(payload: unknown) {
   const telemetry: PrinterTelemetry = {
     printerId: "a1",
     model: "A1",
+    serial: typeof value.serial === "string" ? value.serial : null,
     state: normalizedState,
     progress: typeof value.progress === "number" ? value.progress : null,
     jobName: typeof value.jobName === "string" ? value.jobName : null,
@@ -42,6 +43,8 @@ function parseTelemetry(payload: unknown) {
     fanSpeed: normalizeFanSpeed(value.fanSpeed),
     wifiSignal: typeof value.wifiSignal === "number" ? value.wifiSignal : null,
     firmware: typeof value.firmware === "string" ? value.firmware : null,
+    layerNumber: typeof value.layerNumber === "number" ? value.layerNumber : typeof value.layer_num === "number" ? value.layer_num : null,
+    totalLayers: typeof value.totalLayers === "number" ? value.totalLayers : typeof value.total_layer_num === "number" ? value.total_layer_num : null,
     observedAt,
   };
   const normalized = normalizePrinterTelemetry(telemetry);
