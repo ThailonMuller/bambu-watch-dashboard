@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { getA1TelemetryHistory, recordA1Telemetry } from "./db";
 import { isFreshTelemetry, normalizePrinterTelemetry, type PrinterTelemetry } from "../shared/printerTelemetry";
 
 const TELEMETRY_URL = process.env.FR3D_TELEMETRY_WORKER_URL ?? "https://fr3d-a1-telemetry.thailonfalcon.workers.dev";
@@ -74,9 +75,20 @@ export const appRouter = router({
         });
         if (!response.ok) return { telemetry: null, online: false, error: `worker_http_${response.status}` };
         const telemetry = parseTelemetry(await response.json());
+        if (telemetry && telemetry.fresh && process.env.NODE_ENV !== "test") {
+          void recordA1Telemetry(telemetry).catch((error) => console.warn("[Telemetry] history write failed", error instanceof Error ? error.message : "unknown_error"));
+        }
         return { telemetry, online: Boolean(telemetry?.fresh), error: telemetry ? null : "invalid_telemetry" };
       } catch {
         return { telemetry: null, online: false, error: "worker_unreachable" };
+      }
+    }),
+    a1History: publicProcedure.query(async () => {
+      try {
+        const rows = await getA1TelemetryHistory();
+        return rows.map((row) => ({ ...row, nozzleTemperature: row.nozzleTemperature == null ? null : row.nozzleTemperature / 10, bedTemperature: row.bedTemperature == null ? null : row.bedTemperature / 10 }));
+      } catch {
+        return [];
       }
     }),
   }),

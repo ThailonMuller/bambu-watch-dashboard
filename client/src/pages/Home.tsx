@@ -247,9 +247,9 @@ function PrinterDetailsPanel({ printer }: { printer: PrinterData }) {
   );
 }
 
-function TelemetryStatusPanel({ printer }: { printer: PrinterData }) {
+function TelemetryStatusPanel({ printer, historyCount }: { printer: PrinterData; historyCount: number }) {
   return (
-    <div className="panel telemetry-status-panel"><div className="panel-heading"><div><p className="eyebrow">FONTE REAL</p><h3>Telemetria da A1</h3></div><Radio size={16} className="panel-live-icon" /></div><p>Os dados abaixo vêm do bridge local por HTTPS autenticado. Nenhum comando é enviado à impressora.</p><div className="telemetry-status-list"><div><span>Estado</span><strong>{statusLabel(printer.state)}</strong></div><div><span>Wi-Fi</span><strong>{printer.wifi}</strong></div><div><span>Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div></div></div>
+    <div className="panel telemetry-status-panel"><div className="panel-heading"><div><p className="eyebrow">FONTE REAL</p><h3>Telemetria da A1</h3></div><Radio size={16} className="panel-live-icon" /></div><p>Os dados abaixo vêm do bridge local por HTTPS autenticado. Nenhum comando é enviado à impressora.</p><div className="telemetry-status-list"><div><span>Estado</span><strong>{statusLabel(printer.state)}</strong></div><div><span>Wi-Fi</span><strong>{printer.wifi}</strong></div><div><span>Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div><div><span>Snapshots salvos</span><strong>{historyCount}</strong></div></div></div>
   );
 }
 
@@ -280,7 +280,7 @@ function MiniChart() {
   );
 }
 
-function SettingsView({ simulationMode, setSimulationMode, polling, setPolling }: { simulationMode: boolean; setSimulationMode: (value: boolean) => void; polling: string; setPolling: (value: string) => void }) {
+function SettingsView({ simulationMode, setSimulationMode, polling, setPolling, a1Telemetry, historyCount }: { simulationMode: boolean; setSimulationMode: (value: boolean) => void; polling: string; setPolling: (value: string) => void; a1Telemetry: PrinterData | null; historyCount: number }) {
   const [bridgeStatus, setBridgeStatus] = useState<"waiting" | "offline">("waiting");
   const [lastCheck, setLastCheck] = useState("Ainda não verificado");
   const [telemetryErrors, setTelemetryErrors] = useState([
@@ -295,13 +295,16 @@ function SettingsView({ simulationMode, setSimulationMode, polling, setPolling }
     toast.info("Verificação concluída", { description: "O bridge ainda não respondeu. O painel permanece em modo demonstração." });
   };
 
+  const bridgeHasTelemetry = Boolean(a1Telemetry && a1Telemetry.state !== "offline");
+  const bridgeIsOnline = bridgeStatus !== "offline" && bridgeHasTelemetry;
+
   return (
     <div className="settings-view">
       <div className="section-heading"><div><p className="eyebrow">CONTROLE LOCAL</p><h2>Configuração do monitoramento</h2><p>Defina como o painel deve receber e apresentar a telemetria das suas máquinas.</p></div><div className="secure-badge"><ShieldCheck size={16} /> Dados locais</div></div>
       <div className="settings-grid">
         <section className="settings-card featured-settings">
-          <div className="settings-card-heading"><div className="settings-symbol purple"><Cable size={19} /></div><div><h3>Bridge local</h3><p>Conector seguro entre sua rede e o dashboard.</p></div><span className={`status-pill ${bridgeStatus === "offline" ? "status-offline" : "status-idle"}`}><span className="status-dot" /> {bridgeStatus === "offline" ? "Sem resposta" : "Aguardando"}</span></div>
-          <div className="bridge-health-grid"><div><span>Status da conexão</span><strong className={bridgeStatus === "offline" ? "health-danger" : "health-waiting"}>{bridgeStatus === "offline" ? "Bridge offline" : "Aguardando bridge"}</strong></div><div><span>Última verificação</span><strong>{lastCheck}</strong></div><div><span>Última telemetria</span><strong>Nenhuma recebida</strong></div><div><span>Latência MQTT</span><strong>—</strong></div></div>
+          <div className="settings-card-heading"><div className="settings-symbol purple"><Cable size={19} /></div><div><h3>Bridge local</h3><p>Conector seguro entre sua rede e o dashboard.</p></div><span className={`status-pill ${bridgeStatus === "offline" ? "status-offline" : "status-idle"}`}><span className="status-dot" /> {bridgeStatus === "offline" ? "Sem resposta" : bridgeIsOnline ? "Telemetria ativa" : "Aguardando"}</span></div>
+          <div className="bridge-health-grid"><div><span>Status da conexão</span><strong className={bridgeStatus === "offline" ? "health-danger" : bridgeIsOnline ? "health-online" : "health-waiting"}>{bridgeStatus === "offline" ? "Bridge offline" : bridgeIsOnline ? "Telemetria recebida" : "Aguardando bridge"}</strong></div><div><span>Última verificação</span><strong>{lastCheck}</strong></div><div><span>Última telemetria</span><strong>{a1Telemetry ? a1Telemetry.lastSeen : "Nenhuma recebida"}</strong></div><div><span>Latência MQTT</span><strong>Local no bridge</strong></div></div>
           <div className="bridge-steps"><div className="bridge-step done"><span>1</span><div><strong>Instale o bridge na mesma rede</strong><p>O processo local fala com as impressoras via MQTT TLS.</p></div><CheckCircle2 size={18} /></div><div className="bridge-step"><span>2</span><div><strong>Cadastre IP e código de acesso</strong><p>As credenciais ficam somente no dispositivo local.</p></div><CircleHelp size={18} /></div><div className="bridge-step"><span>3</span><div><strong>Envie telemetria resumida</strong><p>O painel recebe apenas status, progresso e temperaturas.</p></div><CircleHelp size={18} /></div></div>
           <div className="bridge-actions"><button className="secondary-button" onClick={checkBridge}><RefreshCw size={15} /> Testar conexão</button><button className="secondary-button" onClick={() => toast.info("O pacote do bridge será disponibilizado na próxima etapa do projeto.")}><ExternalLink size={15} /> Ver guia de instalação</button></div>
         </section>
@@ -310,6 +313,11 @@ function SettingsView({ simulationMode, setSimulationMode, polling, setPolling }
           <label className="setting-row"><div><strong>Modo demonstração</strong><p>Usa telemetria simulada enquanto o bridge não está conectado.</p></div><button className={`toggle ${simulationMode ? "on" : ""}`} onClick={() => setSimulationMode(!simulationMode)} aria-pressed={simulationMode}><span /></button></label>
           <label className="setting-row"><div><strong>Frequência de atualização</strong><p>Intervalo de atualização visual do painel.</p></div><select value={polling} onChange={(event) => setPolling(event.target.value)}><option value="5">5s</option><option value="10">10s</option><option value="30">30s</option></select></label>
           <div className="privacy-note"><LockKeyhole size={15} /><span>Nenhuma credencial ou imagem é enviada para o Bambu Handy por esta aplicação.</span></div>
+        </section>
+        <section className="settings-card printer-identity-settings">
+          <div className="settings-card-heading"><div className="settings-symbol purple"><Printer size={19} /></div><div><h3>Identidade da A1</h3><p>Dados reais recebidos pelo Worker.</p></div><History size={17} className="settings-history-icon" /></div>
+          <div className="identity-settings-grid"><div><span>Serial</span><strong>{a1Telemetry?.serial ?? "Não informado"}</strong></div><div><span>Firmware</span><strong>{a1Telemetry?.firmware ?? "Não informado"}</strong></div><div><span>Camada</span><strong>{a1Telemetry?.layerNumber != null && a1Telemetry.totalLayers != null ? `${a1Telemetry.layerNumber} / ${a1Telemetry.totalLayers}` : "Não informado"}</strong></div><div><span>Snapshots persistentes</span><strong>{historyCount}</strong></div></div>
+          <div className="privacy-note"><ShieldCheck size={15} /><span>O serial e a versão permanecem no fluxo privado do dashboard; o Access Code não é transportado.</span></div>
         </section>
       </div>
       <section className="telemetry-errors-card"><div className="telemetry-errors-heading"><div><p className="eyebrow">DIAGNÓSTICO</p><h3>Erros de telemetria</h3><p>Alertas recebidos durante a comunicação com o bridge e as impressoras.</p></div><div className="error-count-badge"><AlertCircle size={15} /> {telemetryErrors.length} {telemetryErrors.length === 1 ? "alerta" : "alertas"}</div></div>{telemetryErrors.length === 0 ? <div className="telemetry-empty"><CheckCircle2 size={18} /><span>Nenhum erro registrado nesta sessão.</span></div> : <div className="telemetry-error-list">{telemetryErrors.map((error) => <div className={`telemetry-error-row ${error.tone}`} key={error.id}><div className="telemetry-error-icon"><AlertCircle size={17} /></div><div className="telemetry-error-copy"><strong>{error.title}</strong><span>{error.detail}</span></div><time>{error.time}</time><button className="telemetry-dismiss" onClick={() => setTelemetryErrors((current) => current.filter((item) => item.id !== error.id))} aria-label={`Dispensar alerta: ${error.title}`}><X size={15} /></button></div>)}</div>}<div className="telemetry-errors-footer"><span>Os alertas são locais e não contêm credenciais.</span><button className="text-action" onClick={() => setTelemetryErrors([])} disabled={telemetryErrors.length === 0}>Limpar alertas</button></div></section>
@@ -679,6 +687,7 @@ function BudgetView() {
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const telemetryQuery = trpc.telemetry.a1.useQuery(undefined, { refetchInterval: 10000, retry: false });
+  const historyQuery = trpc.telemetry.a1History.useQuery(undefined, { refetchInterval: 30000, retry: false });
   const [view, setView] = useState<View>("overview");
   const [printers, setPrinters] = useState(initialPrinters);
   const [simulationMode, setSimulationMode] = useState(false);
@@ -768,7 +777,7 @@ export default function Home() {
 
         <div className="page-content">
           {telemetryWarning && <div className="telemetry-live-alert" role="status"><AlertCircle size={17} /><div><strong>Telemetria da A1 indisponível ou atrasada</strong><span>O último estado recebido tem mais de 45 segundos ou o Worker não respondeu. A1 marcada como offline até a próxima leitura válida.</span></div><button onClick={() => void telemetryQuery.refetch()}><RefreshCw size={14} /> Tentar novamente</button></div>}
-          {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
+          {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} a1Telemetry={a1Printer ?? null} historyCount={historyQuery.data?.length ?? 0} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
             <section className="hero-banner"><div className="hero-banner-image" role="img" aria-label="Falcão e rosa da Falcão Rosa3D em cenário neon" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara das impressoras, filamentos e orçamentos da sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></section>
 
             <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
@@ -778,7 +787,7 @@ export default function Home() {
             <section className="printers-grid">{printers.map((printer) => <PrinterCard key={printer.id} printer={printer} onDetails={showDetails} />)}</section>
             {view === "printers" && a1Printer && <PrinterDetailsPanel printer={a1Printer} />}
 
-            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} /><SimulationStatusPanel /></section>}
+            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} historyCount={historyQuery.data?.length ?? 0} /><SimulationStatusPanel /></section>}
 
             <div className="local-note"><div className="local-note-icon"><LockKeyhole size={16} /></div><div><strong>Construído para permanecer privado.</strong><span>O painel foi desenhado para conversar com um bridge local via MQTT TLS. Ele não acessa a conta Bambu Handy, não tenta contornar proteções do fabricante e não envia comandos às impressoras.</span></div><button onClick={() => setView("settings")}><span>Entender a arquitetura</span><ArrowUpRight size={14} /></button></div>
           </>}

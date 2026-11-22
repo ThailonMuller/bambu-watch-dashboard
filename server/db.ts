@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { a1TelemetryHistory, InsertUser, users } from "../drizzle/schema";
+import type { NormalizedPrinterTelemetry } from "../shared/printerTelemetry";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +90,30 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function recordA1Telemetry(snapshot: NormalizedPrinterTelemetry) {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(a1TelemetryHistory).values({
+    printerId: snapshot.printerId,
+    serial: snapshot.serial,
+    observedAt: snapshot.observedAt,
+    state: snapshot.state,
+    progress: snapshot.progress,
+    remainingSeconds: snapshot.remainingSeconds,
+    nozzleTemperature: snapshot.nozzleTemperature == null ? null : Math.round(snapshot.nozzleTemperature * 10),
+    bedTemperature: snapshot.bedTemperature == null ? null : Math.round(snapshot.bedTemperature * 10),
+    fanSpeed: snapshot.fanSpeed,
+    wifiSignal: snapshot.wifiSignal,
+    layerNumber: snapshot.layerNumber,
+    totalLayers: snapshot.totalLayers,
+  });
+}
+
+export async function getA1TelemetryHistory(limit = 120) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(a1TelemetryHistory).orderBy(desc(a1TelemetryHistory.observedAt)).limit(limit);
+}
+
+// TODO: add feature routers here as your schema grows.

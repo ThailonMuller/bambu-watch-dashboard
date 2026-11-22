@@ -8,6 +8,13 @@
       "when": 1789914557771,
       "tag": "0000_abandoned_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1795307013741,
+      "tag": "0001_sudden_beast",
+      "breakpoints": true
     }
   ]
 }
