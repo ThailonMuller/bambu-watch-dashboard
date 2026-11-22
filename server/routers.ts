@@ -7,6 +7,23 @@ import { isFreshTelemetry, normalizePrinterTelemetry, type PrinterTelemetry } fr
 
 const TELEMETRY_URL = process.env.FR3D_TELEMETRY_WORKER_URL ?? "https://fr3d-a1-telemetry.thailonfalcon.workers.dev";
 
+async function fetchTelemetrySnapshot() {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await fetch(`${TELEMETRY_URL}/v1/telemetry/a1`, {
+        headers: { "Accept": "application/json", "User-Agent": "fr3d-dashboard/1.1" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(attempt === 0 ? 5000 : 2500),
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("telemetry_fetch_failed");
+}
+
 function normalizeFanSpeed(value: unknown) {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   if (value >= 0 && value <= 15) return Math.min(100, Math.max(0, Math.round(value / 15 * 100)));
@@ -69,18 +86,15 @@ export const appRouter = router({
   telemetry: router({
     a1: publicProcedure.query(async () => {
       try {
-        const response = await fetch(`${TELEMETRY_URL}/v1/telemetry/a1`, {
-          headers: { "Accept": "application/json", "User-Agent": "fr3d-dashboard/1.0" },
-          signal: AbortSignal.timeout(5000),
-        });
+        const response = await fetchTelemetrySnapshot();
         if (!response.ok) return { telemetry: null, online: false, error: `worker_http_${response.status}` };
         const telemetry = parseTelemetry(await response.json());
         if (telemetry && telemetry.fresh && process.env.NODE_ENV !== "test") {
           void recordA1Telemetry(telemetry).catch((error) => console.warn("[Telemetry] history write failed", error instanceof Error ? error.message : "unknown_error"));
         }
-        return { telemetry, online: Boolean(telemetry?.fresh), error: telemetry ? null : "invalid_telemetry" };
+        return { telemetry, online: Boolean(telemetry?.fresh), ageMs: telemetry ? Math.max(0, Date.now() - telemetry.observedAt) : null, error: telemetry ? null : "invalid_telemetry" };
       } catch {
-        return { telemetry: null, online: false, error: "worker_unreachable" };
+        return { telemetry: null, online: false, ageMs: null, error: "worker_unreachable" };
       }
     }),
     a1History: publicProcedure.query(async () => {

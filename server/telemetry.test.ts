@@ -60,7 +60,22 @@ describe("telemetry.a1", () => {
 
     const result = await appRouter.createCaller(context).telemetry.a1();
 
-    expect(result).toEqual({ telemetry: null, online: false, error: "worker_unreachable" });
+    expect(result).toEqual({ telemetry: null, online: false, ageMs: null, error: "worker_unreachable" });
+  });
+
+  it("recovers from one transient Worker failure without marking offline", async () => {
+    const observedAt = Date.now();
+    const fetchMock = vi.fn()
+      .mockRejectedValueOnce(new Error("temporary network failure"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ printerId: "a1", state: "idle", progress: 100, remainingSeconds: 0, observedAt }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await appRouter.createCaller(context).telemetry.a1();
+
+    expect(result.online).toBe(true);
+    expect(result.error).toBeNull();
+    expect(result.ageMs).toBeGreaterThanOrEqual(0);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("does not accept malformed or stale Worker payloads as online", async () => {

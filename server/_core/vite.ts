@@ -9,7 +9,11 @@ import viteConfig from "../../vite.config";
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server },
+    // O preview WebDev encaminha a aplicação por HTTPS na porta 443. Sem
+    // clientPort, o Vite anuncia a porta interna padrão 5173 ao navegador.
+    // O protocolo continua sendo inferido pelo cliente a partir da URL: ws
+    // em acesso local HTTP e wss no preview HTTPS.
+    hmr: { server, clientPort: 443 },
     allowedHosts: true as const,
   };
 
