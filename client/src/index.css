@@ -943,9 +943,9 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 .topnav-brand .brand { display:flex; align-items:center; min-width:0; }
 .brand-wordmark { display:block; width:196px; height:60px; object-fit:contain; object-position:left center; border-radius:10px; }
 .hero-banner { min-height:300px; padding:36px 42px; border:1px solid rgba(162,76,255,.35); background:#09051c; box-shadow:0 18px 38px rgba(0,0,0,.28); }
-.hero-banner::before { position:absolute; inset:0; z-index:-3; background-image:url('/manus-storage/fr3d-hero-banner_ba71637b.png'); background-position:center; background-size:cover; content:''; }
+.hero-banner::before { position:absolute; inset:0; z-index:-3; background-image:url('/assets/fr3d-wallpaper-banner.webp'); background-position:center; background-size:cover; content:''; }
 .hero-banner::after { z-index:-2; opacity:1; background:linear-gradient(90deg,rgba(8,4,27,.94) 0%,rgba(10,4,31,.82) 31%,rgba(17,5,46,.38) 61%,rgba(8,4,27,.12) 100%); background-image:linear-gradient(90deg,rgba(8,4,27,.94) 0%,rgba(10,4,31,.82) 31%,rgba(17,5,46,.38) 61%,rgba(8,4,27,.12) 100%); }
-.hero-banner-image { position:absolute; inset:0; z-index:-3; background-image:url('/manus-storage/fr3d-hero-banner_ba71637b.png'); background-position:center; background-size:cover; }
+.hero-banner-image { position:absolute; inset:0; z-index:-3; background-image:url('/assets/fr3d-wallpaper-banner.webp'); background-position:center; background-size:cover; }
 .hero-copy { max-width:520px; }
 .hero-eyebrow { color:#73f4ff; }
 .hero-copy h1 { color:#fff7ff; text-shadow:0 3px 22px rgba(0,0,0,.35); }
@@ -1004,7 +1004,7 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 
 
 /* New supplied wallpaper: centered emblem focus, aspect-safe cover framing */
-.hero-banner::before, .hero-banner-image { background-image:url('/manus-storage/fr3d-wallpaper-banner_139dbe28.png'); background-size:cover; background-position:center 42%; background-repeat:no-repeat; }
+.hero-banner::before, .hero-banner-image { background-image:url('/assets/fr3d-wallpaper-banner.webp'); background-size:cover; background-position:center 42%; background-repeat:no-repeat; }
 .hero-banner::after { background-image:linear-gradient(90deg,rgba(8,3,27,.9) 0%,rgba(10,3,32,.68) 30%,rgba(12,4,42,.2) 62%,rgba(8,3,27,.08) 100%); }
 @media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:cover; background-position:center 42%; } .hero-banner::after { background-image:linear-gradient(180deg,rgba(8,3,27,.88) 0%,rgba(10,3,32,.66) 42%,rgba(8,3,27,.14) 100%); } }
 

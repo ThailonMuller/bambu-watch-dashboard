@@ -48,7 +48,7 @@ import {
 import { toast } from "sonner";
 import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
-import { estimatedCompletionAt } from "../../../shared/printerTelemetry";
+import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
 
@@ -718,7 +718,7 @@ export default function Home() {
       state: telemetry.fresh && telemetry.state !== "error" ? telemetry.state : "offline",
       serial: telemetry.serial,
       progress: telemetry.progress,
-      job: telemetry.jobName,
+      job: displayJobName(telemetry.state, telemetry.progress, telemetry.remainingSeconds, telemetry.jobName),
       remaining: telemetry.remainingSeconds == null ? "—" : `${String(Math.floor(telemetry.remainingSeconds / 3600)).padStart(2, "0")}h ${String(Math.floor((telemetry.remainingSeconds % 3600) / 60)).padStart(2, "0")}m`,
       remainingSeconds: telemetry.remainingSeconds,
       nozzle: telemetry.nozzleTemperature,
@@ -768,7 +768,7 @@ export default function Home() {
   return (
     <div className="app-shell">
       <header className="app-topnav">
-        <div className="topnav-brand"><div className="brand"><div className="brand-mark"><img src="/manus-storage/fr3d-menu-logo-extracted_84bf73d5.png" alt="Logo Falcão Rosa3D" /></div><div className="brand-copy"><strong>FALCÃO ROSA3D</strong><small>monitoramento pessoal</small></div></div><div className="workspace-switcher"><div className="workspace-avatar">L</div><div><span>Meu workspace</span><small>conta pessoal</small></div><ChevronRight size={15} /></div></div>
+        <div className="topnav-brand"><div className="brand"><div className="brand-mark"><img src="/assets/fr3d-menu-logo.png" alt="Logo Falcão Rosa3D" /></div><div className="brand-copy"><strong>FALCÃO ROSA3D</strong><small>monitoramento pessoal</small></div></div><div className="workspace-switcher"><div className="workspace-avatar">L</div><div><span>Meu workspace</span><small>conta pessoal</small></div><ChevronRight size={15} /></div></div>
         <nav className="topnav-menu" aria-label="Navegação principal">{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={`nav-item ${view === id ? "active" : ""}`} onClick={() => setView(id)}><Icon size={17} /><span>{label}</span>{id === "printers" && <span className="nav-count">2</span>}</button>)}</nav>
         <div className="topnav-tools"><div className="agent-card"><div className="agent-icon"><Radio size={15} /></div><div><strong>Bridge local</strong><span><i /> Aguardando conexão</span></div><button onClick={() => setView("settings")} aria-label="Abrir configuração"><Settings2 size={15} /></button></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></div>
       </header>

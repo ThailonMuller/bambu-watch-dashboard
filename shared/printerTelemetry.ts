@@ -61,6 +61,11 @@ export function estimatedCompletionAt(remainingSeconds: number | null | undefine
   return now + Math.round(remainingSeconds) * 1000;
 }
 
+export function displayJobName(state: PrinterState, progress: number, remainingSeconds: number | null | undefined, jobName: string) {
+  const completed = state === "idle" && (progress >= 100 || remainingSeconds === 0);
+  return completed ? "Pronta para o próximo trabalho" : jobName;
+}
+
 export function displayPrinterState(state: PrinterState) {
   if (state === "printing") return "Imprimindo";
   if (state === "idle") return "Disponível";

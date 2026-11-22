@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { displayJobName } from "../shared/printerTelemetry";
 
 const context = {
   req: { protocol: "https", headers: {} },
@@ -74,5 +75,15 @@ describe("telemetry.a1", () => {
     expect(result.online).toBe(false);
     expect(result.error).toBeNull();
     expect(result.telemetry).toMatchObject({ printerId: "a1", fresh: false, state: "printing" });
+  });
+});
+
+describe("telemetry presentation", () => {
+  it("shows readiness after a completed print", () => {
+    expect(displayJobName("idle", 100, 0, "trabalho concluído")).toBe("Pronta para o próximo trabalho");
+  });
+
+  it("keeps the active job while it is printing", () => {
+    expect(displayJobName("printing", 100, 12, "últimos segundos")).toBe("últimos segundos");
   });
 });
