@@ -10,17 +10,19 @@ export type PrinterTelemetry = {
   remainingSeconds?: number | null;
   nozzleTemperature?: number | null;
   bedTemperature?: number | null;
+  fanSpeed?: number | null;
   wifiSignal?: number | null;
   firmware?: string | null;
   observedAt: number;
 };
 
-export type NormalizedPrinterTelemetry = Omit<PrinterTelemetry, "progress" | "jobName" | "remainingSeconds" | "nozzleTemperature" | "bedTemperature" | "wifiSignal" | "firmware"> & {
+export type NormalizedPrinterTelemetry = Omit<PrinterTelemetry, "progress" | "jobName" | "remainingSeconds" | "nozzleTemperature" | "bedTemperature" | "fanSpeed" | "wifiSignal" | "firmware"> & {
   progress: number;
   jobName: string;
   remainingSeconds: number | null;
   nozzleTemperature: number | null;
   bedTemperature: number | null;
+  fanSpeed: number | null;
   wifiSignal: number | null;
   firmware: string | null;
 };
@@ -35,6 +37,7 @@ export function normalizePrinterTelemetry(input: PrinterTelemetry): NormalizedPr
     remainingSeconds: typeof input.remainingSeconds === "number" && Number.isFinite(input.remainingSeconds) && input.remainingSeconds >= 0 ? Math.round(input.remainingSeconds) : null,
     nozzleTemperature: typeof input.nozzleTemperature === "number" && Number.isFinite(input.nozzleTemperature) ? Math.round(input.nozzleTemperature * 10) / 10 : null,
     bedTemperature: typeof input.bedTemperature === "number" && Number.isFinite(input.bedTemperature) ? Math.round(input.bedTemperature * 10) / 10 : null,
+    fanSpeed: typeof input.fanSpeed === "number" && Number.isFinite(input.fanSpeed) ? clampPercent(input.fanSpeed) : null,
     wifiSignal: typeof input.wifiSignal === "number" && Number.isFinite(input.wifiSignal) ? Math.round(input.wifiSignal) : null,
     firmware: input.firmware?.trim() || null,
   };

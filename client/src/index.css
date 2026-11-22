@@ -1140,3 +1140,30 @@ html.light .budget-step-button { color:#147892 !important; }
   .topnav-brand .brand-mark { width:60px; height:60px; flex-basis:60px; }
   .topnav-brand .brand-mark img { width:56px; height:56px; }
 }
+
+.telemetry-live-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  color: #8d4d5b;
+  border: 1px solid #f2c6d0;
+  border-left: 3px solid #dd7188;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff7f8, #fff1f5);
+  box-shadow: 0 5px 18px rgba(180, 84, 111, .08);
+}
+.telemetry-live-alert > svg { flex: 0 0 auto; color: #d8667d; }
+.telemetry-live-alert > div { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.telemetry-live-alert strong { font-size: 11px; }
+.telemetry-live-alert span { color: #aa7380; font-size: 9px; line-height: 1.45; }
+.telemetry-live-alert button { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 7px 9px; color: #bd5c73; border: 1px solid #efc0cc; border-radius: 8px; background: rgba(255,255,255,.65); font-size: 9px; font-weight: 800; }
+.telemetry-live-alert button:hover { background: #fff; box-shadow: 0 4px 12px rgba(180, 84, 111, .1); }
+@media (max-width: 600px) {
+  .telemetry-live-alert { align-items: flex-start; flex-wrap: wrap; }
+  .telemetry-live-alert button { margin-left: 29px; }
+}
+.dark .telemetry-live-alert { color: #ffd5df; border-color: rgba(240, 126, 153, .35); background: linear-gradient(135deg, rgba(91, 24, 52, .58), rgba(55, 17, 45, .72)); }
+.dark .telemetry-live-alert span { color: #e1a6b5; }
+.dark .telemetry-live-alert button { color: #ffd5df; border-color: rgba(240, 126, 153, .4); background: rgba(25, 10, 30, .5); }

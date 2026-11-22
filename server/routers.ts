@@ -6,6 +6,12 @@ import { isFreshTelemetry, normalizePrinterTelemetry, type PrinterTelemetry } fr
 
 const TELEMETRY_URL = process.env.FR3D_TELEMETRY_WORKER_URL ?? "https://fr3d-a1-telemetry.thailonfalcon.workers.dev";
 
+function normalizeFanSpeed(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value >= 0 && value <= 15) return Math.min(100, Math.max(0, Math.round(value / 15 * 100)));
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
 function parseTelemetry(payload: unknown) {
   if (!payload || typeof payload !== "object") return null;
   const value = payload as Record<string, unknown>;
@@ -33,6 +39,7 @@ function parseTelemetry(payload: unknown) {
     remainingSeconds: typeof value.remainingSeconds === "number" ? value.remainingSeconds : null,
     nozzleTemperature: typeof value.nozzleTemperature === "number" ? value.nozzleTemperature : null,
     bedTemperature: typeof value.bedTemperature === "number" ? value.bedTemperature : null,
+    fanSpeed: normalizeFanSpeed(value.fanSpeed),
     wifiSignal: typeof value.wifiSignal === "number" ? value.wifiSignal : null,
     firmware: typeof value.firmware === "string" ? value.firmware : null,
     observedAt,

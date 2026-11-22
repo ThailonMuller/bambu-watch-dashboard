@@ -66,6 +66,7 @@ type PrinterData = {
   remaining: string;
   nozzle: number;
   bed: number;
+  fanSpeed: number | null;
   layer: string;
   wifi: string;
   lastSeen: string;
@@ -83,6 +84,7 @@ const initialPrinters: PrinterData[] = [
     remaining: "00h 38m",
     nozzle: 218,
     bed: 60,
+    fanSpeed: 42,
     layer: "128 / 176",
     wifi: "-48 dBm",
     lastSeen: "há 12 s",
@@ -98,6 +100,7 @@ const initialPrinters: PrinterData[] = [
     remaining: "—",
     nozzle: 28,
     bed: 25,
+    fanSpeed: 0,
     layer: "—",
     wifi: "-55 dBm",
     lastSeen: "há 18 s",
@@ -198,7 +201,7 @@ function PrinterCard({ printer, onDetails }: { printer: PrinterData; onDetails: 
       <div className="printer-stats">
         <div><span><Thermometer size={14} /> Bico</span><strong>{printer.nozzle}°C</strong></div>
         <div><span><Layers3 size={14} /> Mesa</span><strong>{printer.bed}°C</strong></div>
-        <div><span><Fan size={14} /> Ventilação</span><strong>{isPrinting ? "42%" : "0%"}</strong></div>
+        <div><span><Fan size={14} /> Ventilação</span><strong>{printer.fanSpeed == null ? "—" : `${printer.fanSpeed}%`}</strong></div>
       </div>
     </article>
   );
@@ -657,6 +660,7 @@ export default function Home() {
       remaining: telemetry.remainingSeconds == null ? "—" : `${String(Math.floor(telemetry.remainingSeconds / 3600)).padStart(2, "0")}h ${String(Math.floor((telemetry.remainingSeconds % 3600) / 60)).padStart(2, "0")}m`,
       nozzle: telemetry.nozzleTemperature ?? 0,
       bed: telemetry.bedTemperature ?? 0,
+      fanSpeed: telemetry.fanSpeed,
       wifi: telemetry.wifiSignal == null ? "—" : `${telemetry.wifiSignal} dBm`,
       lastSeen: formatLastSeen(telemetry.observedAt),
     }));
@@ -692,6 +696,7 @@ export default function Home() {
 
   const activePrinters = printers.filter((printer) => printer.state !== "offline").length;
   const busyPrinters = printers.filter((printer) => printer.state === "printing").length;
+  const telemetryWarning = telemetryQuery.isFetched && !telemetryQuery.data?.online;
 
   return (
     <div className="app-shell">
@@ -704,6 +709,7 @@ export default function Home() {
         <div className="context-bar"><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="context-status"><span className="mini-live" /> Área ativa</div></div>
 
         <div className="page-content">
+          {telemetryWarning && <div className="telemetry-live-alert" role="status"><AlertCircle size={17} /><div><strong>Telemetria da A1 indisponível ou atrasada</strong><span>O último estado recebido tem mais de 45 segundos ou o Worker não respondeu. A1 marcada como offline até a próxima leitura válida.</span></div><button onClick={() => void telemetryQuery.refetch()}><RefreshCw size={14} /> Tentar novamente</button></div>}
           {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
             <section className="hero-banner"><div className="hero-banner-image" role="img" aria-label="Falcão e rosa da Falcão Rosa3D em cenário neon" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara das impressoras, filamentos e orçamentos da sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></section>
 
