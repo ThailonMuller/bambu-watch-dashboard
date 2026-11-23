@@ -51,9 +51,11 @@ import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/fil
 import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
+import { useLocation } from "wouter";
+import PrintSchedule from "./PrintSchedule";
 
 type PrinterState = "printing" | "idle" | "offline";
-type View = "overview" | "printers" | "settings" | "budget" | "filaments";
+type View = "overview" | "printers" | "settings" | "budget" | "filaments" | "schedule";
 type PlateAnimation = { type: "add" | "remove"; index: number } | null;
 
 type PrinterData = {
@@ -133,6 +135,7 @@ const activity = [
 const navItems: { id: View; label: string; icon: typeof CircleGauge }[] = [
   { id: "overview", label: "Visão geral", icon: CircleGauge },
   { id: "printers", label: "Impressoras", icon: Printer },
+  { id: "schedule", label: "Cronograma", icon: Clock3 },
   { id: "settings", label: "Configuração", icon: Settings2 },
   { id: "budget", label: "Orçamentos", icon: Calculator },
   { id: "filaments", label: "Filamentos", icon: Layers3 },
@@ -717,7 +720,13 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const telemetryQuery = trpc.telemetry.a1.useQuery(undefined, { refetchInterval: 10000, retry: false });
   const historyQuery = trpc.telemetry.a1History.useQuery(undefined, { refetchInterval: 30000, retry: false });
-  const [view, setView] = useState<View>("overview");
+  const [location, navigate] = useLocation();
+  const [localView, setLocalView] = useState<View>("overview");
+  const view: View = location === "/cronograma" ? "schedule" : localView;
+  const setView = (next: View) => {
+    if (next === "schedule") navigate("/cronograma");
+    else { setLocalView(next); if (location === "/cronograma") navigate("/"); }
+  };
   const [printers, setPrinters] = useState(initialPrinters);
   const [simulationMode, setSimulationMode] = useState(false);
   const [polling, setPolling] = useState("10");
@@ -805,8 +814,8 @@ export default function Home() {
         <div className="context-bar"><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="context-status"><span className="mini-live" /> Área ativa</div></div>
 
         <div className="page-content">
-          {telemetryWarning && <div className="telemetry-live-alert" role="status"><AlertCircle size={17} /><div><strong>Telemetria da A1 indisponível ou atrasada</strong><span>O último estado recebido tem mais de 45 segundos ou o Worker não respondeu. A1 marcada como offline até a próxima leitura válida.</span></div><button onClick={() => void telemetryQuery.refetch()}><RefreshCw size={14} /> Tentar novamente</button></div>}
-          {view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} a1Telemetry={a1Printer ?? null} historyCount={historyQuery.data?.length ?? 0} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
+          {telemetryWarning && view !== "schedule" && <div className="telemetry-live-alert" role="status"><AlertCircle size={17} /><div><strong>Telemetria da A1 indisponível ou atrasada</strong><span>O último estado recebido tem mais de 45 segundos ou o Worker não respondeu. A1 marcada como offline até a próxima leitura válida.</span></div><button onClick={() => void telemetryQuery.refetch()}><RefreshCw size={14} /> Tentar novamente</button></div>}
+          {view === "schedule" ? <PrintSchedule /> : view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} a1Telemetry={a1Printer ?? null} historyCount={historyQuery.data?.length ?? 0} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
             <section className="hero-banner"><div className="hero-banner-image" role="img" aria-label="Falcão e rosa da Falcão Rosa3D em cenário neon" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara das impressoras, filamentos e orçamentos da sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></section>
 
             <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
