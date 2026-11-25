@@ -46,7 +46,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, type BudgetInput, type BudgetResult } from "../../../shared/budget";
+import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
 import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
@@ -385,6 +385,10 @@ type SpreadsheetItem = {
   productName: string;
   cost: number;
   salePrice: number;
+  salePriceBasis?: "direct";
+  shopeePrice?: number;
+  shopeePercentage?: number;
+  shopeeFixedFee?: number;
   addedAt: string;
   budgetMode?: BudgetMode;
 };
@@ -525,19 +529,20 @@ function BudgetView() {
   const [budgetMode, setBudgetMode] = useState<BudgetMode>("store");
   const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
-  const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>([]);
+  const [loadedSpreadsheet] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem("falcaorosa3d-spreadsheet");
+      if (saved) return migrateSpreadsheetSales(JSON.parse(saved) as SpreadsheetItem[]);
+    } catch { /* ignore invalid local spreadsheet */ }
+    return { items: [] as SpreadsheetItem[], migratedCount: 0, defaultRatesCount: 0 };
+  });
+  const [spreadsheet, setSpreadsheet] = useState<SpreadsheetItem[]>(loadedSpreadsheet.items);
+  const [spreadsheetMigrationWarning, setSpreadsheetMigrationWarning] = useState(loadedSpreadsheet.defaultRatesCount);
   const [spreadsheetError, setSpreadsheetError] = useState("");
   const [focusedPlateIndex, setFocusedPlateIndex] = useState<number | null>(null);
   const [plateAnimation, setPlateAnimation] = useState<PlateAnimation>(null);
   const [showShopeePrice, setShowShopeePrice] = useState(false);
   const modeDefaults = budgetMode === "store" ? DEFAULT_BUDGET_INPUT : CUSTOM_BUDGET_INPUT;
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("falcaorosa3d-spreadsheet");
-    if (saved) {
-      try { setSpreadsheet(JSON.parse(saved) as SpreadsheetItem[]); } catch { /* ignore invalid local spreadsheet */ }
-    }
-  }, []);
 
   useEffect(() => {
     window.localStorage.setItem("falcaorosa3d-spreadsheet", JSON.stringify(spreadsheet));
@@ -645,7 +650,7 @@ function BudgetView() {
       toast.error("ID duplicado");
       return;
     }
-    setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.suggestedPrice, addedAt: new Date().toLocaleDateString("pt-BR"), budgetMode }]);
+    setSpreadsheet((current) => [...current, { productId, productName, cost: result.operationalCost, salePrice: result.priceBeforeShopee, salePriceBasis: "direct", shopeePrice: result.suggestedPrice, shopeePercentage: input.shopeePercentage, shopeeFixedFee: input.shopeeFixedFee, addedAt: new Date().toLocaleDateString("pt-BR"), budgetMode }]);
     setSpreadsheetError("");
     toast.success("Produto adicionado à planilha", { description: `${productName} está pronto para controle interno.` });
   };
@@ -663,7 +668,9 @@ function BudgetView() {
     const saved = window.localStorage.getItem("falcaorosa3d-last-spreadsheet");
     if (!saved) { toast.info("Nenhuma planilha anterior encontrada"); return; }
     try {
-      setSpreadsheet(JSON.parse(saved) as SpreadsheetItem[]);
+      const migrated = migrateSpreadsheetSales(JSON.parse(saved) as SpreadsheetItem[]);
+      setSpreadsheet(migrated.items);
+      setSpreadsheetMigrationWarning(migrated.defaultRatesCount);
       setSpreadsheetError("");
       toast.success("Última planilha restaurada");
     } catch { toast.error("Não foi possível restaurar a última planilha"); }
@@ -671,7 +678,7 @@ function BudgetView() {
 
   const downloadSpreadsheet = () => {
     if (spreadsheet.length === 0) { toast.info("Adicione pelo menos um produto antes de baixar"); return; }
-    const rows = [["ID do produto", "Nome do produto", "Tipo de orçamento", "Custo operacional", "Valor de venda", "Adicionado em"], ...spreadsheet.map((item) => [item.productId, item.productName, item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja", item.cost.toFixed(2).replace(".", ","), item.salePrice.toFixed(2).replace(".", ","), item.addedAt])];
+    const rows = [["ID do produto", "Nome do produto", "Tipo de orçamento", "Custo operacional", "Valor de venda direta", "Preço Shopee (referência)", "Adicionado em"], ...spreadsheet.map((item) => [item.productId, item.productName, item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja", item.cost.toFixed(2).replace(".", ","), item.salePrice.toFixed(2).replace(".", ","), item.shopeePrice == null ? "" : item.shopeePrice.toFixed(2).replace(".", ","), item.addedAt])];
     const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(";" )).join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -710,7 +717,8 @@ function BudgetView() {
       </div>
       <section className="spreadsheet-card">
         <div className="spreadsheet-heading"><div><p className="eyebrow">CONTROLE INTERNO</p><h3>Planilha de produtos</h3></div><div className="spreadsheet-actions"><button className="sheet-button" onClick={downloadSpreadsheet}><Cloud size={14} /> Download</button><button className="sheet-button" onClick={restoreLastSpreadsheet}><RotateCcw size={14} /> Restaurar última</button><button className="sheet-button sheet-button-danger" onClick={newSpreadsheet}><Plus size={14} /> Nova planilha</button></div></div>
-        {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Tipo</th><th>Custo</th><th>Valor de venda</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td><span className={`budget-type-badge ${item.budgetMode === "custom" ? "is-custom" : "is-store"}`}>{item.budgetMode === "custom" ? <Sparkles size={11} /> : <Package size={11} />}{item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja"}</span></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
+        {spreadsheetMigrationWarning > 0 && <div className="spreadsheet-migration-notice" role="status"><AlertCircle size={16} /><span>{spreadsheetMigrationWarning} registro(s) antigo(s) convertido(s) para venda direta usando as taxas padrão da Shopee (14% + R$ 4), pois as taxas originais não estavam salvas. Revise os itens que usavam taxas personalizadas.</span><button type="button" onClick={() => setSpreadsheetMigrationWarning(0)} aria-label="Dispensar aviso de conversão"><X size={14} /></button></div>}
+        {spreadsheet.length === 0 ? <div className="spreadsheet-empty"><ReceiptText size={22} /><strong>Nenhum produto adicionado ainda</strong><span>Calcule um orçamento e use “Adicionar à planilha” para registrar o produto.</span></div> : <div className="spreadsheet-table-wrap"><table className="spreadsheet-table"><thead><tr><th>ID</th><th>Produto</th><th>Tipo</th><th>Custo</th><th>Venda direta</th><th>Shopee (referência)</th><th></th></tr></thead><tbody>{spreadsheet.map((item, index) => <tr key={`${item.productId}-${index}`}><td><code>{item.productId}</code></td><td><strong>{item.productName}</strong><small>{item.addedAt}</small></td><td><span className={`budget-type-badge ${item.budgetMode === "custom" ? "is-custom" : "is-store"}`}>{item.budgetMode === "custom" ? <Sparkles size={11} /> : <Package size={11} />}{item.budgetMode === "custom" ? "Personalizado" : "Produto de Loja"}</span></td><td>{currency(item.cost)}</td><td className="sheet-sale-price">{currency(item.salePrice)}</td><td className="sheet-shopee-reference">{item.shopeePrice == null ? "—" : currency(item.shopeePrice)}</td><td><button className="remove-sheet-item" onClick={() => removeSpreadsheetItem(index)} aria-label={`Remover ${item.productName}`}><X size={15} /></button></td></tr>)}</tbody></table></div>}
       </section>
     </div>
   );

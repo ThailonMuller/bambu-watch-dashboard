@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId } from "../shared/budget";
+import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, directPriceFromShopee, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("replicates the store sequence and includes the fixed Shopee fee", () => {
@@ -18,6 +18,34 @@ describe("budget calculator", () => {
 
   it("keeps the custom defaults aligned with the requested rates", () => {
     expect(CUSTOM_BUDGET_INPUT).toMatchObject({ mkp: 150, lossPercentage: 30, depreciationPercentage: 3, maintenancePercentage: 2, shopeePercentage: 14, shopeeFixedFee: 4 });
+  });
+
+  it("converts a Shopee price back to the direct-sale price", () => {
+    const quote = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [20] });
+    expect(directPriceFromShopee(quote.suggestedPrice)).toBeCloseTo(quote.priceBeforeShopee, 8);
+  });
+
+  it("migrates existing spreadsheet entries while preserving the former Shopee price", () => {
+    const quote = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [20] });
+    const result = migrateSpreadsheetSales([{ productId: "1001", salePrice: quote.suggestedPrice }]);
+    expect(result.migratedCount).toBe(1);
+    expect(result.defaultRatesCount).toBe(1);
+    expect(result.items[0].salePrice).toBeCloseTo(quote.priceBeforeShopee, 8);
+    expect(result.items[0].shopeePrice).toBe(quote.suggestedPrice);
+    expect(result.items[0].salePriceBasis).toBe("direct");
+  });
+
+  it("uses saved custom Shopee rates and does not convert direct-sale entries twice", () => {
+    const custom = calculateBudget({ ...DEFAULT_BUDGET_INPUT, plateCosts: [30], shopeePercentage: 22, shopeeFixedFee: 2 });
+    const result = migrateSpreadsheetSales([
+      { productId: "1", salePrice: custom.suggestedPrice, shopeePercentage: 22, shopeeFixedFee: 2 },
+      { productId: "2", salePrice: 45, salePriceBasis: "direct" as const, shopeePrice: 60 },
+    ]);
+    expect(result.migratedCount).toBe(1);
+    expect(result.defaultRatesCount).toBe(0);
+    expect(result.items[0].salePrice).toBeCloseTo(custom.priceBeforeShopee, 8);
+    expect(result.items[1].salePrice).toBe(45);
+    expect(migrateSpreadsheetSales(result.items).items[0].salePrice).toBeCloseTo(custom.priceBeforeShopee, 8);
   });
 
   it("calculates the custom quote with its own defaults", () => {

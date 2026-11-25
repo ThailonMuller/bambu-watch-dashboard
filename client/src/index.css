@@ -1336,3 +1336,9 @@ html.light .schedule-start-controls input { color-scheme:light; }
 @media (max-width:600px) {
   .schedule-start-controls input { flex:1 1 100%; width:100%; }
 }
+.spreadsheet-migration-notice { display:flex; align-items:flex-start; gap:10px; margin:0 0 14px; padding:12px 14px; border:1px solid rgba(245,174,58,.35); border-radius:12px; background:rgba(245,174,58,.09); color:var(--foreground); font-size:13px; line-height:1.5; }
+.spreadsheet-migration-notice > svg { flex:0 0 auto; margin-top:2px; color:#e6a12d; }
+.spreadsheet-migration-notice > span { flex:1; min-width:0; }
+.spreadsheet-migration-notice > button { display:grid; place-items:center; flex:0 0 auto; border:0; background:transparent; color:inherit; cursor:pointer; opacity:.75; }
+.spreadsheet-migration-notice > button:hover { opacity:1; }
+.sheet-shopee-reference { white-space:nowrap; opacity:.75; }

@@ -70,6 +70,50 @@ const numeric = (value: number | string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+export type SpreadsheetSaleRecord = {
+  salePrice: number;
+  salePriceBasis?: "direct";
+  shopeePrice?: number;
+  shopeePercentage?: number;
+  shopeeFixedFee?: number;
+};
+
+export function directPriceFromShopee(
+  shopeePrice: number,
+  shopeePercentage: number = DEFAULT_BUDGET_INPUT.shopeePercentage,
+  shopeeFixedFee: number = DEFAULT_BUDGET_INPUT.shopeeFixedFee,
+) {
+  return money(numeric(shopeePrice) * (1 - percentage(shopeePercentage)) - numeric(shopeeFixedFee));
+}
+
+export function migrateSpreadsheetSales<T extends SpreadsheetSaleRecord>(items: readonly T[]) {
+  let migratedCount = 0;
+  let defaultRatesCount = 0;
+  const normalized = items.map((item) => {
+    if (item.salePriceBasis === "direct") {
+      return {
+        ...item,
+        shopeePrice: item.shopeePrice ?? item.salePrice,
+      };
+    }
+
+    migratedCount += 1;
+    if (item.shopeePercentage == null || item.shopeeFixedFee == null) defaultRatesCount += 1;
+    return {
+      ...item,
+      salePrice: directPriceFromShopee(
+        item.salePrice,
+        item.shopeePercentage ?? DEFAULT_BUDGET_INPUT.shopeePercentage,
+        item.shopeeFixedFee ?? DEFAULT_BUDGET_INPUT.shopeeFixedFee,
+      ),
+      shopeePrice: item.shopeePrice ?? item.salePrice,
+      salePriceBasis: "direct" as const,
+    };
+  });
+
+  return { items: normalized, migratedCount, defaultRatesCount };
+}
+
 export function hasInvalidBudgetPercentages(input: Pick<BudgetInput, "lossPercentage" | "shopeePercentage">) {
   return percentage(input.lossPercentage) >= 1 || percentage(input.shopeePercentage) >= 1;
 }
