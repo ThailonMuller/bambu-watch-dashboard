@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, directPriceFromShopee, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales } from "../shared/budget";
+import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, directPriceFromShopee, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("replicates the store sequence and includes the fixed Shopee fee", () => {
@@ -18,6 +18,30 @@ describe("budget calculator", () => {
 
   it("keeps the custom defaults aligned with the requested rates", () => {
     expect(CUSTOM_BUDGET_INPUT).toMatchObject({ mkp: 150, lossPercentage: 30, depreciationPercentage: 3, maintenancePercentage: 2, shopeePercentage: 14, shopeeFixedFee: 4 });
+  });
+
+  it("clears product identity and plates while restoring the selected mode defaults", () => {
+    const store = createCleanBudgetInput("store");
+    const custom = createCleanBudgetInput("custom");
+
+    expect(store).toEqual({ ...DEFAULT_BUDGET_INPUT, productId: "", productName: "", plateCosts: [0] });
+    expect(custom).toEqual({ ...CUSTOM_BUDGET_INPUT, productId: "", productName: "", plateCosts: [0] });
+    expect(calculateBudget(store).materialCost).toBe(0);
+    expect(calculateBudget(custom).materialCost).toBe(0);
+  });
+
+  it("creates independent reset state without mutating defaults or previous resets", () => {
+    const first = createCleanBudgetInput("store");
+    const next = createCleanBudgetInput("store");
+    expect(first).not.toBe(next);
+    expect(first.plateCosts).not.toBe(next.plateCosts);
+    expect(first.plateCosts).not.toBe(DEFAULT_BUDGET_INPUT.plateCosts);
+    first.productId = "999";
+    first.packagingCost = 100;
+    expect(next.productId).toBe("");
+    expect(next.packagingCost).toBe(3.44);
+    expect(DEFAULT_BUDGET_INPUT.productId).toBe("1001");
+    expect(calculateBudget(next)).toEqual(calculateBudget(DEFAULT_BUDGET_INPUT));
   });
 
   it("converts a Shopee price back to the direct-sale price", () => {

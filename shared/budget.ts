@@ -38,6 +38,11 @@ export type BudgetInput = {
   shopeeFixedFee: number;
 };
 
+export function createCleanBudgetInput(mode: "store" | "custom"): BudgetInput {
+  const defaults = mode === "custom" ? CUSTOM_BUDGET_INPUT : DEFAULT_BUDGET_INPUT;
+  return { ...defaults, productId: "", productName: "", plateCosts: [0] };
+}
+
 export type BudgetResult = {
   materialCost: number;
   costWithOtherExpenses: number;
