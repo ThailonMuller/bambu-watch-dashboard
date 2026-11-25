@@ -28,6 +28,16 @@ function finalStyles(selector: string) {
   return values;
 }
 
+function finalDeclarations(selector: string) {
+  const values: Record<string, { value: string; important: boolean }> = {};
+  stylesheet.walkRules(rule => {
+    if (rule.selectors.includes(selector)) {
+      rule.walkDecls(declaration => { values[declaration.prop] = { value: declaration.value, important: declaration.important }; });
+    }
+  });
+  return values;
+}
+
 describe("FR3D custom budget increment controls", () => {
   it("renders exactly the two styled buttons beside a number input and its unit", () => {
     const node = BudgetField({ label: "MKP", value: 130, suffix: "%", onChange: vi.fn() });
@@ -68,5 +78,27 @@ describe("FR3D custom budget increment controls", () => {
     expect(finalStyles('.budget-number-control input[type="number"]')["padding-right"]).toBe("52px");
     expect(finalStyles('.budget-input-wrap:not(.has-suffix) .budget-number-control input[type="number"]')["padding-right"]).toBe("52px");
     expect(finalStyles(".budget-input-suffix")["right"]).toBe("27px");
+  });
+
+  it("overrides conflicting global number-input rules and hides native spinners everywhere", () => {
+    expect(finalDeclarations('input[type="number"]')).toMatchObject({
+      appearance: { value: "textfield", important: true },
+      "-moz-appearance": { value: "textfield", important: true },
+      "-webkit-appearance": { value: "none", important: true },
+    });
+    for (const pseudo of ["::-webkit-inner-spin-button", "::-webkit-outer-spin-button"]) {
+      expect(finalDeclarations(`input[type="number"]${pseudo}`)).toMatchObject({
+        display: { value: "none", important: true },
+        "-webkit-appearance": { value: "none", important: true },
+        opacity: { value: "0", important: true },
+        filter: { value: "none", important: true },
+      });
+    }
+  });
+
+  it("sets the clear-budget button to the same 39px height as the product fields", () => {
+    const fieldHeight = finalStyles(".budget-input-wrap").height;
+    expect(fieldHeight).toBe("39px");
+    expect(finalStyles(".clear-budget-button")).toMatchObject({ height: fieldHeight, "min-height": fieldHeight });
   });
 });

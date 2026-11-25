@@ -1357,3 +1357,10 @@ html.light .budget-stepper { border-left-color:rgba(20,120,146,.38); background:
 html.light .budget-step-up { border-bottom-color:rgba(20,120,146,.2); }
 html.light .budget-step-button { color:#147892; }
 html.light .budget-step-button:hover, html.light .budget-step-button:focus-visible { color:#54207e; background:linear-gradient(135deg,rgba(126,43,182,.2),rgba(0,167,189,.18)); }
+
+/* Final override: hide only browser-native number spinners on every numeric input. */
+input[type="number"] { appearance:textfield !important; -moz-appearance:textfield !important; -webkit-appearance:none !important; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { display:none !important; appearance:none !important; -webkit-appearance:none !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; opacity:0 !important; filter:none !important; }
+
+/* The clear action matches the 39px height of the adjacent product fields. */
+.clear-budget-button { height:39px; min-height:39px; }
