@@ -53,6 +53,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
 import { useLocation } from "wouter";
 import PrintSchedule from "./PrintSchedule";
+import BudgetField from "../components/BudgetField";
 
 type PrinterState = "printing" | "idle" | "offline";
 type View = "overview" | "printers" | "settings" | "budget" | "filaments" | "schedule";
@@ -360,15 +361,6 @@ function SettingsView({ simulationMode, setSimulationMode, polling, setPolling, 
 
 function currency(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function BudgetField({ label, value, onChange, prefix, suffix, step = "1", min = "0" }: { label: string; value: string | number; onChange: (value: string) => void; prefix?: string; suffix?: string; step?: string; min?: string }) {
-  return (
-    <label className="budget-field">
-      <span>{label}</span>
-      <div className={`budget-input-wrap ${suffix ? "has-suffix" : ""}`}>{prefix && <b className="budget-input-prefix">{prefix}</b>}<div className="budget-number-control"><input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />{suffix && <b className="budget-input-suffix">{suffix}</b>}</div></div>
-    </label>
-  );
 }
 
 type SpreadsheetItem = {

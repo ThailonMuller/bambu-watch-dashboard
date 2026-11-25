@@ -1331,9 +1331,9 @@ html.light .topnav-brand .brand-mark { background:transparent; box-shadow:none; 
 .clear-budget-button:focus-visible { outline:2px solid #00d8f5; outline-offset:3px; }
 html.light .clear-budget-button { color:#54246e; border-color:#dec5ed; background:linear-gradient(135deg,#faf5ff,#f5edff); box-shadow:0 5px 14px rgba(94,55,121,.09); }
 html.light .clear-budget-button:hover { color:#42115d; border-color:#b58bd0; background:linear-gradient(135deg,#f4e9ff,#f4e8ff); box-shadow:0 8px 18px rgba(98,30,121,.13); }
-.budget-number-control input[type="number"] { appearance:textfield !important; -moz-appearance:textfield !important; -webkit-appearance:none !important; padding-right:38px !important; }
+.budget-number-control input[type="number"] { appearance:textfield !important; -moz-appearance:textfield !important; -webkit-appearance:none !important; padding-right:52px !important; }
 .budget-number-control input[type="number"]::-webkit-inner-spin-button, .budget-number-control input[type="number"]::-webkit-outer-spin-button { display:none !important; appearance:none !important; -webkit-appearance:none !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; opacity:0 !important; }
-.budget-input-suffix { right:9px !important; }
+.budget-input-suffix { right:27px !important; }
 @media (max-width:760px) { .budget-identity-grid { grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); }.clear-budget-button { grid-column:1 / -1; justify-self:end; } }
 @media (max-width:480px) { .budget-identity-grid { grid-template-columns:minmax(0,1fr); }.clear-budget-button { grid-column:1; width:100%; } }
 @media (prefers-reduced-motion:no-preference) {
@@ -1344,4 +1344,16 @@ html.light .clear-budget-button:hover { color:#42115d; border-color:#b58bd0; bac
 /* Hide native increment arrows consistently across all numeric inputs. */
 input[type="number"] { appearance:textfield; -moz-appearance:textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance:none; -webkit-appearance:none; display:none; margin:0; }
-.budget-input-wrap:not(.has-suffix) .budget-number-control input[type="number"] { padding-right:0 !important; }
+.budget-input-wrap:not(.has-suffix) .budget-number-control input[type="number"] { padding-right:52px !important; }
+
+/* Restored FR3D blue +/− controls; browser-native arrows remain hidden. */
+.budget-stepper { position:absolute; top:-1px; right:-10px; bottom:-1px; z-index:2; display:grid; grid-template-rows:1fr 1fr; width:25px; overflow:hidden; border-left:1px solid rgba(0,216,245,.46); border-radius:0 8px 8px 0; background:linear-gradient(180deg,rgba(0,216,245,.2),rgba(74,81,220,.24)); }
+.budget-step-button { display:grid; place-items:center; width:100%; height:100%; min-height:0; padding:0; color:#8ff5ff; border:0; background:transparent; font-family:Arial,sans-serif; font-size:15px !important; font-weight:800; line-height:1; cursor:pointer; transition:color .16s ease, background .16s ease; }
+.budget-step-up { border-bottom:1px solid rgba(0,216,245,.28); }
+.budget-step-button:hover, .budget-step-button:focus-visible { color:#fff; background:linear-gradient(180deg,rgba(0,216,245,.42),rgba(116,74,220,.34)); outline:0; }
+.budget-step-button:active { background:rgba(0,216,245,.32); }
+.budget-input-wrap:has(.budget-step-button:focus-visible) { border-color:#00d8f5; box-shadow:0 0 0 3px rgba(0,216,245,.14), inset 0 0 0 1px rgba(0,216,245,.16); }
+html.light .budget-stepper { border-left-color:rgba(20,120,146,.38); background:linear-gradient(180deg,rgba(0,167,189,.16),rgba(126,43,182,.18)); }
+html.light .budget-step-up { border-bottom-color:rgba(20,120,146,.2); }
+html.light .budget-step-button { color:#147892; }
+html.light .budget-step-button:hover, html.light .budget-step-button:focus-visible { color:#54207e; background:linear-gradient(135deg,rgba(126,43,182,.2),rgba(0,167,189,.18)); }
