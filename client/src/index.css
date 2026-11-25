@@ -1342,3 +1342,16 @@ html.light .schedule-start-controls input { color-scheme:light; }
 .spreadsheet-migration-notice > button { display:grid; place-items:center; flex:0 0 auto; border:0; background:transparent; color:inherit; cursor:pointer; opacity:.75; }
 .spreadsheet-migration-notice > button:hover { opacity:1; }
 .sheet-shopee-reference { white-space:nowrap; opacity:.75; }
+
+/* Header identity: centered artwork with its own transparency, without circular masks or crop. */
+.topnav-brand .brand-mark { width:64px; height:64px; flex:0 0 64px; overflow:visible; border-radius:0; background:transparent; box-shadow:none; }
+html.light .topnav-brand .brand-mark { background:transparent; box-shadow:none; }
+.topnav-brand .brand-mark img { display:block; width:100%; height:100%; object-fit:contain; object-position:center; border-radius:0; box-shadow:none; }
+.topnav-brand .brand-copy small { font-size:15px !important; line-height:1.3; }
+@media (max-width:1100px) {
+  .topnav-brand .brand-mark { width:64px; height:64px; flex-basis:64px; }
+  .topnav-brand .brand-copy small { font-size:14px !important; }
+}
+@media (max-width:760px) {
+  .topnav-brand .brand-mark { width:56px; height:56px; flex-basis:56px; }
+}
