@@ -69,7 +69,8 @@ describe("header brand styling", () => {
 
   it("uses the transparent neon logo in project storage, not the previous centered image", () => {
     const home = readFileSync(resolve("client/src/pages/Home.tsx"), "utf8");
-    expect(home).toContain("/manus-storage/fr3d-neon-logo-web_a188498a.png");
+    expect(home).toContain("/manus-storage/fr3d-circular-logo-web_c6f0ab7e.png");
+    expect(home).not.toContain("fr3d-neon-logo-web_a188498a.png");
     expect(home).not.toContain("fr3d-menu-logo-centered_2cbcc8eb.png");
     expect(home).toMatch(/width=\{64\}\s+height=\{64\}\s+alt="Logo Falcão Rosa3D"/);
   });

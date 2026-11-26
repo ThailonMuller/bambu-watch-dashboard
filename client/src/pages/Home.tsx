@@ -27,6 +27,7 @@ import {
   PencilLine,
   Layers3,
   LockKeyhole,
+  Menu as MenuIcon,
   Moon,
   MoreHorizontal,
   PlayCircle,
@@ -757,6 +758,8 @@ export default function Home() {
   const [polling, setPolling] = useState("10");
   const [lastSync, setLastSync] = useState(new Date());
   const [refreshing, setRefreshing] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("fr3d-monitoring-preferences-v2");
@@ -835,7 +838,7 @@ export default function Home() {
           <div className="brand">
             <div className="brand-mark">
               <img
-                src="https://bambuwatch-wwg9stua.manus.space/manus-storage/fr3d-neon-logo-web_a188498a.png"
+                src="https://bambuwatch-wwg9stua.manus.space/manus-storage/fr3d-circular-logo-web_c6f0ab7e.png"
                 width={64}
                 height={64}
                 alt="Logo Falcão Rosa3D"
@@ -855,8 +858,69 @@ export default function Home() {
             <ChevronRight size={15} />
           </div>
         </div>
-        <nav className="topnav-menu" aria-label="Navegação principal">{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={`nav-item ${view === id ? "active" : ""}`} onClick={() => setView(id)}><Icon size={17} /><span>{label}</span>{id === "printers" && <span className="nav-count">2</span>}</button>)}</nav>
-        <div className="topnav-tools"><div className="agent-card"><div className="agent-icon"><Radio size={15} /></div><div><strong>Bridge local</strong><span><i /> Aguardando conexão</span></div><button onClick={() => setView("settings")} aria-label="Abrir configuração"><Settings2 size={15} /></button></div><div className="topbar-actions"><div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div><button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button><button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button><div className="profile-avatar">LM</div></div></div>
+        <div className="topnav-tools">
+          <div className="agent-card">
+            <div className="agent-icon"><Radio size={15} /></div>
+            <div><strong>Bridge local</strong><span><i /> Aguardando conexão</span></div>
+            <button onClick={() => setView("settings")} aria-label="Abrir configuração"><Settings2 size={15} /></button>
+          </div>
+          <div className="topbar-actions">
+            <div className="sync-status"><span className="live-dot" /> <span>Última leitura {formatSync(lastSync)}</span></div>
+            <button className="theme-toggle" onClick={toggleTheme} aria-label={`Ativar tema ${theme === "dark" ? "claro" : "escuro"}`} title={`Tema ${theme === "dark" ? "claro" : "escuro"}`}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
+            <button className={`refresh-button ${refreshing ? "spinning" : ""}`} onClick={refresh} aria-label="Atualizar telemetria"><RefreshCw size={17} /></button>
+            <div className="profile-avatar">LM</div>
+          </div>
+          <button
+            ref={mobileMenuButtonRef}
+            type="button"
+            className="mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? "Fechar navegação principal" : "Abrir navegação principal"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="fr3d-primary-navigation"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && mobileMenuOpen) setMobileMenuOpen(false);
+            }}
+          >
+            {mobileMenuOpen ? <X size={18} aria-hidden="true" /> : <MenuIcon size={18} aria-hidden="true" />}
+          </button>
+        </div>
+        <nav
+          id="fr3d-primary-navigation"
+          className="topnav-menu"
+          aria-label="Navegação principal"
+          data-mobile-open={mobileMenuOpen}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && mobileMenuOpen) {
+              event.preventDefault();
+              setMobileMenuOpen(false);
+              mobileMenuButtonRef.current?.focus();
+            }
+          }}
+          onBlur={(event) => {
+            if (mobileMenuOpen && event.relatedTarget !== mobileMenuButtonRef.current && !event.currentTarget.contains(event.relatedTarget as Node | null)) {
+              setMobileMenuOpen(false);
+            }
+          }}
+        >
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              aria-current={view === id ? "page" : undefined}
+              className={`nav-item ${view === id ? "active" : ""}`}
+              onClick={() => {
+                setView(id);
+                setMobileMenuOpen(false);
+                if (window.matchMedia("(max-width: 760px)").matches) mobileMenuButtonRef.current?.focus();
+              }}
+            >
+              <Icon size={17} />
+              <span>{label}</span>
+              {id === "printers" && <span className="nav-count">2</span>}
+            </button>
+          ))}
+        </nav>
       </header>
       <main className="main-content">
         <div className="context-bar"><div className="breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{activeTitle}</strong></div><div className="context-status"><span className="mini-live" /> Área ativa</div></div>
