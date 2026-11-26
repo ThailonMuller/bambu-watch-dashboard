@@ -58,7 +58,7 @@ describe("filament spool cards", () => {
 
   it("uses a compact responsive grid, color swatches and a color-matched weight band", () => {
     expect(card).toContain('className="filament-card-swatch"');
-    expect(card).toContain('className={`filament-card-weight ${low ? "is-low" : ""}`}');
+    expect(card).toContain('className="filament-card-weight"');
     expect(stylesheet).toContain(
       "grid-template-columns: repeat(auto-fill, minmax(112px, 1fr))"
     );
@@ -67,13 +67,12 @@ describe("filament spool cards", () => {
     expect(stylesheet).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
-  it("integrates the readable low-stock status into the rounded weight band", () => {
-    expect(card).toContain("{low && <small>Estoque baixo</small>}");
+  it("shows the low-stock warning on a rounded, filament-colored top ribbon", () => {
+    expect(card).toContain('{low && <span className="filament-card-low-ribbon">Estoque baixo</span>}');
     expect(card).toContain('${low ? ", estoque baixo" : ""}');
-    expect(stylesheet).toContain(".filament-card-weight.is-low");
-    expect(stylesheet).toContain(".app-shell .filament-card-weight small");
-    expect(stylesheet).toContain("font-size: 11px !important;");
-    expect(stylesheet).toContain("border-radius: 0 0 14px 14px");
+    expect(stylesheet).toContain(".filament-card-low-ribbon");
+    expect(stylesheet).toContain("background: var(--filament-color, #8f77f4)");
+    expect(stylesheet).toContain("border-radius: 14px 14px 0 0");
     expect(stylesheet).not.toContain(".filament-card-low-tag");
   });
 
@@ -85,5 +84,19 @@ describe("filament spool cards", () => {
     expect(stylesheet).not.toContain("debit-stock-remaining");
     expect(stylesheet).toContain(".debit-card .filament-card-heading h3");
     expect(stylesheet).toContain("font-size: 18px;");
+  });
+
+  it("uses a rounded left-edge stripe matching each debit's linked filament color", () => {
+    expect(home).toContain('style={{ borderLeft: `5px solid ${linked?.color ?? debit.color}` }}');
+    expect(home).not.toContain('style={{ background: debit.color }}');
+    expect(stylesheet).toContain(".debit-row { overflow: hidden; border-radius: 10px; }");
+  });
+
+  it("removes the per-spool consumption chart while retaining the history list and summaries", () => {
+    expect(home).not.toContain("Consumo por bobina");
+    expect(home).not.toContain("consumption-chart");
+    expect(home).not.toContain("chartData");
+    expect(home).toContain('className="history-summary"');
+    expect(home).toContain('className="history-list"');
   });
 });

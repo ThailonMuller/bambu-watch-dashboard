@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   AlertCircle,
-  BarChart3,
   ArrowUpRight,
   Bot,
   Cable,
@@ -10,7 +9,6 @@ import {
   Check,
   CheckCircle2,
   ChevronRight,
-  CircleGauge,
   CircleHelp,
   Copy,
   DollarSign,
@@ -30,7 +28,6 @@ import {
   Menu as MenuIcon,
   Moon,
   MoreHorizontal,
-  PlayCircle,
   Plus,
   Printer,
   Radio,
@@ -59,7 +56,7 @@ import DecimalInput from "../components/DecimalInput";
 import FilamentSpoolCard from "../components/FilamentSpoolCard";
 
 type PrinterState = "printing" | "idle" | "offline";
-type View = "overview" | "printers" | "settings" | "budget" | "filaments" | "schedule";
+type View = "printers" | "settings" | "budget" | "filaments" | "schedule";
 type PlateAnimation = { type: "add" | "remove"; index: number } | null;
 
 type PrinterData = {
@@ -129,15 +126,7 @@ const initialPrinters: PrinterData[] = [
   },
 ];
 
-const activity = [
-  { time: "10:42", label: "A1 retomou a impressão", detail: "vaso-organico-v3.3mf", tone: "violet" },
-  { time: "10:16", label: "P1S concluiu o trabalho", detail: "suporte-fone-final.3mf", tone: "green" },
-  { time: "09:58", label: "Telemetria recebida", detail: "Bridge local conectado", tone: "blue" },
-  { time: "09:41", label: "A1 atingiu 60°C", detail: "Mesa aquecida", tone: "pink" },
-];
-
-const navItems: { id: View; label: string; icon: typeof CircleGauge }[] = [
-  { id: "overview", label: "Visão geral", icon: CircleGauge },
+const navItems: { id: View; label: string; icon: typeof Printer }[] = [
   { id: "printers", label: "Impressoras", icon: Printer },
   { id: "schedule", label: "Cronograma", icon: Clock3 },
   { id: "settings", label: "Configuração", icon: Settings2 },
@@ -184,19 +173,6 @@ function ProgressRing({ value, tone }: { value: number; tone: "violet" | "blue" 
       <div className="progress-ring-inner">
         <span>{value}%</span>
         <small>feito</small>
-      </div>
-    </div>
-  );
-}
-
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Thermometer; label: string; value: string; hint: string; tone: string }) {
-  return (
-    <div className="metric-card">
-      <div className={`metric-icon ${tone}`}><Icon size={17} strokeWidth={2.2} /></div>
-      <div>
-        <p className="metric-label">{label}</p>
-        <p className="metric-value">{value}</p>
-        <p className="metric-hint">{hint}</p>
       </div>
     </div>
   );
@@ -292,27 +268,6 @@ function TelemetryDiagnosticsPanel({ data }: { data: { ageMs?: number | null; di
       <div className="telemetry-status-list"><div><span>Idade do snapshot</span><strong>{age}</strong></div><div><span>Recebido pelo Worker</span><strong>{received}</strong></div><div><span>Resposta do Worker</span><strong>{diagnostics?.responseMs == null ? "Não disponível" : `${diagnostics.responseMs} ms`}</strong></div><div><span>Falhas consecutivas</span><strong>{diagnostics?.consecutiveFailures ?? "Não disponível"}</strong></div></div>
       <span className={`telemetry-diagnostics-note ${data?.error ? "is-warning" : ""}`}>{data?.error ? `Último diagnóstico: ${data.error}` : "Worker acessível; a disponibilidade depende do frescor do snapshot."}</span>
     </section>
-  );
-}
-
-function MiniChart() {
-  return (
-    <div className="chart-wrap" aria-label="Gráfico de uso das impressoras nas últimas 24 horas">
-      <div className="chart-y-labels"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
-      <svg className="usage-chart" viewBox="0 0 640 180" preserveAspectRatio="none" role="img">
-        <defs>
-          <linearGradient id="violetFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8f77f4" stopOpacity="0.26" /><stop offset="100%" stopColor="#8f77f4" stopOpacity="0" /></linearGradient>
-          <linearGradient id="blueFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4ca9ef" stopOpacity="0.22" /><stop offset="100%" stopColor="#4ca9ef" stopOpacity="0" /></linearGradient>
-        </defs>
-        {[30, 66, 102, 138].map((y) => <line key={y} x1="0" x2="640" y1={y} y2={y} className="chart-grid" />)}
-        <path d="M0 144 C48 141, 58 100, 105 114 S155 145, 198 95 S252 86, 294 112 S347 74, 384 88 S436 110, 478 70 S531 46, 566 77 S606 56, 640 38 L640 180 L0 180Z" fill="url(#violetFill)" />
-        <path d="M0 160 C46 155, 72 128, 112 144 S160 106, 208 131 S258 120, 300 141 S347 108, 386 122 S428 136, 476 105 S528 120, 566 99 S604 116, 640 88 L640 180 L0 180Z" fill="url(#blueFill)" />
-        <path d="M0 144 C48 141, 58 100, 105 114 S155 145, 198 95 S252 86, 294 112 S347 74, 384 88 S436 110, 478 70 S531 46, 566 77 S606 56, 640 38" fill="none" stroke="#8f77f4" strokeWidth="3" strokeLinecap="round" />
-        <path d="M0 160 C46 155, 72 128, 112 144 S160 106, 208 131 S258 120, 300 141 S347 108, 386 122 S428 136, 476 105 S528 120, 566 99 S604 116, 640 88" fill="none" stroke="#4ca9ef" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 0" />
-        <circle cx="478" cy="70" r="5" fill="#fff" stroke="#8f77f4" strokeWidth="3" />
-      </svg>
-      <div className="chart-x-labels"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>Agora</span></div>
-    </div>
   );
 }
 
@@ -491,8 +446,6 @@ function FilamentsView() {
   const rejectedGrams = filteredHistory.filter((entry) => entry.status === "rejected").reduce((sum, entry) => sum + entry.grams, 0);
   const historyPageCount = Math.max(1, Math.ceil(filteredHistory.length / historyPageSize));
   const visibleHistory = filteredHistory.slice((historyPage - 1) * historyPageSize, historyPage * historyPageSize);
-  const chartData = Object.values(filteredHistory.reduce<Record<string, { name: string; color: string; grams: number }>>((acc, entry) => { const key = entry.filamentName || "Filamento não identificado"; acc[key] = acc[key] || { name: key, color: entry.color, grams: 0 }; acc[key].grams += entry.grams; return acc; }, {}));
-  const chartMax = Math.max(...chartData.map((item) => item.grams), 1);
   useEffect(() => { setHistoryPage(1); }, [historyStatusFilter, historyPeriodFilter]);
   useEffect(() => { if (historyPage > historyPageCount) setHistoryPage(historyPageCount); }, [historyPage, historyPageCount]);
   const startHistoryEdit = (entry: FilamentHistoryEntry) => { const linked = entry.filamentId ? filaments.find((item) => item.id === entry.filamentId) : filaments.find((item) => item.color.toLowerCase() === entry.color.toLowerCase()); setEditingHistoryId(entry.id); setEditingHistory({ piece: entry.piece, grams: String(entry.grams), filamentId: linked ? String(linked.id) : "", status: entry.status }); };
@@ -514,8 +467,8 @@ function FilamentsView() {
         />
       ))}
     </div>
-    <section className="debit-card"><div className="filament-card-heading"><div className="settings-symbol pink"><ReceiptText size={19} /></div><div><h3>Débitos de filamentos</h3></div><span className="pending-count">{pendingDebits.length} aguardando</span></div><div className="debit-add-form"><input className="budget-text-input debit-piece-input" value={newDebit.piece} onChange={(event) => setNewDebit((current) => ({ ...current, piece: event.target.value }))} placeholder="Nome da peça / arquivo" /><div className="debit-add-controls"><select className="debit-spool-select" value={newDebit.filamentId} onChange={(event) => { const filament = filaments.find((item) => String(item.id) === event.target.value); setNewDebit((current) => ({ ...current, filamentId: event.target.value, color: filament?.color || current.color })); }} aria-label="Selecionar bobina"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><input className="debit-color" type="color" value={newDebit.color} onChange={(event) => setNewDebit((current) => ({ ...current, color: event.target.value }))} aria-label="Cor do débito" /><DecimalInput className="budget-text-input grams-input" min="0" step="1" value={newDebit.grams} onChange={(event) => setNewDebit((current) => ({ ...current, grams: event.target.value }))} placeholder="Gramas consumidas" /><button className="filament-primary-button" onClick={addDebit}><Plus size={15} /> Adicionar débito</button></div>{debitExceedsStock && <div className="stock-warning" role="alert"><AlertCircle size={15} /><span>O débito de {newDebit.grams || 0} g é maior que o estoque disponível de {selectedDebitFilament?.grams ?? 0} g em {selectedDebitFilament?.name}.</span></div>}</div><div className="debit-list">{debits.map((debit) => { const linked = debit.filamentId ? filaments.find((item) => item.id === debit.filamentId) : filaments.find((item) => item.color.toLowerCase() === debit.color.toLowerCase()); return <div className={`debit-row debit-${debit.status}`} key={debit.id}><span className="debit-color-dot" style={{ background: debit.color }} /><div className="debit-copy"><strong>{debit.piece}</strong><span>{linked?.name || "Bobina não identificada"} · {debit.grams} g · {debit.status === "pending" ? "aguardando confirmação" : debit.status === "approved" ? "aprovado" : "rejeitado"}</span></div>{debit.status === "pending" ? <div className="debit-actions"><button className="approve-button" onClick={() => approveDebit(debit)}><Check size={14} /> Aprovar</button><button className="reject-button" onClick={() => rejectDebit(debit.id)}><X size={14} /> Rejeitar</button></div> : <span className="debit-status-label">{debit.status === "approved" ? "Confirmado" : "Rejeitado"}</span>}</div>; })}</div></section>
-    <section className="history-card"><div className="filament-card-heading"><div className="settings-symbol blue"><History size={19} /></div><div><h3>Histórico de consumo</h3><p>Registro organizado dos débitos confirmados ou rejeitados.</p></div><div className="history-heading-actions"><span className="history-total">{filteredHistory.length} registros</span><button className="clear-history-button" onClick={clearHistory} disabled={!history.length}><Trash2 size={13} /> Limpar histórico</button></div></div><div className="history-filters"><label>Período<select value={historyPeriodFilter} onChange={(event) => setHistoryPeriodFilter(event.target.value as typeof historyPeriodFilter)}><option value="all">Todo o período</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select></label><label>Status<select value={historyStatusFilter} onChange={(event) => setHistoryStatusFilter(event.target.value as typeof historyStatusFilter)}><option value="all">Todos</option><option value="approved">Aprovados</option><option value="rejected">Rejeitados</option></select></label></div><div className="history-summary"><div><span>Total filtrado</span><strong>{approvedGrams + rejectedGrams} g</strong></div><div><span>Aprovado</span><strong className="summary-approved">{approvedGrams} g</strong></div><div><span>Rejeitado</span><strong className="summary-rejected">{rejectedGrams} g</strong></div></div><div className="consumption-chart"><div className="chart-heading"><div><strong>Consumo por bobina</strong><span>Somatório do período e status selecionados</span></div><BarChart3 size={17} /></div>{chartData.length === 0 ? <div className="chart-empty">Sem dados para desenhar neste filtro.</div> : <div className="chart-bars">{chartData.map((item) => <div className="chart-bar-row" key={item.name}><div className="chart-label"><span>{item.name}</span><strong>{item.grams} g</strong></div><div className="chart-track"><span style={{ width: `${Math.max(5, item.grams / chartMax * 100)}%`, background: item.color }} /></div></div>)}</div>}</div>{visibleHistory.length === 0 ? <div className="history-empty"><History size={21} /><span>{history.length ? "Nenhum registro corresponde aos filtros." : "Nenhum consumo registrado ainda."}</span></div> : <div className="history-list">{visibleHistory.map((entry) => editingHistoryId === entry.id ? <div className="history-row history-edit-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><input className="history-edit-input" value={editingHistory.piece} onChange={(event) => setEditingHistory((current) => ({ ...current, piece: event.target.value }))} /><DecimalInput className="history-edit-grams" min="1" value={editingHistory.grams} onChange={(event) => setEditingHistory((current) => ({ ...current, grams: event.target.value }))} /><select className="history-edit-spool" value={editingHistory.filamentId} onChange={(event) => setEditingHistory((current) => ({ ...current, filamentId: event.target.value }))} aria-label="Editar bobina do registro"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><select className="history-edit-status" value={editingHistory.status} onChange={(event) => setEditingHistory((current) => ({ ...current, status: event.target.value as FilamentHistoryEntry["status"] }))}><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select><button className="history-save-button" onClick={() => saveHistoryEdit(entry.id)} aria-label="Salvar registro"><Check size={14} /></button><button className="history-cancel-button" onClick={() => setEditingHistoryId(null)} aria-label="Cancelar edição"><X size={14} /></button></div> : <div className="history-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><div className="history-copy"><strong>{entry.piece}</strong><span className="history-filament-name">{entry.filamentName || "Filamento não identificado"}</span><span>{entry.createdAt} · {entry.grams} g</span></div><span className={`history-status ${entry.status}`}>{entry.status === "approved" ? "Aprovado" : "Rejeitado"}</span><div className="history-actions"><button onClick={() => startHistoryEdit(entry)} aria-label={`Editar ${entry.piece}`}><PencilLine size={13} /></button><button onClick={() => removeHistoryEntry(entry.id)} aria-label={`Excluir ${entry.piece}`}><Trash2 size={13} /></button></div></div>)}</div>}{historyPageCount > 1 && <div className="history-pagination"><button disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</button><span>Página {historyPage} de {historyPageCount}</span><button disabled={historyPage === historyPageCount} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</button></div>}</section>
+    <section className="debit-card"><div className="filament-card-heading"><div className="settings-symbol pink"><ReceiptText size={19} /></div><div><h3>Débitos de filamentos</h3></div><span className="pending-count">{pendingDebits.length} aguardando</span></div><div className="debit-add-form"><input className="budget-text-input debit-piece-input" value={newDebit.piece} onChange={(event) => setNewDebit((current) => ({ ...current, piece: event.target.value }))} placeholder="Nome da peça / arquivo" /><div className="debit-add-controls"><select className="debit-spool-select" value={newDebit.filamentId} onChange={(event) => { const filament = filaments.find((item) => String(item.id) === event.target.value); setNewDebit((current) => ({ ...current, filamentId: event.target.value, color: filament?.color || current.color })); }} aria-label="Selecionar bobina"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><input className="debit-color" type="color" value={newDebit.color} onChange={(event) => setNewDebit((current) => ({ ...current, color: event.target.value }))} aria-label="Cor do débito" /><DecimalInput className="budget-text-input grams-input" min="0" step="1" value={newDebit.grams} onChange={(event) => setNewDebit((current) => ({ ...current, grams: event.target.value }))} placeholder="Gramas consumidas" /><button className="filament-primary-button" onClick={addDebit}><Plus size={15} /> Adicionar débito</button></div>{debitExceedsStock && <div className="stock-warning" role="alert"><AlertCircle size={15} /><span>O débito de {newDebit.grams || 0} g é maior que o estoque disponível de {selectedDebitFilament?.grams ?? 0} g em {selectedDebitFilament?.name}.</span></div>}</div><div className="debit-list">{debits.map((debit) => { const linked = debit.filamentId ? filaments.find((item) => item.id === debit.filamentId) : filaments.find((item) => item.color.toLowerCase() === debit.color.toLowerCase()); return <div className={`debit-row debit-${debit.status}`} key={debit.id} style={{ borderLeft: `5px solid ${linked?.color ?? debit.color}` }}><div className="debit-copy"><strong>{debit.piece}</strong><span>{linked?.name || "Bobina não identificada"} · {debit.grams} g · {debit.status === "pending" ? "aguardando confirmação" : debit.status === "approved" ? "aprovado" : "rejeitado"}</span></div>{debit.status === "pending" ? <div className="debit-actions"><button className="approve-button" onClick={() => approveDebit(debit)}><Check size={14} /> Aprovar</button><button className="reject-button" onClick={() => rejectDebit(debit.id)}><X size={14} /> Rejeitar</button></div> : <span className="debit-status-label">{debit.status === "approved" ? "Confirmado" : "Rejeitado"}</span>}</div>; })}</div></section>
+    <section className="history-card"><div className="filament-card-heading"><div className="settings-symbol blue"><History size={19} /></div><div><h3>Histórico de consumo</h3><p>Registro organizado dos débitos confirmados ou rejeitados.</p></div><div className="history-heading-actions"><span className="history-total">{filteredHistory.length} registros</span><button className="clear-history-button" onClick={clearHistory} disabled={!history.length}><Trash2 size={13} /> Limpar histórico</button></div></div><div className="history-filters"><label>Período<select value={historyPeriodFilter} onChange={(event) => setHistoryPeriodFilter(event.target.value as typeof historyPeriodFilter)}><option value="all">Todo o período</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select></label><label>Status<select value={historyStatusFilter} onChange={(event) => setHistoryStatusFilter(event.target.value as typeof historyStatusFilter)}><option value="all">Todos</option><option value="approved">Aprovados</option><option value="rejected">Rejeitados</option></select></label></div><div className="history-summary"><div><span>Total filtrado</span><strong>{approvedGrams + rejectedGrams} g</strong></div><div><span>Aprovado</span><strong className="summary-approved">{approvedGrams} g</strong></div><div><span>Rejeitado</span><strong className="summary-rejected">{rejectedGrams} g</strong></div></div>{visibleHistory.length === 0 ? <div className="history-empty"><History size={21} /><span>{history.length ? "Nenhum registro corresponde aos filtros." : "Nenhum consumo registrado ainda."}</span></div> : <div className="history-list">{visibleHistory.map((entry) => editingHistoryId === entry.id ? <div className="history-row history-edit-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><input className="history-edit-input" value={editingHistory.piece} onChange={(event) => setEditingHistory((current) => ({ ...current, piece: event.target.value }))} /><DecimalInput className="history-edit-grams" min="1" value={editingHistory.grams} onChange={(event) => setEditingHistory((current) => ({ ...current, grams: event.target.value }))} /><select className="history-edit-spool" value={editingHistory.filamentId} onChange={(event) => setEditingHistory((current) => ({ ...current, filamentId: event.target.value }))} aria-label="Editar bobina do registro"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><select className="history-edit-status" value={editingHistory.status} onChange={(event) => setEditingHistory((current) => ({ ...current, status: event.target.value as FilamentHistoryEntry["status"] }))}><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select><button className="history-save-button" onClick={() => saveHistoryEdit(entry.id)} aria-label="Salvar registro"><Check size={14} /></button><button className="history-cancel-button" onClick={() => setEditingHistoryId(null)} aria-label="Cancelar edição"><X size={14} /></button></div> : <div className="history-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><div className="history-copy"><strong>{entry.piece}</strong><span className="history-filament-name">{entry.filamentName || "Filamento não identificado"}</span><span>{entry.createdAt} · {entry.grams} g</span></div><span className={`history-status ${entry.status}`}>{entry.status === "approved" ? "Aprovado" : "Rejeitado"}</span><div className="history-actions"><button onClick={() => startHistoryEdit(entry)} aria-label={`Editar ${entry.piece}`}><PencilLine size={13} /></button><button onClick={() => removeHistoryEntry(entry.id)} aria-label={`Excluir ${entry.piece}`}><Trash2 size={13} /></button></div></div>)}</div>}{historyPageCount > 1 && <div className="history-pagination"><button disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</button><span>Página {historyPage} de {historyPageCount}</span><button disabled={historyPage === historyPageCount} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</button></div>}</section>
   </div>;
 }
 
@@ -759,7 +712,7 @@ export default function Home() {
   const telemetryQuery = trpc.telemetry.a1.useQuery(undefined, { refetchInterval: 10000, retry: false });
   const historyQuery = trpc.telemetry.a1History.useQuery(undefined, { refetchInterval: 30000, retry: false });
   const [location, navigate] = useLocation();
-  const [localView, setLocalView] = useState<View>("overview");
+  const [localView, setLocalView] = useState<View>("printers");
   const view: View = location === "/cronograma" ? "schedule" : localView;
   const setView = (next: View) => {
     if (next === "schedule") navigate("/cronograma");
@@ -820,7 +773,7 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [polling, simulationMode]);
 
-  const activeTitle = useMemo(() => navItems.find((item) => item.id === view)?.label ?? "Visão geral", [view]);
+  const activeTitle = navItems.find((item) => item.id === view)?.label ?? "Impressoras";
 
   const refresh = () => {
     setRefreshing(true);
@@ -838,8 +791,6 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const activePrinters = printers.filter((printer) => printer.state !== "offline").length;
-  const busyPrinters = printers.filter((printer) => printer.state === "printing").length;
   const a1Printer = printers.find((printer) => printer.id === "a1");
   const telemetryWarning = telemetryQuery.isFetched && !telemetryQuery.data?.online;
 
@@ -940,17 +891,10 @@ export default function Home() {
         <div className="page-content">
           {telemetryWarning && view !== "schedule" && <div className="telemetry-live-alert" role="status"><AlertCircle size={17} /><div><strong>Telemetria da A1 indisponível ou atrasada</strong><span>O último estado recebido tem mais de 45 segundos ou o Worker não respondeu. A1 marcada como offline até a próxima leitura válida.</span></div><button onClick={() => void telemetryQuery.refetch()}><RefreshCw size={14} /> Tentar novamente</button></div>}
           {view === "schedule" ? <PrintSchedule /> : view === "settings" ? <SettingsView simulationMode={simulationMode} setSimulationMode={setSimulationMode} polling={polling} setPolling={setPolling} a1Telemetry={a1Printer ?? null} historyCount={historyQuery.data?.length ?? 0} /> : view === "budget" ? <BudgetView /> : view === "filaments" ? <FilamentsView /> : <>
-            <section className="hero-banner"><div className="hero-banner-image" role="img" aria-label="Falcão e rosa da Falcão Rosa3D em cenário neon" /><div className="hero-copy"><div className="hero-eyebrow"><span className="mini-live" /> MONITORAMENTO EM TEMPO REAL</div><h1>Falcão Rosa3D <span>—</span><br /><em>tudo sob controle.</em></h1><p>Uma visão clara das impressoras, filamentos e orçamentos da sua bancada, sem ruído e sem complicação.</p><div className="hero-note"><ShieldCheck size={14} /> Modo seguro · telemetria privada</div></div><div className="hero-float-card float-card-one"><Activity size={14} /><span>uso agora</span><strong>72%</strong></div><div className="hero-float-card float-card-two"><Zap size={14} /><span>status</span><strong>estável</strong></div></section>
-
-            <div className="overview-heading"><div><p className="eyebrow">RESUMO DA OPERAÇÃO</p><h2>Hoje na sua bancada</h2></div><button className="outline-button" onClick={() => setView("settings")}><Settings2 size={15} /> Ajustar painel</button></div>
-            <section className="metrics-grid"><Metric icon={Printer} label="Impressoras ativas" value={`${activePrinters} / 2`} hint="A1 real · P1S demonstração" tone="purple" /><Metric icon={PlayCircle} label="Em impressão" value={`${busyPrinters}`} hint="estado recebido da A1" tone="blue" /><Metric icon={Clock3} label="Tempo estimado" value={a1Printer?.remaining ?? "—"} hint="tempo restante real da A1" tone="pink" /><Metric icon={Activity} label="Disponibilidade" value="98,4%" hint="indicador ainda em demonstração" tone="green" /></section>
-
-            <div className="section-heading printers-heading"><div><p className="eyebrow">SEU PARQUE</p><h2>{view === "printers" ? "Todas as impressoras" : "Impressoras"}</h2></div><button className="outline-button" onClick={() => toast.info("O cadastro de novas impressoras será liberado com o bridge local.")}><Plus size={15} /> Adicionar</button></div>
+            <div className="section-heading printers-heading"><div><p className="eyebrow">SEU PARQUE</p><h2>Todas as impressoras</h2></div><button className="outline-button" onClick={() => toast.info("O cadastro de novas impressoras será liberado com o bridge local.")}><Plus size={15} /> Adicionar</button></div>
             <section className="printers-grid">{printers.map((printer) => <PrinterCard key={printer.id} printer={printer} onDetails={showDetails} />)}</section>
-            {view === "printers" && a1Printer && <PrinterDetailsPanel printer={a1Printer} />}
-
-            {view === "overview" && a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} historyCount={historyQuery.data?.length ?? 0} /><SimulationStatusPanel /><TelemetryDiagnosticsPanel data={telemetryQuery.data} /></section>}
-
+            {a1Printer && <PrinterDetailsPanel printer={a1Printer} />}
+            {a1Printer && <section className="lower-grid"><TelemetryStatusPanel printer={a1Printer} historyCount={historyQuery.data?.length ?? 0} /><SimulationStatusPanel /><TelemetryDiagnosticsPanel data={telemetryQuery.data} /></section>}
             <div className="local-note"><div className="local-note-icon"><LockKeyhole size={16} /></div><div><strong>Construído para permanecer privado.</strong><span>O painel foi desenhado para conversar com um bridge local via MQTT TLS. Ele não acessa a conta Bambu Handy, não tenta contornar proteções do fabricante e não envia comandos às impressoras.</span></div><button onClick={() => setView("settings")}><span>Entender a arquitetura</span><ArrowUpRight size={14} /></button></div>
           </>}
         </div>

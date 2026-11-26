@@ -28,20 +28,30 @@ function stylesFor(selector: string, viewportWidth: number) {
 }
 
 describe("responsive FR3D navigation", () => {
-  it("uses one desktop row only when the full header has room and a second row at tablet/intermediate widths", () => {
-    expect(stylesFor(".app-topnav", 1346)).toMatchObject({
-      "grid-template-columns": "minmax(0,1fr) auto",
-      "grid-template-rows": "auto auto",
-    });
-    expect(stylesFor(".topnav-menu", 1346)).toMatchObject({
-      "grid-column": "1 / -1",
-      "grid-row": "2",
-      "overflow": "visible",
-    });
-    expect(stylesFor(".app-topnav", 1920)).toMatchObject({
-      "grid-template-columns": "max-content minmax(0,1fr) max-content",
-      "grid-template-rows": "auto",
-    });
+  it("keeps the header and five navigation items on one horizontal row from tablet through desktop", () => {
+    for (const width of [768, 1024, 1346, 1799, 1920]) {
+      expect(stylesFor(".app-topnav", width)).toMatchObject({
+        "grid-template-columns": "max-content minmax(0,1fr) max-content",
+        "grid-template-rows": "auto",
+      });
+      expect(stylesFor(".topnav-menu", width)).toMatchObject({
+        "grid-column": "2",
+        "grid-row": "1",
+        "flex-wrap": "nowrap",
+        overflow: "visible",
+      });
+      expect(stylesFor(".topnav-menu .nav-item", width)["white-space"]).toBe("nowrap");
+    }
+  });
+
+  it("removes Overview and starts directly on the printer list", () => {
+    expect(home).not.toContain('id: "overview"');
+    expect(home).not.toContain("Visão geral");
+    expect(home).not.toContain('view === "overview"');
+    expect(home).not.toContain('className="hero-banner"');
+    expect(home).not.toContain('className="metrics-grid"');
+    expect(home).toContain('useState<View>("printers")');
+    expect(home).toContain('label: "Impressoras"');
   });
 
   it("shows the navigation disclosure on mobile only when expanded and exposes a touch-sized link grid", () => {

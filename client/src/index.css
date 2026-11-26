@@ -1003,7 +1003,7 @@ html.light .budget-input-suffix { color:#147892 !important; }
 
 
 
-/* Responsive top navigation: reserve a full row for the menu before tablet width */
+/* Keep tablet navigation compact while sharing the same header row as the brand and actions. */
 @media (min-width:761px) and (max-width:1100px) {
   .brand-copy { min-width:0; overflow:hidden; }
   .brand-copy strong { overflow:hidden; text-overflow:ellipsis; font-size:14px; }
@@ -1301,41 +1301,42 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
 
 @media (min-width:761px) and (max-width:1799px) {
   .app-topnav {
-    grid-template-columns:minmax(0,1fr) auto;
-    grid-template-rows:auto auto;
+    grid-template-columns:max-content minmax(0,1fr) max-content;
+    grid-template-rows:auto;
     align-items:center;
-    gap:8px 16px;
+    gap:8px 12px;
     min-height:auto;
-    padding:10px 24px 8px;
+    padding:10px 20px;
   }
   .topnav-brand { grid-column:1; grid-row:1; min-width:0; flex-shrink:1; }
-  .topnav-brand .brand, .brand-copy { min-width:0; }
-  .topnav-tools { grid-column:2; grid-row:1; min-width:0; flex-shrink:0; gap:10px; }
+  .topnav-brand .brand, .topnav-brand .brand-copy { min-width:0; }
+  .topnav-tools { grid-column:3; grid-row:1; min-width:0; flex-shrink:0; gap:8px; }
   .topnav-tools .topbar-actions { gap:8px; }
   .topnav-menu {
-    grid-column:1 / -1;
-    grid-row:2;
+    grid-column:2;
+    grid-row:1;
     display:flex;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
     align-items:center;
     justify-content:center;
-    gap:6px;
-    width:100%;
+    gap:3px;
+    width:auto;
     min-width:0;
     max-width:100%;
     margin:0;
-    padding:5px 6px 4px;
+    padding:4px 0;
     overflow:visible;
-    border:1px solid rgba(151,91,177,.22);
-    border-radius:12px 12px 0 0;
-    background:rgba(20,10,31,.62);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 8px 24px rgba(5,2,12,.18);
-    backdrop-filter:blur(18px) saturate(125%);
-    -webkit-backdrop-filter:blur(18px) saturate(125%);
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
   }
   .topnav-menu[data-mobile-open="false"] { display:flex; }
-  .topnav-menu .nav-item { flex:0 1 auto; min-height:40px; gap:7px; padding:0 10px; font-size:12px !important; }
+  .topnav-menu .nav-item { flex:0 0 auto; min-height:40px; gap:6px; padding:0 7px; font-size:12px !important; white-space:nowrap; }
   .mobile-menu-toggle { display:none; }
+  html.light .topnav-menu { border:0; background:transparent; box-shadow:none; }
 }
 
 @media (min-width:761px) and (max-width:1400px) {
@@ -1354,6 +1355,17 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   .topnav-menu .nav-item { min-height:38px; gap:6px; padding-right:9px; padding-left:9px; font-size:12px !important; }
   .topnav-tools { gap:7px; }
   .topnav-tools .topbar-actions { gap:6px; }
+}
+
+@media (min-width:761px) and (max-width:900px) {
+  .app-topnav { gap:6px; padding-right:8px; padding-left:8px; }
+  .topnav-brand .brand { gap:7px; }
+  .topnav-brand .brand-copy small { display:none; }
+  .topnav-brand .brand-copy strong { font-size:12px; }
+  .topnav-tools .agent-card, .topnav-tools .sync-status, .topnav-tools .profile-avatar { display:none; }
+  .topnav-tools .topbar-actions { gap:5px; }
+  .topnav-menu .nav-item { min-height:36px; gap:4px; padding-right:4px; padding-left:4px; font-size:10px !important; }
+  .topnav-menu .nav-item svg { width:14px; height:14px; }
 }
 
 @media (min-width:1800px) {
@@ -1380,7 +1392,7 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
   }
-  .topnav-menu .nav-item { flex:0 0 auto; gap:8px; padding-right:10px; padding-left:10px; }
+  .topnav-menu .nav-item { flex:0 0 auto; gap:8px; padding-right:10px; padding-left:10px; white-space:nowrap; }
   .topnav-tools { grid-column:3; grid-row:1; flex-shrink:0; }
   html.light .topnav-menu { border:0; background:transparent; box-shadow:none; }
 }
@@ -1512,6 +1524,26 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   outline: 3px solid #12d7ed;
   outline-offset: 3px;
 }
+.app-shell .filament-card-low-ribbon {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% + 16px);
+  min-height: 24px;
+  margin: -13px -8px 10px;
+  padding: 3px 5px;
+  overflow: hidden;
+  color: var(--filament-ink, #fff);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 14px 14px 0 0;
+  background: var(--filament-color, #8f77f4);
+  font-family: Inter, sans-serif;
+  font-size: 11px !important;
+  font-weight: 800;
+  line-height: 1.2;
+}
 .filament-spool-card.is-low {
   border-color: #a64d78;
   box-shadow: 0 0 0 1px rgba(220, 92, 146, .16);
@@ -1566,17 +1598,6 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   font-size: 13px;
   font-weight: 700;
   line-height: 1.2;
-}
-.filament-card-weight.is-low {
-  color: #fff;
-  background: linear-gradient(135deg, #c7366b, #9d2451);
-}
-.app-shell .filament-card-weight small {
-  font-family: Inter, sans-serif;
-  font-size: 11px !important;
-  font-weight: 750;
-  line-height: 1.15;
-  letter-spacing: .015em;
 }
 .debit-card .filament-card-heading h3 {
   font-size: 18px;
@@ -1864,3 +1885,17 @@ html.light .filament-detail-activity { border-top-color: #e5dbea; }
 @media (prefers-reduced-motion: reduce) {
   .filament-spool-card { transition: none; }
 }
+
+/* Keep filament-colored debit stripes clipped to the rounded card edge. */
+.debit-row { overflow: hidden; border-radius: 10px; }
+
+/* Let compact navigation typography override the generic readability span rule. */
+@media (min-width:761px) {
+  .topnav-menu .nav-item > span:not(.nav-count) { font-size:inherit !important; }
+}
+@media (max-width:600px) {
+  .debit-row .debit-actions { margin-left:0; }
+}
+
+/* Debit filenames must follow the active theme, including light cards. */
+.light .app-shell .debit-row strong { color:var(--foreground); }

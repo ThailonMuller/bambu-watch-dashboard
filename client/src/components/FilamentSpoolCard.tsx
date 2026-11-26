@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DecimalInput from "./DecimalInput";
-import { isLowStock } from "../../../shared/filament";
+import { filamentTextColor, isLowStock } from "../../../shared/filament";
 
 type Filament = {
   id: number;
@@ -56,18 +56,6 @@ const materials = ["PLA", "PETG", "ABS", "TPU"];
 const formatGrams = (grams: number) =>
   `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(grams)} g`;
 
-function contrastColor(hex: string) {
-  const match = /^#?([0-9a-f]{6})$/i.exec(hex);
-  if (!match) return "#ffffff";
-  const color = match[1]!;
-  const red = parseInt(color.slice(0, 2), 16);
-  const green = parseInt(color.slice(2, 4), 16);
-  const blue = parseInt(color.slice(4, 6), 16);
-  return (red * 299 + green * 587 + blue * 114) / 1000 > 158
-    ? "#211b26"
-    : "#ffffff";
-}
-
 function draftFrom(item: Filament): FilamentDraft {
   return {
     name: item.name,
@@ -100,7 +88,7 @@ export default function FilamentSpoolCard({
     .reduce((total, entry) => total + entry.grams, 0);
   const cardStyle = {
     "--filament-color": item.color,
-    "--filament-ink": contrastColor(item.color),
+    "--filament-ink": filamentTextColor(item.color),
   } as React.CSSProperties;
 
   const showDetails = () => {
@@ -146,6 +134,7 @@ export default function FilamentSpoolCard({
           aria-haspopup="dialog"
           aria-label={`Detalhes do filamento ${item.name}, ${formatGrams(item.grams)} disponíveis${low ? ", estoque baixo" : ""}`}
         >
+          {low && <span className="filament-card-low-ribbon">Estoque baixo</span>}
           <span
             className="filament-card-swatch"
             style={{ backgroundColor: item.color }}
@@ -153,10 +142,7 @@ export default function FilamentSpoolCard({
           />
           <span className="filament-card-name">{item.name}</span>
           <span className="filament-card-material">{item.material}</span>
-          <span className={`filament-card-weight ${low ? "is-low" : ""}`}>
-            {formatGrams(item.grams)}
-            {low && <small>Estoque baixo</small>}
-          </span>
+          <span className="filament-card-weight">{formatGrams(item.grams)}</span>
         </button>
       </DialogTrigger>
 
