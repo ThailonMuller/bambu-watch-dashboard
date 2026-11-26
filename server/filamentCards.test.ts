@@ -58,12 +58,32 @@ describe("filament spool cards", () => {
 
   it("uses a compact responsive grid, color swatches and a color-matched weight band", () => {
     expect(card).toContain('className="filament-card-swatch"');
-    expect(card).toContain('className="filament-card-weight"');
+    expect(card).toContain('className={`filament-card-weight ${low ? "is-low" : ""}`}');
     expect(stylesheet).toContain(
       "grid-template-columns: repeat(auto-fill, minmax(112px, 1fr))"
     );
     expect(stylesheet).toContain("background: var(--filament-color, #8f77f4)");
     expect(stylesheet).toContain(".filament-spool-card:focus-visible");
     expect(stylesheet).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
+  it("integrates the readable low-stock status into the rounded weight band", () => {
+    expect(card).toContain("{low && <small>Estoque baixo</small>}");
+    expect(card).toContain('${low ? ", estoque baixo" : ""}');
+    expect(stylesheet).toContain(".filament-card-weight.is-low");
+    expect(stylesheet).toContain(".app-shell .filament-card-weight small");
+    expect(stylesheet).toContain("font-size: 11px !important;");
+    expect(stylesheet).toContain("border-radius: 0 0 14px 14px");
+    expect(stylesheet).not.toContain(".filament-card-low-tag");
+  });
+
+  it("keeps the debit header concise and removes per-debit remaining-stock calculations", () => {
+    expect(home).toContain("<h3>Débitos de filamentos</h3>");
+    expect(home).not.toContain("Confirme ou rejeite o material usado por cada impressão.");
+    expect(home).not.toContain("debit-stock-remaining");
+    expect(home).not.toContain("remainingAfterDebit");
+    expect(stylesheet).not.toContain("debit-stock-remaining");
+    expect(stylesheet).toContain(".debit-card .filament-card-heading h3");
+    expect(stylesheet).toContain("font-size: 18px;");
   });
 });

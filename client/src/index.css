@@ -515,13 +515,11 @@ select { color-scheme:dark; }
 @media (max-width:1000px) { .debit-add-controls { grid-template-columns:minmax(160px,1.4fr) 39px minmax(100px,170px) auto; } }
 @media (max-width:600px) { .debit-add-controls { grid-template-columns:minmax(0,1fr) 39px minmax(100px,1fr) auto; }.debit-add-controls .filament-primary-button { grid-column:auto; width:auto; padding:0 9px; }.debit-spool-select { grid-column:1 / -1; } }
 
-/* Debit stock visibility and history spool editing */
-.debit-stock-remaining { display:block; margin-top:4px; color:#b99bc8; font-size:11px; line-height:1.4; }
-.debit-stock-remaining b { color:#f2dfff; font-family:'DM Mono',monospace; }
+/* History spool editing */
 .history-edit-spool { min-width:180px; min-height:34px; padding:0 8px; color:#f4eafe; border:1px solid #65418a; border-radius:8px; background:#29123f; }
 .history-edit-spool:focus { border-color:#b468ff; outline:0; box-shadow:0 0 0 2px rgba(180,104,255,.14); }
 .history-edit-row { align-items:center; }
-@media (max-width:700px) { .debit-stock-remaining { font-size:10px; }.history-edit-spool { width:100%; order:5; }.history-edit-row .history-save-button, .history-edit-row .history-cancel-button { order:6; } }
+@media (max-width:700px) { .history-edit-spool { width:100%; order:5; }.history-edit-row .history-save-button, .history-edit-row .history-cancel-button { order:6; } }
 
 /* Budget mode switch */
 .budget-mode-switch { display:flex; align-items:center; gap:8px; margin:0 0 16px; padding:5px; border:1px solid #432557; border-radius:11px; background:#211038; }
@@ -1550,32 +1548,38 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.filament-card-low-tag {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  max-width: calc(100% - 10px);
-  padding: 2px 5px;
-  overflow: hidden;
-  color: #fff;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border-radius: 999px;
-  background: #a34770;
-  font-size: 7px;
-  font-weight: 800;
-}
 .filament-card-weight {
-  display: block;
+  display: flex;
   width: calc(100% + 18px);
   margin: auto -9px 0;
-  padding: 9px 4px 10px;
+  min-height: 46px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
   color: var(--filament-ink, #fff);
   background: var(--filament-color, #8f77f4);
   border-radius: 0 0 14px 14px;
   font-family: 'DM Mono', monospace;
   font-size: 13px;
   font-weight: 700;
+  line-height: 1.2;
+}
+.filament-card-weight.is-low {
+  color: #fff;
+  background: linear-gradient(135deg, #c7366b, #9d2451);
+}
+.app-shell .filament-card-weight small {
+  font-family: Inter, sans-serif;
+  font-size: 11px !important;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: .015em;
+}
+.debit-card .filament-card-heading h3 {
+  font-size: 18px;
   line-height: 1.2;
 }
 .filament-detail-dialog {
