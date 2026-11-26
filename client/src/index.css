@@ -1358,6 +1358,10 @@ html.light .budget-step-up { border-bottom-color:rgba(20,120,146,.2); }
 html.light .budget-step-button { color:#147892; }
 html.light .budget-step-button:hover, html.light .budget-step-button:focus-visible { color:#54207e; background:linear-gradient(135deg,rgba(126,43,182,.2),rgba(0,167,189,.18)); }
 
+/* Budget values use text inputs with a decimal keyboard; no native spinner exists. */
+.budget-number-control input { appearance:none; -moz-appearance:none; -webkit-appearance:none; padding-right:52px !important; }
+.budget-input-wrap:not(.has-suffix) .budget-number-control input { padding-right:52px !important; }
+
 /* Final override: hide only browser-native number spinners on every numeric input. */
 input[type="number"] { appearance:textfield !important; -moz-appearance:textfield !important; -webkit-appearance:none !important; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { display:none !important; appearance:none !important; -webkit-appearance:none !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; opacity:0 !important; filter:none !important; }

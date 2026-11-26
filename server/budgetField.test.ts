@@ -6,7 +6,7 @@ import postcss from "postcss";
 import { describe, expect, it, vi } from "vitest";
 import BudgetField from "../client/src/components/BudgetField";
 
-type ElementProps = { children?: ReactNode; onClick?: () => void; className?: string; type?: string; "aria-label"?: string };
+type ElementProps = { children?: ReactNode; onClick?: () => void; className?: string; type?: string; inputMode?: string; "aria-label"?: string };
 
 function elements(node: ReactNode): ReactElement<ElementProps>[] {
   const found: ReactElement<ElementProps>[] = [];
@@ -39,14 +39,17 @@ function finalDeclarations(selector: string) {
 }
 
 describe("FR3D custom budget increment controls", () => {
-  it("renders exactly the two styled buttons beside a number input and its unit", () => {
+  it("renders exactly the two styled buttons beside a text input and its unit", () => {
     const node = BudgetField({ label: "MKP", value: 130, suffix: "%", onChange: vi.fn() });
     const buttons = elements(node).filter(element => element.type === "button");
     expect(buttons).toHaveLength(2);
     expect(buttons.map(button => button.props["aria-label"])).toEqual(["Aumentar MKP", "Diminuir MKP"]);
     expect(buttons.every(button => button.props.type === "button" && button.props.className?.includes("budget-step-button"))).toBe(true);
+    const input = elements(node).find(element => element.type === "input");
+    expect(input?.props).toMatchObject({ type: "text", inputMode: "decimal" });
     const html = renderToStaticMarkup(node);
-    expect(html).toContain('type="number"');
+    expect(html).toContain('type="text"');
+    expect(html).not.toContain('type="number"');
     expect(html).toContain('class="budget-stepper"');
     expect(html).toContain('class="budget-input-suffix"');
     expect(html).toContain('aria-label="Ajustar MKP"');
@@ -68,15 +71,13 @@ describe("FR3D custom budget increment controls", () => {
     expect(onChange.mock.calls).toEqual([["0.01"], ["0.00"]]);
   });
 
-  it("keeps native arrows hidden while restoring the original blue edge and spacing", () => {
-    expect(finalStyles('.budget-number-control input[type="number"]::-webkit-inner-spin-button')).toMatchObject({ display: "none", opacity: "0", width: "0" });
-    expect(finalStyles('.budget-number-control input[type="number"]::-webkit-outer-spin-button')).toMatchObject({ display: "none", opacity: "0", width: "0" });
+  it("keeps native number-input arrows hidden while preserving the blue custom controls and spacing", () => {
     expect(finalStyles('input[type="number"]::-webkit-inner-spin-button')["display"]).toBe("none");
     expect(finalStyles(".budget-stepper")).toMatchObject({ display: "grid", width: "25px", right: "-10px" });
     expect(finalStyles(".budget-step-button")).toMatchObject({ display: "grid", color: "#8ff5ff" });
     expect(finalStyles('html.light .budget-step-button')["color"]).toBe("#147892");
-    expect(finalStyles('.budget-number-control input[type="number"]')["padding-right"]).toBe("52px");
-    expect(finalStyles('.budget-input-wrap:not(.has-suffix) .budget-number-control input[type="number"]')["padding-right"]).toBe("52px");
+    expect(finalStyles(".budget-number-control input")).toMatchObject({ appearance: "none", "-moz-appearance": "none", "-webkit-appearance": "none", "padding-right": "52px" });
+    expect(finalStyles(".budget-input-wrap:not(.has-suffix) .budget-number-control input")["padding-right"]).toBe("52px");
     expect(finalStyles(".budget-input-suffix")["right"]).toBe("27px");
   });
 

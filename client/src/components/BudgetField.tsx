@@ -26,7 +26,7 @@ export default function BudgetField({ label, value, onChange, prefix, suffix, st
       <div className={`budget-input-wrap ${suffix ? "has-suffix" : ""}`}>
         {prefix && <b className="budget-input-prefix">{prefix}</b>}
         <div className="budget-number-control">
-          <input type="number" inputMode="decimal" value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} />
+          <input type="text" inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value)} />
           {suffix && <b className="budget-input-suffix">{suffix}</b>}
           <span className="budget-stepper" role="group" aria-label={`Ajustar ${label}`}>
             <button type="button" className="budget-step-button budget-step-up" onClick={() => adjustValue(1)} aria-label={`Aumentar ${label}`}>+</button>
