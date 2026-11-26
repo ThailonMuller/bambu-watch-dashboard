@@ -51,4 +51,26 @@ describe("header brand styling", () => {
     expect(identityStyles(".topnav-brand .brand-copy small", 1024)["font-size"]).toBe("14px");
     expect(identityStyles(".topnav-brand .brand-copy small", 390)["font-size"]).toBe("14px");
   });
+
+  it("keeps only one base logo style, one mobile size override and one image style", () => {
+    const logoRules: string[] = [];
+    stylesheet.walkRules((rule) => {
+      if (rule.selector.includes("brand-mark")) logoRules.push(rule.selector);
+    });
+    expect(logoRules).toEqual([
+      ".topnav-brand .brand-mark",
+      ".topnav-brand .brand-mark img",
+      ".topnav-brand .brand-mark",
+    ]);
+    for (const viewport of [1440, 1024, 390]) {
+      expect(identityStyles(".topnav-brand .brand-mark", viewport).background).toBe("transparent");
+    }
+  });
+
+  it("uses the transparent neon logo in project storage, not the previous centered image", () => {
+    const home = readFileSync(resolve("client/src/pages/Home.tsx"), "utf8");
+    expect(home).toContain("/manus-storage/fr3d-neon-logo-web_a188498a.png");
+    expect(home).not.toContain("fr3d-menu-logo-centered_2cbcc8eb.png");
+    expect(home).toMatch(/width=\{64\}\s+height=\{64\}\s+alt="Logo Falcão Rosa3D"/);
+  });
 });
