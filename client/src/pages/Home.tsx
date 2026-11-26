@@ -461,7 +461,18 @@ function FilamentsView() {
   };
 
   const updateFilament = (id: number, patch: Partial<FilamentItem>) => setFilaments((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item));
-  const addHistory = (debit: FilamentDebit, status: FilamentHistoryEntry["status"]) => { const filamentName = filaments.find((item) => item.id === debit.filamentId)?.name || filaments.find((item) => item.color.toLowerCase() === debit.color.toLowerCase())?.name || "Filamento não identificado"; setHistory((current) => [{ id: Date.now(), piece: debit.piece, grams: debit.grams, color: debit.color, filamentName, status, createdAt: new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) }, ...current]); };
+  const addHistory = (debit: FilamentDebit, status: FilamentHistoryEntry["status"]) => {
+    const linked = debit.filamentId
+      ? filaments.find((item) => item.id === debit.filamentId)
+      : filaments.find((item) => item.color.toLowerCase() === debit.color.toLowerCase());
+    setHistory((current) => [{
+      id: Date.now(), piece: debit.piece, grams: debit.grams,
+      filamentId: linked?.id ?? debit.filamentId,
+      color: linked?.color ?? debit.color,
+      filamentName: linked?.name ?? "Filamento não identificado", status,
+      createdAt: new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }),
+    }, ...current]);
+  };
   const approveDebit = (debit: FilamentDebit) => {
     setFilaments((current) => {
       const matchingIndex = current.findIndex((item) => debit.filamentId ? item.id === debit.filamentId : item.color.toLowerCase() === debit.color.toLowerCase());
