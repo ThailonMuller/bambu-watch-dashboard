@@ -1476,3 +1476,387 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   .telemetry-live-alert > div { flex:1 1 calc(100% - 40px); min-width:0; }
   .telemetry-live-alert > button { margin-left:auto; }
 }
+
+
+/* Compact spool cards inspired by the supplied filament inventory reference. */
+.filament-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 11px;
+  margin-top: 15px;
+}
+.filament-spool-card {
+  appearance: none;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 164px;
+  padding: 13px 8px 0;
+  overflow: hidden;
+  color: #f5f2f7;
+  text-align: center;
+  font: inherit;
+  border: 1px solid #45414a;
+  border-radius: 15px;
+  background: #29272a;
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.23, 1, .32, 1), border-color .18s ease, box-shadow .18s ease;
+}
+.filament-spool-card:hover {
+  transform: translateY(-2px);
+  border-color: #77628c;
+  box-shadow: 0 9px 20px rgba(0, 0, 0, .22);
+}
+.filament-spool-card:focus-visible {
+  outline: 3px solid #12d7ed;
+  outline-offset: 3px;
+}
+.filament-spool-card.is-low {
+  border-color: #a64d78;
+  box-shadow: 0 0 0 1px rgba(220, 92, 146, .16);
+}
+.filament-card-swatch {
+  display: block;
+  width: 41px;
+  height: 41px;
+  flex: 0 0 41px;
+  margin: 2px auto 9px;
+  border: 3px solid rgba(255, 255, 255, .76);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .23), 0 2px 8px rgba(0, 0, 0, .22);
+}
+.filament-card-name {
+  display: -webkit-box;
+  width: 100%;
+  min-height: 28px;
+  overflow: hidden;
+  color: #f5f2f7;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.filament-card-material {
+  display: block;
+  margin: 5px 0 10px;
+  color: #c3bdc8;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.filament-card-low-tag {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  max-width: calc(100% - 10px);
+  padding: 2px 5px;
+  overflow: hidden;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #a34770;
+  font-size: 7px;
+  font-weight: 800;
+}
+.filament-card-weight {
+  display: block;
+  width: calc(100% + 18px);
+  margin: auto -9px 0;
+  padding: 9px 4px 10px;
+  color: var(--filament-ink, #fff);
+  background: var(--filament-color, #8f77f4);
+  border-radius: 0 0 14px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.filament-detail-dialog {
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
+  color: #f3ebf7;
+  border-color: #503564;
+  background: #211038;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .48);
+}
+.filament-detail-header {
+  padding-right: 26px;
+  text-align: left;
+}
+.filament-detail-header [data-slot="dialog-title"] {
+  color: #f7edfc;
+  font-size: 19px;
+}
+.filament-detail-header [data-slot="dialog-description"] {
+  color: #b9a7c2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.filament-detail-identity {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #432858;
+  border-radius: 12px;
+  background: #2a1540;
+}
+.filament-detail-swatch {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 255, 255, .72);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .2);
+}
+.filament-detail-identity > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.filament-detail-identity > div > span,
+.filament-detail-identity small {
+  color: #b9a7c2;
+  font-size: 10px;
+}
+.filament-detail-identity strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: 13px;
+}
+.filament-detail-status {
+  padding: 5px 8px;
+  color: #88edce;
+  border: 1px solid #28695c;
+  border-radius: 999px;
+  background: #153a37;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.filament-detail-status.is-low {
+  color: #ffc1d8;
+  border-color: #854265;
+  background: #421c3d;
+}
+.filament-detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.filament-detail-metrics > div {
+  display: grid;
+  gap: 5px;
+  padding: 10px 11px;
+  border: 1px solid #3c2651;
+  border-radius: 10px;
+  background: #29143f;
+}
+.filament-detail-metrics span {
+  color: #ad9ab8;
+  font-size: 9px;
+}
+.filament-detail-metrics strong {
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+}
+.filament-detail-form {
+  display: grid;
+  gap: 14px;
+}
+.filament-detail-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.filament-detail-field {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: #c3b2cc;
+  font-size: 10px;
+  font-weight: 650;
+}
+.filament-detail-field-wide {
+  grid-column: 1 / -1;
+}
+.filament-detail-field input:not([type="color"]),
+.filament-detail-field select {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  color: #f4eafe;
+  border: 1px solid #573b68;
+  border-radius: 8px;
+  outline: 0;
+  background: #2a1540;
+  font: 11px 'DM Mono', monospace;
+}
+.filament-detail-field input:focus,
+.filament-detail-field select:focus {
+  border-color: #c07cff;
+  box-shadow: 0 0 0 3px rgba(180, 104, 255, .14);
+}
+.filament-detail-color-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+}
+.filament-detail-color-control input[type="color"] {
+  width: 42px;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid #65418a;
+  border-radius: 8px;
+  background: #2a1540;
+  cursor: pointer;
+}
+.filament-detail-color-control code {
+  color: #d1c3da;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+}
+.filament-detail-actions {
+  margin-top: 2px;
+}
+.filament-detail-cancel,
+.filament-detail-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 37px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.filament-detail-cancel {
+  color: #d2c3db;
+  border-color: #573b68;
+  background: #2a1540;
+}
+.filament-detail-save {
+  color: #fff;
+  background: linear-gradient(135deg, #00aabf, #7e1ae6 58%, #e000a7);
+}
+.filament-detail-cancel:focus-visible,
+.filament-detail-save:focus-visible {
+  outline: 2px solid #12d7ed;
+  outline-offset: 2px;
+}
+.filament-detail-activity {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #432858;
+}
+.filament-detail-activity-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #e7d8ef;
+  font-size: 10px;
+}
+.filament-detail-activity-heading svg {
+  color: #9a76ce;
+}
+.filament-detail-empty {
+  margin: 0;
+  color: #a996b5;
+  font-size: 10px;
+}
+.filament-detail-activity-list {
+  display: grid;
+  gap: 6px;
+}
+.filament-detail-activity-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 8px;
+  color: #b8a7c1;
+  border-radius: 7px;
+  background: #29143f;
+  font-size: 9px;
+}
+.filament-activity-name {
+  overflow: hidden;
+  color: #eee3f3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.filament-activity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d2a0ff;
+}
+.filament-activity-dot.pending { background: #ffbd6f; }
+.filament-activity-dot.approved { background: #71e0bb; }
+.filament-activity-dot.rejected { background: #f185a7; }
+html.light .filament-spool-card {
+  color: #35273e;
+  border-color: #ded5e3;
+  background: #2b292d;
+}
+html.light .filament-spool-card .filament-card-name { color: #f8f5fa; }
+html.light .filament-spool-card .filament-card-material { color: #d2ccd7; }
+html.light .filament-detail-dialog {
+  color: #342542;
+  border-color: #e1d5e9;
+  background: #fff;
+}
+html.light .filament-detail-header [data-slot="dialog-title"] { color: #342542; }
+html.light .filament-detail-header [data-slot="dialog-description"] { color: #786887; }
+html.light .filament-detail-identity,
+html.light .filament-detail-metrics > div,
+html.light .filament-detail-activity-row { border-color: #e5dbea; background: #faf7fc; }
+html.light .filament-detail-identity strong,
+html.light .filament-detail-metrics strong { color: #342542; }
+html.light .filament-detail-identity > div > span,
+html.light .filament-detail-identity small,
+html.light .filament-detail-metrics span,
+html.light .filament-detail-empty,
+html.light .filament-detail-activity-row { color: #786887; }
+html.light .filament-detail-activity-heading,
+html.light .filament-activity-name { color: #4b3758; }
+html.light .filament-detail-field { color: #685578; }
+html.light .filament-detail-field input:not([type="color"]),
+html.light .filament-detail-field select,
+html.light .filament-detail-cancel { color: #342542; border-color: #d9c8e4; background: #fff; }
+html.light .filament-detail-color-control code { color: #685578; }
+html.light .filament-detail-activity { border-top-color: #e5dbea; }
+@media (max-width: 600px) {
+  .filament-stock-grid { grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 9px; }
+  .filament-spool-card { min-height: 158px; }
+  .filament-detail-dialog { max-height: 90vh; max-height: 90dvh; padding: 20px; }
+  .filament-detail-identity { grid-template-columns: 42px minmax(0, 1fr); gap: 9px; }
+  .filament-detail-swatch { width: 40px; height: 40px; }
+  .filament-detail-status { grid-column: 1 / -1; justify-self: start; }
+  .filament-detail-activity-row { grid-template-columns: 8px minmax(0, 1fr); }
+  .filament-detail-activity-row > span:last-child { grid-column: 2; }
+  .filament-detail-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 360px) {
+  .filament-detail-fields { grid-template-columns: 1fr; }
+  .filament-detail-field-wide { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filament-spool-card { transition: none; }
+}

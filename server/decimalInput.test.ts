@@ -43,6 +43,7 @@ describe("spinner-free decimal inputs", () => {
       expect(readFileSync(path, "utf8"), path).not.toMatch(/type\s*=\s*["']number["']/);
     }
     const home = readFileSync(resolve("client/src/pages/Home.tsx"), "utf8");
-    expect(home.match(/<DecimalInput\b/g)).toHaveLength(6);
+    const spoolCard = readFileSync(resolve("client/src/components/FilamentSpoolCard.tsx"), "utf8");
+    expect(`${home}\n${spoolCard}`.match(/<DecimalInput\b/g)).toHaveLength(6);
   });
 });
