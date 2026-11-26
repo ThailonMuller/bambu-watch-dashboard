@@ -46,7 +46,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, type BudgetInput, type BudgetResult } from "../../../shared/budget";
+import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, parsePackagingCostDraft, type BudgetInput, type BudgetResult } from "../../../shared/budget";
 import { debitStock, isLowStock, remainingAfterDebit } from "../../../shared/filament";
 import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
@@ -511,6 +511,7 @@ type BudgetMode = "store" | "custom";
 function BudgetView() {
   const [budgetMode, setBudgetMode] = useState<BudgetMode>("store");
   const [input, setInput] = useState<BudgetInput>({ ...DEFAULT_BUDGET_INPUT, plateCosts: [...DEFAULT_BUDGET_INPUT.plateCosts] });
+  const [packagingDraft, setPackagingDraft] = useState(String(DEFAULT_BUDGET_INPUT.packagingCost));
   const [result, setResult] = useState<BudgetResult>(() => calculateBudget(DEFAULT_BUDGET_INPUT));
   const [loadedSpreadsheet] = useState(() => {
     try {
@@ -547,6 +548,13 @@ function BudgetView() {
   const updateNumber = (field: Exclude<keyof BudgetInput, "productId" | "productName" | "plateCosts">, value: string) => {
     const parsed = Number(value.replace(",", "."));
     setInput((current) => ({ ...current, [field]: Number.isFinite(parsed) ? parsed : 0 }));
+  };
+
+  const updatePackaging = (value: string) => {
+    const parsed = parsePackagingCostDraft(value);
+    if (parsed == null) return;
+    setPackagingDraft(value.trim());
+    setInput((current) => ({ ...current, packagingCost: parsed }));
   };
 
   const updatePlate = (index: number, value: string) => {
@@ -605,6 +613,7 @@ function BudgetView() {
     const defaults = nextMode === "store" ? DEFAULT_BUDGET_INPUT : CUSTOM_BUDGET_INPUT;
     setBudgetMode(nextMode);
     setInput((current) => ({ ...defaults, productId: current.productId, productName: current.productName, plateCosts: [...current.plateCosts] }));
+    setPackagingDraft(String(defaults.packagingCost));
     setResult(calculateBudget(defaults));
     setSpreadsheetError("");
     toast.info(nextMode === "store" ? "Modo Produto de Loja selecionado" : "Modo Personalizado selecionado");
@@ -613,6 +622,7 @@ function BudgetView() {
   const restoreDefaults = () => {
     const defaults = { ...modeDefaults, plateCosts: [...modeDefaults.plateCosts] };
     setInput(defaults);
+    setPackagingDraft(String(defaults.packagingCost));
     setResult(calculateBudget(defaults));
     setSpreadsheetError("");
     toast.info("Valores padrão restaurados");
@@ -623,6 +633,7 @@ function BudgetView() {
     window.clearTimeout(clearAnimationTimer.current);
     const defaults = createCleanBudgetInput(budgetMode);
     setInput(defaults);
+    setPackagingDraft(String(defaults.packagingCost));
     setResult(calculateBudget(defaults));
     setShowShopeePrice(false);
     setSpreadsheetError("");
@@ -706,7 +717,7 @@ function BudgetView() {
           <div className="plates-header"><div><span className="budget-section-label">Placas do OrcaSlicer</span><small>Adicione uma linha para cada placa usada na impressão.</small></div></div>
           <div className="plates-list">{input.plateCosts.map((cost, index) => <div className={`plate-row ${focusedPlateIndex === index ? "is-focused" : ""} ${plateAnimation?.index === index ? `plate-${plateAnimation.type}-animation` : ""} ${String(cost).startsWith("-") ? "has-invalid-value" : ""}`} key={`plate-${index}`}><div className="plate-card-header"><span>Placa {index + 1}</span></div><div className="plate-card-body"><label className="budget-field plate-value-field"><span className="plate-field-label">Valor da placa {index + 1}</span><div className="budget-input-wrap"><b>R$</b><input type="text" inputMode="decimal" min="0" step="0.01" value={plateDisplayValue(cost, index)} onFocus={() => setFocusedPlateIndex(index)} onBlur={() => { normalizePlate(index); setFocusedPlateIndex(null); }} onChange={(event) => updatePlate(index, event.target.value.replace(/[^0-9,.-]/g, ""))} aria-label={`Valor da placa ${index + 1}`} /></div>{String(cost).startsWith("-") && <small className="plate-validation-message">O valor não pode ser negativo.</small>}</label><div className="plate-actions"><button className="duplicate-plate-button" onClick={() => duplicatePlate(index)} disabled={Boolean(plateAnimation)} aria-label={`Duplicar placa ${index + 1}`}><Copy size={14} /></button><button className="remove-plate-button" onClick={() => removePlate(index)} disabled={input.plateCosts.length === 1 || Boolean(plateAnimation)} aria-label={`Remover placa ${index + 1}`}><X size={15} /></button></div></div></div>)}<div className={`plate-add-tile ${plateAnimation?.type === "add" && plateAnimation.index === input.plateCosts.length - 1 ? "plate-add-animation" : ""}`}><button className="add-plate-button" onClick={addPlate} disabled={Boolean(plateAnimation)}><Plus size={16} /> Adicionar placa</button></div></div>
           <div className="plates-total"><ReceiptText size={15} /><span>Soma das placas</span><strong>{currency(plateTotal)}</strong></div>
-          <div className="budget-fields-grid budget-costs-grid"><BudgetField label="Embalagem" value={input.packagingCost} prefix="R$" onChange={(value) => updateNumber("packagingCost", value)} />{budgetMode === "store" && <BudgetField label="Outros custos" value={input.otherCosts} prefix="R$" onChange={(value) => updateNumber("otherCosts", value)} />}</div>
+          <div className="budget-fields-grid budget-costs-grid"><BudgetField label="Embalagem" value={packagingDraft} prefix="R$" step="0.01" onChange={updatePackaging} />{budgetMode === "store" && <BudgetField label="Outros custos" value={input.otherCosts} prefix="R$" onChange={(value) => updateNumber("otherCosts", value)} />}</div>
           <div className="budget-divider" />
           <div className="budget-card-title compact"><div className="settings-symbol blue"><SlidersHorizontal size={19} /></div><div><h3>Parâmetros de preço · {budgetMode === "store" ? "Produto de Loja" : "Personalizado"}</h3>{budgetMode === "custom" && <p>Use para encomendas especiais e projetos sob medida.</p>}</div></div>
           <div className="budget-fields-grid budget-parameters-grid"><BudgetField label="MKP" value={input.mkp} suffix="%" step="1" onChange={(value) => updateNumber("mkp", value)} /><BudgetField label="Perda" value={input.lossPercentage} suffix="%" step="1" onChange={(value) => updateNumber("lossPercentage", value)} /><BudgetField label="Depreciação" value={input.depreciationPercentage} suffix="%" step="1" onChange={(value) => updateNumber("depreciationPercentage", value)} /><BudgetField label="Manutenção" value={input.maintenancePercentage} suffix="%" step="1" onChange={(value) => updateNumber("maintenancePercentage", value)} />{showShopeePrice && <><BudgetField label="Taxa da Shopee" value={input.shopeePercentage} suffix="%" onChange={(value) => updateNumber("shopeePercentage", value)} /><BudgetField label="Tarifa fixa Shopee" value={input.shopeeFixedFee} prefix="R$" onChange={(value) => updateNumber("shopeeFixedFee", value)} /></>}</div>

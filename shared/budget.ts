@@ -43,6 +43,14 @@ export function createCleanBudgetInput(mode: "store" | "custom"): BudgetInput {
   return { ...defaults, productId: "", productName: "", plateCosts: [0] };
 }
 
+/** Preserve the UI draft separately; incomplete separators are valid while typing. */
+export function parsePackagingCostDraft(value: string): number | null {
+  const normalized = value.trim().replace(",", ".");
+  if (!/^\d*(?:\.\d*)?$/.test(normalized)) return null;
+  const parsed = Number(normalized === "." ? "0" : normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export type BudgetResult = {
   materialCost: number;
   costWithOtherExpenses: number;

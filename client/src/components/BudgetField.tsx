@@ -12,7 +12,7 @@ type BudgetFieldProps = {
 
 export default function BudgetField({ label, value, onChange, prefix, suffix, step = "1", min = "0" }: BudgetFieldProps) {
   const adjustValue = (direction: 1 | -1) => {
-    const numericValue = Number(value);
+    const numericValue = Number(String(value).replace(",", "."));
     const numericStep = Number(step) || 1;
     const minimum = Number(min) || 0;
     const nextValue = Math.max(minimum, (Number.isFinite(numericValue) ? numericValue : minimum) + direction * numericStep);

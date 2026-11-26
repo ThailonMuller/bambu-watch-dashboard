@@ -71,6 +71,31 @@ describe("FR3D custom budget increment controls", () => {
     expect(onChange.mock.calls).toEqual([["0.01"], ["0.00"]]);
   });
 
+  it("adjusts comma-decimal packaging values by one cent instead of restarting from zero", () => {
+    const onChange = vi.fn();
+    const buttons = elements(BudgetField({ label: "Embalagem", value: "3,44", step: "0.01", onChange })).filter(element => element.type === "button");
+    buttons[0].props.onClick?.();
+    buttons[1].props.onClick?.();
+    expect(onChange.mock.calls).toEqual([["3.45"], ["3.43"]]);
+  });
+
+  it("carries centavos to the next real without floating-point noise", () => {
+    let value = "1.99";
+    const onChange = (nextValue: string) => { value = nextValue; };
+    for (let count = 0; count < 101; count += 1) {
+      const button = elements(BudgetField({ label: "Embalagem", value, step: "0.01", onChange })).find(element => element.props["aria-label"] === "Aumentar Embalagem");
+      button?.props.onClick?.();
+    }
+    expect(value).toBe("3.00");
+  });
+
+  it("connects the real packaging field to its editable text draft and centavo step", () => {
+    const home = readFileSync(resolve("client/src/pages/Home.tsx"), "utf8");
+    expect(home).toMatch(/<BudgetField label="Embalagem" value=\{packagingDraft\} prefix="R\$" step="0\.01" onChange=\{updatePackaging\}/);
+    expect(home).not.toContain('updateNumber("packagingCost", value)');
+    expect(home.match(/setPackagingDraft\(String\(defaults.packagingCost\)\)/g)).toHaveLength(3);
+  });
+
   it("keeps native number-input arrows hidden while preserving the blue custom controls and spacing", () => {
     expect(finalStyles('input[type="number"]::-webkit-inner-spin-button')["display"]).toBe("none");
     expect(finalStyles(".budget-stepper")).toMatchObject({ display: "grid", width: "25px", right: "-10px" });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, directPriceFromShopee, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales } from "../shared/budget";
+import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, directPriceFromShopee, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, parsePackagingCostDraft } from "../shared/budget";
 
 describe("budget calculator", () => {
   it("replicates the store sequence and includes the fixed Shopee fee", () => {
@@ -122,5 +122,32 @@ describe("budget calculator", () => {
     expect(isValidProductId("FALCAO-001")).toBe(false);
     expect(hasDuplicateProductId([{ productId: "12345" }], "12345")).toBe(true);
     expect(hasDuplicateProductId([{ productId: "12345" }], "67890")).toBe(false);
+  });
+});
+
+describe("packaging decimal draft", () => {
+  it("recognizes either decimal separator, including centavos without a leading zero", () => {
+    for (const value of ["1.25", "1,25", " 1,25 "]) expect(parsePackagingCostDraft(value)).toBe(1.25);
+    for (const value of ["0.01", "0,01", ".01", ",01"]) expect(parsePackagingCostDraft(value)).toBe(0.01);
+  });
+
+  it("accepts the intermediate states needed to type decimals without erasing the draft", () => {
+    for (const value of ["", ".", ",", "0.", "0,"]) expect(parsePackagingCostDraft(value)).toBe(0);
+    for (const value of ["1.", "1,"]) expect(parsePackagingCostDraft(value)).toBe(1);
+  });
+
+  it("rejects invalid, negative and non-finite costs", () => {
+    for (const value of ["abc", "-1", "1.2.3", "1,,2", "1,234.56", "1e2", "9".repeat(400)]) {
+      expect(parsePackagingCostDraft(value)).toBeNull();
+    }
+  });
+
+  it("uses the typed centavos in the calculator rather than the integer portion", () => {
+    for (const value of ["1.25", "1,25"]) {
+      const packagingCost = parsePackagingCostDraft(value)!;
+      const result = calculateBudget({ ...DEFAULT_BUDGET_INPUT, packagingCost });
+      expect(result.costWithOtherExpenses).toBe(1.25);
+      expect(result).toEqual(calculateBudget({ ...DEFAULT_BUDGET_INPUT, packagingCost: 1.25 }));
+    }
   });
 });
