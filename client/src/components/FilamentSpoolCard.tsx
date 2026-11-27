@@ -18,6 +18,7 @@ type Filament = {
   id: number;
   name: string;
   material: string;
+  manufacturer?: string;
   color: string;
   grams: number;
   lowThreshold: number;
@@ -41,6 +42,7 @@ type FilamentHistoryEntry = {
 type FilamentDraft = {
   name: string;
   material: string;
+  manufacturer: string;
   color: string;
   grams: string;
   lowThreshold: string;
@@ -61,6 +63,7 @@ function draftFrom(item: Filament): FilamentDraft {
   return {
     name: item.name,
     material: item.material,
+    manufacturer: item.manufacturer ?? "",
     color: item.color,
     grams: String(item.grams),
     lowThreshold: String(item.lowThreshold),
@@ -124,6 +127,7 @@ export default function FilamentSpoolCard({
     onSave(item.id, {
       name: draft.name.trim(),
       material: draft.material,
+      manufacturer: draft.manufacturer.trim(),
       color: draft.color,
       grams,
       lowThreshold,
@@ -183,6 +187,7 @@ export default function FilamentSpoolCard({
             </span>
             <strong>{item.name}</strong>
             <small>Identificação #{item.id}</small>
+            <small>Fabricante: {item.manufacturer?.trim() || "Não informado"}</small>
           </div>
           <span className={`filament-detail-status ${low ? "is-low" : ""}`}>
             {low ? "Abaixo do limite" : "Estoque normal"}
@@ -245,6 +250,19 @@ export default function FilamentSpoolCard({
                   <option key={material}>{material}</option>
                 ))}
               </select>
+            </label>
+            <label className="filament-detail-field">
+              <span>Fabricante</span>
+              <input
+                value={draft.manufacturer}
+                onChange={event =>
+                  setDraft(current => ({
+                    ...current,
+                    manufacturer: event.target.value,
+                  }))
+                }
+                autoComplete="off"
+              />
             </label>
             <label className="filament-detail-field">
               <span>Cor da bobina</span>

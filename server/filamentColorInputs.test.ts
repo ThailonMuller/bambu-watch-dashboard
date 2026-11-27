@@ -39,8 +39,12 @@ describe("filament color inputs", () => {
     expect(home).toMatch(/value=\{newDebit\.color\}[\s\S]*?onChange=\{\(color\)[\s\S]*?color \}\)\);/);
     expect(spoolCard).toMatch(/value=\{draft\.color\}[\s\S]*?onChange=\{color[\s\S]*?color \}\)\);/);
     expect(requiredColor).toContain("value={draftColor}");
-    expect(requiredColor).toContain("setDraftColor(event.target.value)");
-    expect(requiredColor).toContain("onChange(draftColor)");
+    expect(requiredColor).toContain('aria-label="Código HEX da cor"');
+    expect(requiredColor).toContain("maxLength={7}");
+    expect(requiredColor).toContain("setDraftColor(nextColor)");
+    expect(requiredColor).toContain("setDraftHex(nextColor.toUpperCase())");
+    expect(requiredColor).toContain("onChange(confirmedHex)");
+    expect(requiredColor).toContain("disabled={!confirmedHex}");
     expect(requiredColor).toContain("Confirmar cor");
   });
 

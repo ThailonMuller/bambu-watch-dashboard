@@ -1,6 +1,11 @@
 import { useId, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
+function normalizeHexColor(value: string) {
+  const digits = value.trim().replace(/^#/, "");
+  return /^[0-9a-f]{6}$/i.test(digits) ? `#${digits.toLowerCase()}` : null;
+}
+
 export default function RequiredFilamentColor({
   value,
   onChange,
@@ -20,11 +25,18 @@ export default function RequiredFilamentColor({
 }) {
   const [open, setOpen] = useState(false);
   const [draftColor, setDraftColor] = useState(value || "#000000");
+  const [draftHex, setDraftHex] = useState((value || "#000000").toUpperCase());
   const titleId = useId();
   const errorId = useId();
+  const hexErrorId = useId();
+  const confirmedHex = normalizeHexColor(draftHex);
 
   const changeOpen = (next: boolean) => {
-    if (next) setDraftColor(value || "#000000");
+    if (next) {
+      const initialColor = value || "#000000";
+      setDraftColor(initialColor);
+      setDraftHex(initialColor.toUpperCase());
+    }
     setOpen(next);
   };
 
@@ -58,18 +70,46 @@ export default function RequiredFilamentColor({
                 className="filament-color-input"
                 value={draftColor}
                 style={{ backgroundColor: draftColor }}
-                onChange={event => setDraftColor(event.target.value)}
+                onChange={event => {
+                  const nextColor = normalizeHexColor(event.target.value);
+                  if (!nextColor) return;
+                  setDraftColor(nextColor);
+                  setDraftHex(nextColor.toUpperCase());
+                }}
                 aria-label="Escolher cor"
               />
               <code>{draftColor.toUpperCase()}</code>
+            </label>
+            <label className="filament-hex-field">
+              <span>Código HEX</span>
+              <input
+                type="text"
+                value={draftHex}
+                onChange={event => {
+                  const nextHex = event.target.value.toUpperCase();
+                  setDraftHex(nextHex);
+                  const nextColor = normalizeHexColor(nextHex);
+                  if (nextColor) setDraftColor(nextColor);
+                }}
+                placeholder="#RRGGBB"
+                maxLength={7}
+                autoComplete="off"
+                spellCheck={false}
+                aria-label="Código HEX da cor"
+                aria-invalid={!confirmedHex || undefined}
+                aria-describedby={!confirmedHex ? hexErrorId : undefined}
+              />
+              {!confirmedHex && <small id={hexErrorId} role="alert">Digite um HEX válido, por exemplo #32C8A0.</small>}
             </label>
             <div className="filament-color-popover-actions">
               <button type="button" onClick={() => setOpen(false)}>Cancelar</button>
               <button
                 type="button"
                 className="filament-primary-button"
+                disabled={!confirmedHex}
                 onClick={() => {
-                  onChange(draftColor);
+                  if (!confirmedHex) return;
+                  onChange(confirmedHex);
                   setOpen(false);
                 }}
               >

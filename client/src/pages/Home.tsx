@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, parsePackagingCostDraft, type BudgetInput, type BudgetResult } from "../../../shared/budget";
-import { debitStock, isLowStock } from "../../../shared/filament";
+import { debitStock, filterFilaments, groupFilamentsByTone, isLowStock, type FilamentStockFilters, type FilamentWeightFilter } from "../../../shared/filament";
 import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
@@ -338,6 +338,7 @@ type FilamentItem = {
   id: number;
   name: string;
   material: string;
+  manufacturer?: string;
   color: string;
   grams: number;
   lowThreshold: number;
@@ -364,14 +365,22 @@ type FilamentHistoryEntry = {
 };
 
 const initialFilaments: FilamentItem[] = [
-  { id: 1, name: "PLA Silk Violeta", material: "PLA", color: "#9b4dff", grams: 820, lowThreshold: 200 },
-  { id: 2, name: "PLA Ciano", material: "PLA", color: "#00d8f5", grams: 145, lowThreshold: 200 },
+  { id: 1, name: "PLA Silk Violeta", material: "PLA", manufacturer: "", color: "#9b4dff", grams: 820, lowThreshold: 200 },
+  { id: 2, name: "PLA Ciano", material: "PLA", manufacturer: "", color: "#00d8f5", grams: 145, lowThreshold: 200 },
 ];
 
 const initialDebits: FilamentDebit[] = [
   { id: 1, piece: "suporte-fone-final.3mf", grams: 38, color: "#9b4dff", filamentId: 1, status: "pending" },
   { id: 2, piece: "vaso-organico-v3.3mf", grams: 76, color: "#00d8f5", filamentId: 2, status: "pending" },
 ];
+
+const defaultFilamentStockFilters: FilamentStockFilters = {
+  name: "all",
+  color: "all",
+  material: "all",
+  weight: "all",
+  manufacturer: "all",
+};
 
 function FilamentsView() {
   const [filaments, setFilaments] = useState<FilamentItem[]>(() => {
@@ -389,10 +398,12 @@ function FilamentsView() {
   const historyPageSize = 5;
   const [editingHistoryId, setEditingHistoryId] = useState<number | null>(null);
   const [editingHistory, setEditingHistory] = useState({ piece: "", grams: "", filamentId: "", status: "approved" as FilamentHistoryEntry["status"] });
-  const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", color: "", grams: "", lowThreshold: "200" });
+  const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", manufacturer: "", color: "", grams: "", lowThreshold: "200" });
   const [filamentColorError, setFilamentColorError] = useState(false);
   const [newDebit, setNewDebit] = useState({ piece: "", grams: "", color: "", filamentId: "" });
   const [debitColorError, setDebitColorError] = useState("");
+  const [filamentFilters, setFilamentFilters] = useState<FilamentStockFilters>(defaultFilamentStockFilters);
+  const [groupByColorTone, setGroupByColorTone] = useState(false);
 
   useEffect(() => { window.localStorage.setItem("falcaorosa3d-filaments", JSON.stringify(filaments)); }, [filaments]);
   useEffect(() => { window.localStorage.setItem("falcaorosa3d-filament-debits", JSON.stringify(debits)); }, [debits]);
@@ -409,8 +420,8 @@ function FilamentsView() {
       return;
     }
     setFilamentColorError(false);
-    setFilaments((current) => [...current, { id: Date.now(), name: newFilament.name.trim(), material: newFilament.material, color: newFilament.color, grams, lowThreshold: Number.isFinite(lowThreshold) && lowThreshold >= 0 ? lowThreshold : 0 }]);
-    setNewFilament({ name: "", material: "PLA", color: "", grams: "", lowThreshold: "200" });
+    setFilaments((current) => [...current, { id: Date.now(), name: newFilament.name.trim(), material: newFilament.material, manufacturer: newFilament.manufacturer.trim(), color: newFilament.color, grams, lowThreshold: Number.isFinite(lowThreshold) && lowThreshold >= 0 ? lowThreshold : 0 }]);
+    setNewFilament({ name: "", material: "PLA", manufacturer: "", color: "", grams: "", lowThreshold: "200" });
     toast.success("Filamento adicionado ao estoque");
   };
 
@@ -460,6 +471,25 @@ function FilamentsView() {
   };
   const rejectDebit = (id: number) => { const debit = debits.find((item) => item.id === id); if (debit) addHistory(debit, "rejected"); setDebits((current) => current.map((item) => item.id === id ? { ...item, status: "rejected" } : item)); toast.info("Débito rejeitado"); };
   const pendingDebits = debits.filter((item) => item.status === "pending");
+  const uniqueSorted = (values: string[]) => values.map(value => value.trim()).filter((value, index, list) => value && list.indexOf(value) === index).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const filamentNames = uniqueSorted(filaments.map(item => item.name));
+  const filamentColors = uniqueSorted(filaments.map(item => item.color.toLowerCase()));
+  const filamentMaterials = uniqueSorted(filaments.map(item => item.material));
+  const filamentManufacturers = uniqueSorted(filaments.map(item => item.manufacturer ?? ""));
+  const hasFilamentsWithoutManufacturer = filaments.some(item => !item.manufacturer?.trim());
+  const filteredFilaments = filterFilaments(filaments, filamentFilters);
+  const toneGroups = groupFilamentsByTone(filteredFilaments);
+  const filtersAreActive = filamentFilters.name !== "all" || filamentFilters.color !== "all" || filamentFilters.material !== "all" || filamentFilters.weight !== "all" || filamentFilters.manufacturer !== "all" || groupByColorTone;
+  const clearFilamentFilters = () => { setFilamentFilters(defaultFilamentStockFilters); setGroupByColorTone(false); };
+  const renderFilamentCard = (item: FilamentItem) => (
+    <FilamentSpoolCard
+      key={item.id}
+      item={item}
+      relatedDebits={debits.filter((debit) => debit.filamentId === item.id || (!debit.filamentId && debit.color.toLowerCase() === item.color.toLowerCase()))}
+      relatedHistory={history.filter((entry) => entry.filamentId === item.id || (!entry.filamentId && entry.color.toLowerCase() === item.color.toLowerCase()))}
+      onSave={updateFilament}
+    />
+  );
   const parseHistoryDate = (value: string) => { const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1])); const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? null : parsed; };
   const filteredHistory = history.filter((entry) => { if (historyStatusFilter !== "all" && entry.status !== historyStatusFilter) return false; if (historyPeriodFilter === "all") return true; const date = parseHistoryDate(entry.createdAt); if (!date) return true; return Date.now() - date.getTime() <= Number(historyPeriodFilter) * 24 * 60 * 60 * 1000; });
   const approvedGrams = filteredHistory.filter((entry) => entry.status === "approved").reduce((sum, entry) => sum + entry.grams, 0);
@@ -475,18 +505,34 @@ function FilamentsView() {
 
   return <div className="filaments-view">
     <div className="section-heading"><div><p className="eyebrow">MATERIAIS</p><h2>Consumo de filamentos</h2><p>Controle seu estoque em gramas e confirme os débitos gerados pelas impressões.</p></div><div className="budget-safe-note"><LockKeyhole size={16} /> controle local</div></div>
-    <section className="filament-add-card"><div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><h3>Adicionar filamento</h3></div><p className="filament-card-heading-description">Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p><div className="filament-form-grid"><label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label><label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label><label className="budget-field"><span>Quantidade (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label><label className="budget-field"><span>Avisar abaixo de (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label><div className="budget-field color-field"><span>Cor da bobina *</span><RequiredFilamentColor value={newFilament.color} invalid={filamentColorError} onChange={(color) => { setNewFilament((current) => ({ ...current, color })); setFilamentColorError(false); }} /></div><button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button></div></section>
-    <div className="filament-stock-grid">
-      {filaments.map((item) => (
-        <FilamentSpoolCard
-          key={item.id}
-          item={item}
-          relatedDebits={debits.filter((debit) => debit.filamentId === item.id || (!debit.filamentId && debit.color.toLowerCase() === item.color.toLowerCase()))}
-          relatedHistory={history.filter((entry) => entry.filamentId === item.id || (!entry.filamentId && entry.color.toLowerCase() === item.color.toLowerCase()))}
-          onSave={updateFilament}
-        />
-      ))}
-    </div>
+    <section className="filament-add-card">
+      <div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><h3>Adicionar filamento</h3></div>
+      <p className="filament-card-heading-description">Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p>
+      <div className="filament-form-grid">
+        <label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label>
+        <label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label>
+        <label className="budget-field"><span>Fabricante</span><input className="budget-text-input" value={newFilament.manufacturer} onChange={(event) => setNewFilament((current) => ({ ...current, manufacturer: event.target.value }))} placeholder="Ex.: Bambu Lab" /></label>
+        <label className="budget-field"><span>Quantidade (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label>
+        <label className="budget-field"><span>Avisar abaixo de (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label>
+        <div className="budget-field color-field"><span>Cor da bobina *</span><RequiredFilamentColor value={newFilament.color} invalid={filamentColorError} onChange={(color) => { setNewFilament((current) => ({ ...current, color })); setFilamentColorError(false); }} /></div>
+        <button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button>
+      </div>
+    </section>
+    <section className="filament-collection" aria-label="Bobinas de filamento">
+      <div className="filament-collection-heading">
+        <div><h3>Bobinas de filamento</h3><p>Filtre por nome, cor, tipo, peso e fabricante.</p></div>
+        <div className="filament-collection-actions"><span>{filteredFilaments.length} de {filaments.length} bobinas</span><button className="filament-filter-clear" type="button" onClick={clearFilamentFilters} disabled={!filtersAreActive}>Limpar filtros</button></div>
+      </div>
+      <div className="filament-filter-toolbar" aria-label="Filtros das bobinas">
+        <label className="filament-filter-field"><span>Nome</span><select aria-label="Filtrar por nome" value={filamentFilters.name} onChange={(event) => setFilamentFilters((current) => ({ ...current, name: event.target.value }))}><option value="all">Todos</option>{filamentNames.map(name => <option value={name} key={name}>{name}</option>)}</select></label>
+        <label className="filament-filter-field"><span>Cor</span><select aria-label="Filtrar por cor" value={filamentFilters.color} onChange={(event) => setFilamentFilters((current) => ({ ...current, color: event.target.value }))}><option value="all">Todos</option>{filamentColors.map(color => <option value={color} key={color}>{color.toUpperCase()}</option>)}</select></label>
+        <label className="filament-filter-field"><span>Tipo</span><select aria-label="Filtrar por tipo" value={filamentFilters.material} onChange={(event) => setFilamentFilters((current) => ({ ...current, material: event.target.value }))}><option value="all">Todos</option>{filamentMaterials.map(material => <option value={material} key={material}>{material}</option>)}</select></label>
+        <label className="filament-filter-field"><span>Peso</span><select aria-label="Filtrar por peso" value={filamentFilters.weight} onChange={(event) => setFilamentFilters((current) => ({ ...current, weight: event.target.value as FilamentWeightFilter }))}><option value="all">Todos</option><option value="under250">Abaixo de 250 g</option><option value="250to499">250–499 g</option><option value="500to999">500–999 g</option><option value="1000plus">1.000 g ou mais</option></select></label>
+        <label className="filament-group-toggle"><input type="checkbox" checked={groupByColorTone} onChange={(event) => setGroupByColorTone(event.target.checked)} /><span>Agrupar por tons da mesma cor</span></label>
+        <label className="filament-filter-field"><span>Fabricante</span><select aria-label="Filtrar por fabricante" value={filamentFilters.manufacturer} onChange={(event) => setFilamentFilters((current) => ({ ...current, manufacturer: event.target.value }))}><option value="all">Todos</option>{hasFilamentsWithoutManufacturer && <option value="__none__">Sem fabricante</option>}{filamentManufacturers.map(manufacturer => <option value={manufacturer} key={manufacturer}>{manufacturer}</option>)}</select></label>
+      </div>
+      {filteredFilaments.length === 0 ? <div className="filament-filter-empty" role="status">Nenhuma bobina corresponde aos filtros selecionados.</div> : groupByColorTone ? toneGroups.map(([tone, items]) => <section className="filament-tone-group" key={tone}><div className="filament-tone-heading"><h4>{tone}</h4><span>{items.length} {items.length === 1 ? "bobina" : "bobinas"}</span></div><div className="filament-stock-grid">{items.map(renderFilamentCard)}</div></section>) : <div className="filament-stock-grid">{filteredFilaments.map(renderFilamentCard)}</div>}
+    </section>
     <section className="debit-card"><div className="filament-card-heading"><div className="settings-symbol pink"><ReceiptText size={19} /></div><div><h3>Débitos de filamentos</h3></div><span className="pending-count">{pendingDebits.length} aguardando</span></div><div className="debit-add-form"><input className="budget-text-input debit-piece-input" value={newDebit.piece} onChange={(event) => setNewDebit((current) => ({ ...current, piece: event.target.value }))} placeholder="Nome da peça / arquivo" /><div className="debit-add-controls"><select className="debit-spool-select" value={newDebit.filamentId} onChange={(event) => { setNewDebit((current) => ({ ...current, filamentId: event.target.value, color: "" })); setDebitColorError(""); }} aria-label="Selecionar bobina"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><RequiredFilamentColor compact label="Selecionar cor do débito" title="Escolher cor do débito" value={newDebit.color} invalid={Boolean(debitColorError)} errorMessage={debitColorError} onChange={(color) => { setNewDebit((current) => ({ ...current, color })); setDebitColorError(""); }} /><DecimalInput className="budget-text-input grams-input" min="0" step="1" value={newDebit.grams} onChange={(event) => setNewDebit((current) => ({ ...current, grams: event.target.value }))} placeholder="Gramas consumidas" /><button className="filament-primary-button" onClick={addDebit}><Plus size={15} /> Adicionar débito</button></div>{debitExceedsStock && <div className="stock-warning" role="alert"><AlertCircle size={15} /><span>O débito de {newDebit.grams || 0} g é maior que o estoque disponível de {selectedDebitFilament?.grams ?? 0} g em {selectedDebitFilament?.name}.</span></div>}</div><div className="debit-list">{debits.map((debit) => { const linked = debit.filamentId ? filaments.find((item) => item.id === debit.filamentId) : filaments.find((item) => item.color.toLowerCase() === debit.color.toLowerCase()); return <div className={`debit-row debit-${debit.status}`} key={debit.id} style={{ borderLeft: `5px solid ${linked?.color ?? debit.color}` }}><div className="debit-copy"><strong>{debit.piece}</strong><span>{linked?.name || "Bobina não identificada"} · {debit.grams} g · {debit.status === "pending" ? "aguardando confirmação" : debit.status === "approved" ? "aprovado" : "rejeitado"}</span></div>{debit.status === "pending" ? <div className="debit-actions"><button className="approve-button" onClick={() => approveDebit(debit)}><Check size={14} /> Aprovar</button><button className="reject-button" onClick={() => rejectDebit(debit.id)}><X size={14} /> Rejeitar</button></div> : <span className="debit-status-label">{debit.status === "approved" ? "Confirmado" : "Rejeitado"}</span>}</div>; })}</div></section>
     <section className="history-card"><div className="filament-card-heading"><div className="settings-symbol blue"><History size={19} /></div><h3>Histórico de consumo</h3><div className="history-heading-actions"><span className="history-total">{filteredHistory.length} registros</span><button className="clear-history-button" onClick={clearHistory} disabled={!history.length}><Trash2 size={13} /> Limpar histórico</button></div></div><p className="filament-card-heading-description">Registro organizado dos débitos confirmados ou rejeitados.</p><div className="history-filters"><label>Período<select value={historyPeriodFilter} onChange={(event) => setHistoryPeriodFilter(event.target.value as typeof historyPeriodFilter)}><option value="all">Todo o período</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select></label><label>Status<select value={historyStatusFilter} onChange={(event) => setHistoryStatusFilter(event.target.value as typeof historyStatusFilter)}><option value="all">Todos</option><option value="approved">Aprovados</option><option value="rejected">Rejeitados</option></select></label></div><div className="history-summary"><div><span>Total filtrado</span><strong>{approvedGrams + rejectedGrams} g</strong></div><div><span>Aprovado</span><strong className="summary-approved">{approvedGrams} g</strong></div><div><span>Rejeitado</span><strong className="summary-rejected">{rejectedGrams} g</strong></div></div>{visibleHistory.length === 0 ? <div className="history-empty"><History size={21} /><span>{history.length ? "Nenhum registro corresponde aos filtros." : "Nenhum consumo registrado ainda."}</span></div> : <div className="history-list">{visibleHistory.map((entry) => editingHistoryId === entry.id ? <div className="history-row history-edit-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><input className="history-edit-input" value={editingHistory.piece} onChange={(event) => setEditingHistory((current) => ({ ...current, piece: event.target.value }))} /><DecimalInput className="history-edit-grams" min="1" value={editingHistory.grams} onChange={(event) => setEditingHistory((current) => ({ ...current, grams: event.target.value }))} /><select className="history-edit-spool" value={editingHistory.filamentId} onChange={(event) => setEditingHistory((current) => ({ ...current, filamentId: event.target.value }))} aria-label="Editar bobina do registro"><option value="">Selecionar bobina</option>{filaments.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.grams} g</option>)}</select><select className="history-edit-status" value={editingHistory.status} onChange={(event) => setEditingHistory((current) => ({ ...current, status: event.target.value as FilamentHistoryEntry["status"] }))}><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select><button className="history-save-button" onClick={() => saveHistoryEdit(entry.id)} aria-label="Salvar registro"><Check size={14} /></button><button className="history-cancel-button" onClick={() => setEditingHistoryId(null)} aria-label="Cancelar edição"><X size={14} /></button></div> : <div className="history-row" key={entry.id}><span className="debit-color-dot" style={{ background: entry.color }} /><div className="history-copy"><strong>{entry.piece}</strong><span className="history-filament-name">{entry.filamentName || "Filamento não identificado"}</span><span>{entry.createdAt} · {entry.grams} g</span></div><span className={`history-status ${entry.status}`}>{entry.status === "approved" ? "Aprovado" : "Rejeitado"}</span><div className="history-actions"><button onClick={() => startHistoryEdit(entry)} aria-label={`Editar ${entry.piece}`}><PencilLine size={13} /></button><button onClick={() => removeHistoryEntry(entry.id)} aria-label={`Excluir ${entry.piece}`}><Trash2 size={13} /></button></div></div>)}</div>}{historyPageCount > 1 && <div className="history-pagination"><button disabled={historyPage === 1} onClick={() => setHistoryPage((page) => page - 1)}>Anterior</button><span>Página {historyPage} de {historyPageCount}</span><button disabled={historyPage === historyPageCount} onClick={() => setHistoryPage((page) => page + 1)}>Próxima</button></div>}</section>
   </div>;

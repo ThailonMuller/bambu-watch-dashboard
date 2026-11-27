@@ -22,6 +22,7 @@ describe("filament spool cards", () => {
     for (const label of [
       "Nome do filamento",
       "Material",
+      "Fabricante",
       "Cor da bobina",
       "Estoque (g)",
       "Avisar abaixo de (g)",
@@ -32,7 +33,39 @@ describe("filament spool cards", () => {
       'draft.grams.trim() === ""'
     );
     expect(card).toContain("onSave(item.id, {");
+    expect(card).toContain("manufacturer: draft.manufacturer.trim()");
     expect(card).toContain('toast.success("Dados da bobina atualizados")');
+  });
+
+  it("adds manufacturer after material and wraps the full form responsively", () => {
+    const materialIndex = home.indexOf('<span>Material</span>', home.indexOf('className="filament-add-card"'));
+    const manufacturerIndex = home.indexOf('<span>Fabricante</span>', materialIndex);
+    const quantityIndex = home.indexOf('<span>Quantidade (g)</span>', manufacturerIndex);
+    expect(materialIndex).toBeGreaterThanOrEqual(0);
+    expect(manufacturerIndex).toBeGreaterThan(materialIndex);
+    expect(quantityIndex).toBeGreaterThan(manufacturerIndex);
+    expect(home).toContain('manufacturer: newFilament.manufacturer.trim()');
+    expect(home).toContain('manufacturer: "", color: ""');
+    expect(stylesheet).toContain(".filament-form-grid { grid-template-columns:minmax(150px,1.3fr)");
+    expect(stylesheet).toContain("@media (max-width:1180px)");
+    expect(stylesheet).toContain("@media (max-width:720px)");
+  });
+
+  it("places all requested stock filters in the collection with Todos as the default", () => {
+    expect(home).toContain('aria-label="Bobinas de filamento"');
+    expect(home).toContain('aria-label="Filtros das bobinas"');
+    for (const label of [
+      'aria-label="Filtrar por nome"',
+      'aria-label="Filtrar por cor"',
+      'aria-label="Filtrar por tipo"',
+      'aria-label="Filtrar por peso"',
+      'aria-label="Filtrar por fabricante"',
+      "Agrupar por tons da mesma cor",
+    ]) expect(home).toContain(label);
+    expect(home).toMatch(/const defaultFilamentStockFilters[\s\S]*name: "all"[\s\S]*color: "all"[\s\S]*material: "all"[\s\S]*weight: "all"[\s\S]*manufacturer: "all"/);
+    expect(home).toContain('<option value="all">Todos</option>');
+    expect(home).toContain("filterFilaments(filaments, filamentFilters)");
+    expect(home).toContain("groupFilamentsByTone(filteredFilaments)");
   });
 
   it("shows stock, consumption and related internal movements", () => {

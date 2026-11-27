@@ -78,17 +78,23 @@ describe("required filament color", () => {
       /const \[draftColor,\s*setDraftColor\] = useState\(value \|\| "#000000"\)/
     );
     expect(componentSource).toMatch(
-      /if\s*\(next\)\s*setDraftColor\(value \|\| "#000000"\)/
+      /if\s*\(next\)\s*\{\s*const initialColor = value \|\| "#000000";\s*setDraftColor\(initialColor\);\s*setDraftHex\(initialColor\.toUpperCase\(\)\)/
     );
     expect(componentSource).toContain("onOpenChange={changeOpen}");
     expect(componentSource).toMatch(
       /<input\b(?=[^>]*\btype="color")(?=[^>]*\bclassName="filament-color-input")[^>]*\bvalue=\{draftColor\}[^>]*style=\{\{\s*backgroundColor:\s*draftColor\s*\}\}/s
     );
+    expect(componentSource).toContain('aria-label="Código HEX da cor"');
+    expect(componentSource).toContain('placeholder="#RRGGBB"');
+    expect(componentSource).toContain('normalizeHexColor(nextHex)');
+    expect(componentSource).toContain('disabled={!confirmedHex}');
+    expect(componentSource).toContain("onChange(confirmedHex)");
+    expect(componentSource).toContain("setDraftHex(nextColor.toUpperCase())");
     expect(componentSource).toMatch(
       /onClick=\{\(\)\s*=>\s*setOpen\(false\)\}[^>]*>\s*Cancelar/
     );
     expect(componentSource).toMatch(
-      /onClick=\{\(\)\s*=>\s*\{\s*onChange\(draftColor\);\s*setOpen\(false\);\s*\}\}[\s\S]*?>\s*Confirmar cor/
+      /onClick=\{\(\)\s*=>\s*\{\s*if\s*\(!confirmedHex\)\s*return;\s*onChange\(confirmedHex\);\s*setOpen\(false\);\s*\}\}[\s\S]*?>\s*Confirmar cor/
     );
 
     const openHandlerStart = componentSource.indexOf("const changeOpen");
@@ -102,7 +108,7 @@ describe("required filament color", () => {
       /const \[newFilament,\s*setNewFilament\] = useState\(\s*\{[^}]*\bcolor:\s*""/
     );
     expect(homeSource).toMatch(
-      /setNewFilament\(\s*\{\s*name:\s*""\s*,\s*material:\s*"PLA"\s*,\s*color:\s*""/
+      /setNewFilament\(\s*\{\s*name:\s*""\s*,\s*material:\s*"PLA"\s*,\s*manufacturer:\s*""\s*,\s*color:\s*""/
     );
     expect(homeSource).toMatch(
       /const \[filamentColorError,\s*setFilamentColorError\] = useState(?:<boolean>)?\(false\)/
