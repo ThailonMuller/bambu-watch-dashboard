@@ -134,15 +134,23 @@ export default function FilamentSpoolCard({
           aria-haspopup="dialog"
           aria-label={`Detalhes do filamento ${item.name}, ${formatGrams(item.grams)} disponíveis${low ? ", estoque baixo" : ""}`}
         >
-          {low && <span className="filament-card-low-ribbon">Estoque baixo</span>}
-          <span
-            className="filament-card-swatch"
-            style={{ backgroundColor: item.color }}
-            aria-hidden="true"
-          />
-          <span className="filament-card-name">{item.name}</span>
-          <span className="filament-card-material">{item.material}</span>
-          <span className="filament-card-weight">{formatGrams(item.grams)}</span>
+          {low && (
+            <>
+              <span className="filament-card-alert-ring is-yellow" aria-hidden="true" />
+              <span className="filament-card-alert-ring is-red" aria-hidden="true" />
+            </>
+          )}
+          <span className="filament-card-surface">
+            {low && <span className="filament-card-low-ribbon">Estoque baixo</span>}
+            <span
+              className="filament-card-swatch"
+              style={{ backgroundColor: item.color }}
+              aria-hidden="true"
+            />
+            <span className="filament-card-name">{item.name}</span>
+            <span className="filament-card-material">{item.material}</span>
+            <span className="filament-card-weight">{formatGrams(item.grams)}</span>
+          </span>
         </button>
       </DialogTrigger>
 

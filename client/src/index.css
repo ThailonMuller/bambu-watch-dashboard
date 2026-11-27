@@ -866,18 +866,18 @@ html.light .budget-calculate-button:active, html.light .spreadsheet-add-button:a
 
 /* FR3D left-edge accent: revealed softly on card hover without changing layout */
 .metric-card, .printer-card, .panel, .settings-card, .budget-form-card, .budget-result-card, .spreadsheet-card, .filament-add-card, .debit-card, .history-card, .telemetry-errors-card, .filament-spool-card, .consumption-chart, .activity-panel, .usage-panel, .bridge-health-grid > div, .telemetry-error-row, .plate-row, .plate-add-tile { position:relative; }
-.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { position:absolute; top:12px; bottom:12px; left:0; width:3px; border-radius:0 4px 4px 0; background:linear-gradient(180deg,#00f4ff 0%,#27b9ff 48%,#6e61ff 100%); box-shadow:0 0 12px rgba(0,216,245,.42); content:''; opacity:0; pointer-events:none; transition:opacity .24s ease; }
-.metric-card:hover::after, .printer-card:hover::after, .panel:hover::after, .settings-card:hover::after, .budget-form-card:hover::after, .budget-result-card:hover::after, .spreadsheet-card:hover::after, .filament-add-card:hover::after, .debit-card:hover::after, .history-card:hover::after, .telemetry-errors-card:hover::after, .filament-spool-card:hover::after, .consumption-chart:hover::after, .activity-panel:hover::after, .usage-panel:hover::after, .bridge-health-grid > div:hover::after, .telemetry-error-row:hover::after, .plate-row:hover::after, .plate-add-tile:hover::after { opacity:1; }
-html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#00bcd4 0%,#218bff 50%,#7655d9 100%); box-shadow:0 0 12px rgba(33,139,255,.25); }
-@media (prefers-reduced-motion:reduce) { .metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { transition:none; } }
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { position:absolute; top:12px; bottom:12px; left:0; width:3px; border-radius:0 4px 4px 0; background:linear-gradient(180deg,#00f4ff 0%,#27b9ff 48%,#6e61ff 100%); box-shadow:0 0 12px rgba(0,216,245,.42); content:''; opacity:0; pointer-events:none; transition:opacity .24s ease; }
+.metric-card:hover::after, .printer-card:hover::after, .panel:hover::after, .settings-card:hover::after, .budget-form-card:hover::after, .budget-result-card:hover::after, .spreadsheet-card:hover::after, .filament-add-card:hover::after, .debit-card:hover::after, .history-card:hover::after, .telemetry-errors-card:hover::after, .consumption-chart:hover::after, .activity-panel:hover::after, .usage-panel:hover::after, .bridge-health-grid > div:hover::after, .telemetry-error-row:hover::after, .plate-row:hover::after, .plate-add-tile:hover::after { opacity:1; }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#00bcd4 0%,#218bff 50%,#7655d9 100%); box-shadow:0 0 12px rgba(33,139,255,.25); }
+@media (prefers-reduced-motion:reduce) { .metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { transition:none; } }
 
 
 /* Final refinement: preserve the desktop result-card position and restore the curved turquoise edge */
 @media (min-width:1200px) and (min-height:720px) {
   .budget-result-card, .custom-budget-result-card { position:sticky; top:24px; }
 }
-.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:0; bottom:0; width:5px; border-radius:18px 0 0 18px; background:linear-gradient(180deg,#8fffff 0%,#4ceeff 42%,#35bfff 72%,#719dff 100%); box-shadow:0 0 15px rgba(82,239,255,.52); }
-html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#b8ffff 0%,#55e5f1 48%,#42adff 100%); box-shadow:0 0 15px rgba(45,190,255,.34); }
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:0; bottom:0; width:5px; border-radius:18px 0 0 18px; background:linear-gradient(180deg,#8fffff 0%,#4ceeff 42%,#35bfff 72%,#719dff 100%); box-shadow:0 0 15px rgba(82,239,255,.52); }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#b8ffff 0%,#55e5f1 48%,#42adff 100%); box-shadow:0 0 15px rgba(45,190,255,.34); }
 
 
 /* Preserve the result card's desktop behavior after adding the accent pseudo-element */
@@ -885,13 +885,13 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
   .budget-result-card, .custom-budget-result-card { position:sticky; top:24px; align-self:stretch; }
 }
 /* Turquoise bracket accent: 5px edge with rounded upper and lower turns */
-.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:0; bottom:0; left:0; width:18px; border:5px solid transparent; border-right:0; border-radius:18px 0 0 18px; background:linear-gradient(180deg,#8fffff 0%,#4ceeff 42%,#35bfff 72%,#719dff 100%) border-box; background-clip:border-box; box-shadow:0 0 15px rgba(82,239,255,.52); }
-html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#c4ffff 0%,#55e5f1 48%,#42adff 100%) border-box; box-shadow:0 0 15px rgba(45,190,255,.34); }
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:0; bottom:0; left:0; width:18px; border:5px solid transparent; border-right:0; border-radius:18px 0 0 18px; background:linear-gradient(180deg,#8fffff 0%,#4ceeff 42%,#35bfff 72%,#719dff 100%) border-box; background-clip:border-box; box-shadow:0 0 15px rgba(82,239,255,.52); }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#c4ffff 0%,#55e5f1 48%,#42adff 100%) border-box; box-shadow:0 0 15px rgba(45,190,255,.34); }
 
 
 /* Keep the accent as a contour only: no filled strip inside the card */
-.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { width:18px; border:0; border-left:5px solid #4ceeff; border-top:5px solid #8fffff; border-bottom:5px solid #35bfff; border-radius:18px 0 0 18px; background:transparent; box-shadow:0 0 15px rgba(82,239,255,.52); }
-html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { border-left-color:#55e5f1; border-top-color:#c4ffff; border-bottom-color:#42adff; background:transparent; box-shadow:0 0 15px rgba(45,190,255,.34); }
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { width:18px; border:0; border-left:5px solid #4ceeff; border-top:5px solid #8fffff; border-bottom:5px solid #35bfff; border-radius:18px 0 0 18px; background:transparent; box-shadow:0 0 15px rgba(82,239,255,.52); }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { border-left-color:#55e5f1; border-top-color:#c4ffff; border-bottom-color:#42adff; background:transparent; box-shadow:0 0 15px rgba(45,190,255,.34); }
 
 
 /* Falcão Rosa3D identity refresh: official wordmark and supplied neon banner */
@@ -926,8 +926,8 @@ html.light .metric-card::after, html.light .printer-card::after, html.light .pan
 
 
 /* Visual correction: contained turquoise edge, readable status card and wider banner framing */
-.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .filament-spool-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:3px; bottom:3px; left:0; width:5px; border:0; border-radius:12px 0 0 12px; background:linear-gradient(180deg,#a4ffff 0%,#52efff 46%,#35c4ff 100%); box-shadow:0 0 13px rgba(82,239,255,.55); }
-html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .filament-spool-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#d1ffff 0%,#65e9f2 48%,#48b9ff 100%); box-shadow:0 0 13px rgba(45,190,255,.34); }
+.metric-card::after, .printer-card::after, .panel::after, .settings-card::after, .budget-form-card::after, .budget-result-card::after, .spreadsheet-card::after, .filament-add-card::after, .debit-card::after, .history-card::after, .telemetry-errors-card::after, .consumption-chart::after, .activity-panel::after, .usage-panel::after, .bridge-health-grid > div::after, .telemetry-error-row::after, .plate-row::after, .plate-add-tile::after { top:3px; bottom:3px; left:0; width:5px; border:0; border-radius:12px 0 0 12px; background:linear-gradient(180deg,#a4ffff 0%,#52efff 46%,#35c4ff 100%); box-shadow:0 0 13px rgba(82,239,255,.55); }
+html.light .metric-card::after, html.light .printer-card::after, html.light .panel::after, html.light .settings-card::after, html.light .budget-form-card::after, html.light .budget-result-card::after, html.light .spreadsheet-card::after, html.light .filament-add-card::after, html.light .debit-card::after, html.light .history-card::after, html.light .telemetry-errors-card::after, html.light .consumption-chart::after, html.light .activity-panel::after, html.light .usage-panel::after, html.light .bridge-health-grid > div::after, html.light .telemetry-error-row::after, html.light .plate-row::after, html.light .plate-add-tile::after { background:linear-gradient(180deg,#d1ffff 0%,#65e9f2 48%,#48b9ff 100%); box-shadow:0 0 13px rgba(45,190,255,.34); }
 .hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; background-repeat:no-repeat; }
 .float-card-two { right:22px; bottom:22px; left:auto; }
 @media (max-width:780px) { .hero-banner::before, .hero-banner-image { background-size:100% 100%; background-position:center; } .float-card-two { right:18px; bottom:18px; left:auto; } }
@@ -1495,17 +1495,19 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   gap: 11px;
   margin-top: 15px;
 }
+/* The outer button owns the halo; only its inner surface clips the colored bands. */
 .filament-spool-card {
   appearance: none;
   display: flex;
   position: relative;
+  isolation: isolate;
   flex-direction: column;
   align-items: center;
   width: 100%;
   min-width: 0;
   min-height: 164px;
-  padding: 13px 8px 0;
-  overflow: hidden;
+  padding: 0;
+  overflow: visible;
   color: #f5f2f7;
   text-align: center;
   font: inherit;
@@ -1513,25 +1515,51 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   border-radius: 15px;
   background: #29272a;
   cursor: pointer;
-  transition: transform .18s cubic-bezier(.23, 1, .32, 1), border-color .18s ease, box-shadow .18s ease;
+  transition: transform .18s cubic-bezier(.23, 1, .32, 1);
 }
-.filament-spool-card:hover {
-  transform: translateY(-2px);
-  border-color: #77628c;
-  box-shadow: 0 9px 20px rgba(0, 0, 0, .22);
+.filament-card-surface {
+  display: flex;
+  position: relative;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: inherit;
+  padding: 13px 8px 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: inherit;
+}
+/* Reserve the label's space without shifting the swatch when hover begins. */
+.filament-spool-card.is-low .filament-card-surface { padding-top: 35px; }
+.filament-spool-card::before {
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--filament-color, #8f77f4);
+  filter: blur(14px);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s cubic-bezier(.23, 1, .32, 1);
 }
 .filament-spool-card:focus-visible {
   outline: 3px solid #12d7ed;
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
+.filament-spool-card:focus-visible::before { opacity: .6; }
 .app-shell .filament-card-low-ribbon {
   display: flex;
-  align-self: stretch;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
   align-items: center;
   justify-content: center;
-  width: calc(100% + 16px);
+  width: 100%;
   min-height: 24px;
-  margin: -13px -8px 10px;
   padding: 3px 5px;
   overflow: hidden;
   color: var(--filament-ink, #fff);
@@ -1543,10 +1571,58 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   font-size: 11px !important;
   font-weight: 800;
   line-height: 1.2;
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+  transition: opacity .18s cubic-bezier(.23, 1, .32, 1), transform .18s cubic-bezier(.23, 1, .32, 1);
+}
+.app-shell .filament-spool-card:focus-visible .filament-card-low-ribbon {
+  opacity: 1;
+  transform: translateY(0);
 }
 .filament-spool-card.is-low {
-  border-color: #a64d78;
-  box-shadow: 0 0 0 1px rgba(220, 92, 146, .16);
+  border-color: #45414a;
+  box-shadow: none;
+}
+.filament-card-alert-ring {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border: 2px solid;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* Static combined warning is the fallback when animation is disabled. */
+.filament-card-alert-ring.is-yellow {
+  border-color: #facc15;
+  box-shadow: 0 0 9px rgba(250, 204, 21, .3);
+  opacity: .8;
+}
+.filament-card-alert-ring.is-red {
+  border-color: #ef4444;
+  box-shadow: 0 0 9px rgba(239, 68, 68, .3);
+  opacity: .35;
+}
+@media (hover: hover) {
+  .filament-spool-card:hover { transform: translateY(-2px); }
+  .filament-spool-card:hover::before { opacity: .6; }
+  .app-shell .filament-spool-card:hover .filament-card-low-ribbon {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Slow fade in/out; alternate yellow and red peaks with no abrupt flashes. */
+@keyframes filament-stock-yellow-pulse {
+  0%, 50%, 100% { opacity: 0; }
+  25% { opacity: 1; }
+}
+@keyframes filament-stock-red-pulse {
+  0%, 50%, 100% { opacity: 0; }
+  75% { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .filament-card-alert-ring.is-yellow { animation: filament-stock-yellow-pulse 6.4s ease-in-out infinite; }
+  .filament-card-alert-ring.is-red { animation: filament-stock-red-pulse 6.4s ease-in-out infinite; }
 }
 .filament-card-swatch {
   display: block;
@@ -1883,7 +1959,11 @@ html.light .filament-detail-activity { border-top-color: #e5dbea; }
   .filament-detail-field-wide { grid-column: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .filament-spool-card { transition: none; }
+  .filament-spool-card,
+  .filament-spool-card::before,
+  .app-shell .filament-card-low-ribbon { transition: none; }
+  .filament-spool-card:hover { transform: none; }
+  .filament-card-alert-ring { animation: none; }
 }
 
 /* Keep filament-colored debit stripes clipped to the rounded card edge. */
