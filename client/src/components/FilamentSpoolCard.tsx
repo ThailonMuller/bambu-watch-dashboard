@@ -241,7 +241,9 @@ export default function FilamentSpoolCard({
               <span>Cor da bobina</span>
               <div className="filament-detail-color-control">
                 <input
+                  className="filament-color-input"
                   type="color"
+                  style={{ backgroundColor: draft.color }}
                   value={draft.color}
                   onChange={event =>
                     setDraft(current => ({

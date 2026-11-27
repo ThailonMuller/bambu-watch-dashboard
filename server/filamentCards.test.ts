@@ -126,7 +126,7 @@ describe("filament spool cards", () => {
   });
 
   it("fills the rounded debit color control without a nested swatch frame", () => {
-    expect(home).toContain('className="debit-color" type="color"');
+    expect(home).toContain('className="debit-color filament-color-input" type="color"');
     expect(stylesheet).toContain(".debit-add-controls .debit-color {");
     expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*padding:\s*0;/);
     expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*border-radius:\s*9px;/);

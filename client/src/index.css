@@ -2016,3 +2016,29 @@ html.light .app-shell p.filament-card-heading-description { color:#786887; }
   .debit-card .filament-card-heading { flex-wrap:wrap; }
   .history-card .filament-card-heading { flex-wrap:wrap; }
 }
+
+/* All filament color inputs share a full-bleed swatch, including add/edit forms. */
+.filament-color-input[type="color"],
+.filament-detail-color-control .filament-color-input[type="color"],
+.debit-add-controls .filament-color-input[type="color"] {
+  box-sizing:border-box;
+  padding:0;
+  overflow:hidden;
+  border-radius:9px;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+}
+.filament-color-input[type="color"]::-webkit-color-swatch-wrapper { padding:0; }
+.filament-color-input[type="color"]::-webkit-color-swatch {
+  border:0;
+  border-radius:8px;
+}
+.filament-color-input[type="color"]::-moz-color-swatch {
+  border:0;
+  border-radius:8px;
+}
+.filament-color-input[type="color"]:focus-visible {
+  outline:3px solid #12d7ed;
+  outline-offset:3px;
+}
