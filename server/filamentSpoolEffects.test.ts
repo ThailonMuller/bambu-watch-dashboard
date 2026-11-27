@@ -216,7 +216,6 @@ describe("filament spool visual effects", () => {
       "filament-card-name",
       "filament-card-material",
       "filament-card-weight",
-      "filament-card-low-ribbon",
     ]) {
       expect(
         descendants(lowSurface!).some(element =>
@@ -224,6 +223,7 @@ describe("filament spool visual effects", () => {
         )
       ).toBe(true);
     }
+    expect(lowButton!.children.some(element => classes(element).includes("filament-card-low-ribbon"))).toBe(true);
     expect(
       descendants(normalSurface!).some(element =>
         classes(element).includes("filament-card-low-ribbon")
@@ -250,16 +250,17 @@ describe("filament spool visual effects", () => {
       true
     );
     expect(hasDeclaration(surfaces, "border-radius", /.+/)).toBe(true);
-    expect(hasDeclaration(lowSurfaces, "padding-top", /^35px$/i)).toBe(true);
+    expect(lowSurfaces).toHaveLength(0);
+    expect(hasDeclaration(surfaces, "padding", /^13px\s+8px\s+0$/i)).toBe(true);
 
     expect(ribbons.length).toBeGreaterThan(0);
     expect(hasDeclaration(ribbons, "position", /^absolute$/i)).toBe(true);
-    expect(hasDeclaration(ribbons, "top", /^0(?:px)?$/i)).toBe(true);
-    expect(hasDeclaration(ribbons, "left", /^0(?:px)?$/i)).toBe(true);
-    expect(hasDeclaration(ribbons, "width", /^100%$/i)).toBe(true);
+    expect(hasDeclaration(ribbons, "top", /^-10px$/i)).toBe(true);
+    expect(hasDeclaration(ribbons, "left", /^50%$/i)).toBe(true);
+    expect(hasDeclaration(ribbons, "width", /^max-content$/i)).toBe(true);
     expect(hasDeclaration(ribbons, "opacity", /^0(?:\.0+)?$/)).toBe(true);
     expect(
-      hasDeclaration(ribbons, "transform", /^translateY\(\s*-100%\s*\)$/i)
+      hasDeclaration(ribbons, "transform", /^translateX\(\s*-50%\s*\)\s+translateY\(\s*-4px\s*\)$/i)
     ).toBe(true);
 
     const hoverMedia = allAtRuleBodies(
@@ -287,7 +288,7 @@ describe("filament spool visual effects", () => {
         hasDeclaration(
           revealRules,
           "transform",
-          /^translateY\(\s*0(?:px)?\s*\)$/i
+          /^translateX\(\s*-50%\s*\)\s+translateY\(\s*0(?:px)?\s*\)$/i
         )
       ).toBe(true);
     }

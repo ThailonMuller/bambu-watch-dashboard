@@ -1531,8 +1531,6 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   border-radius: inherit;
   background: inherit;
 }
-/* Reserve the label's space without shifting the swatch when hover begins. */
-.filament-spool-card.is-low .filament-card-surface { padding-top: 35px; }
 .filament-spool-card::before {
   position: absolute;
   inset: -5px;
@@ -1553,32 +1551,33 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
 .app-shell .filament-card-low-ribbon {
   display: flex;
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
+  top: -10px;
+  left: 50%;
+  z-index: 3;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  min-height: 24px;
-  padding: 3px 5px;
+  width: max-content;
+  max-width: calc(100% - 8px);
+  min-height: 20px;
+  padding: 3px 7px;
   overflow: hidden;
   color: var(--filament-ink, #fff);
   text-overflow: ellipsis;
   white-space: nowrap;
-  border-radius: 14px 14px 0 0;
+  border-radius: 999px;
   background: var(--filament-color, #8f77f4);
   font-family: Inter, sans-serif;
   font-size: 11px !important;
   font-weight: 800;
   line-height: 1.2;
   opacity: 0;
-  transform: translateY(-100%);
+  transform: translateX(-50%) translateY(-4px);
   pointer-events: none;
   transition: opacity .18s cubic-bezier(.23, 1, .32, 1), transform .18s cubic-bezier(.23, 1, .32, 1);
 }
 .app-shell .filament-spool-card:focus-visible .filament-card-low-ribbon {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 .filament-spool-card.is-low {
   border-color: #45414a;
@@ -1608,7 +1607,7 @@ html.light .mobile-menu-toggle:hover { color:#7d28b5; border-color:#b98bda; back
   .filament-spool-card:hover::before { opacity: .6; }
   .app-shell .filament-spool-card:hover .filament-card-low-ribbon {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 }
 /* Slow fade in/out; alternate yellow and red peaks with no abrupt flashes. */
@@ -2042,3 +2041,34 @@ html.light .app-shell p.filament-card-heading-description { color:#786887; }
   outline:3px solid #12d7ed;
   outline-offset:3px;
 }
+
+/* Explicit new-spool color selection: the trigger stays empty until confirmed. */
+.filament-color-trigger {
+  display:grid;
+  place-items:center;
+  flex:0 0 39px;
+  width:39px;
+  height:39px;
+  padding:0;
+  border:1px solid #65418a;
+  border-radius:9px;
+  cursor:pointer;
+}
+.filament-color-trigger.is-empty {
+  color:#aa98b6;
+  background:transparent;
+  border-style:dashed;
+}
+.filament-color-trigger[aria-invalid="true"] { border-color:#f185a7; }
+.filament-color-trigger:focus-visible { outline:3px solid #12d7ed; outline-offset:3px; }
+.filament-color-error { display:block; margin-top:5px; color:#f185a7; font-size:11px !important; }
+.filament-color-popover { width:264px; max-width:calc(100vw - 24px); }
+.filament-color-popover h4 { margin:0 0 12px; font-size:15px; font-weight:700; }
+.filament-color-draft { display:flex; align-items:center; gap:9px; }
+.filament-color-draft .filament-color-input { width:42px; height:42px; border:1px solid #65418a; }
+.filament-color-draft code { font-size:12px; }
+.filament-color-popover-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+.filament-color-popover-actions > button { min-height:36px; padding:0 10px; border-radius:8px; font-size:12px; }
+.filament-color-popover-actions > button:first-child { border:1px solid #65418a; background:transparent; }
+html.light .filament-color-trigger.is-empty { color:#786887; border-color:#b8a2c7; }
+html.light .filament-color-error { color:#9e315f; }

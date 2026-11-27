@@ -140,8 +140,8 @@ export default function FilamentSpoolCard({
               <span className="filament-card-alert-ring is-red" aria-hidden="true" />
             </>
           )}
+          {low && <span className="filament-card-low-ribbon">Estoque baixo</span>}
           <span className="filament-card-surface">
-            {low && <span className="filament-card-low-ribbon">Estoque baixo</span>}
             <span
               className="filament-card-swatch"
               style={{ backgroundColor: item.color }}

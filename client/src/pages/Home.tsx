@@ -1,3 +1,4 @@
+import RequiredFilamentColor from "@/components/RequiredFilamentColor";
 import { useEffect, useRef, useState } from "react";
 import {
   Activity,
@@ -388,7 +389,8 @@ function FilamentsView() {
   const historyPageSize = 5;
   const [editingHistoryId, setEditingHistoryId] = useState<number | null>(null);
   const [editingHistory, setEditingHistory] = useState({ piece: "", grams: "", filamentId: "", status: "approved" as FilamentHistoryEntry["status"] });
-  const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", color: "#9b4dff", grams: "", lowThreshold: "200" });
+  const [newFilament, setNewFilament] = useState({ name: "", material: "PLA", color: "", grams: "", lowThreshold: "200" });
+  const [filamentColorError, setFilamentColorError] = useState(false);
   const [newDebit, setNewDebit] = useState({ piece: "", grams: "", color: "#9b4dff", filamentId: "" });
 
   useEffect(() => { window.localStorage.setItem("falcaorosa3d-filaments", JSON.stringify(filaments)); }, [filaments]);
@@ -400,8 +402,14 @@ function FilamentsView() {
     const grams = Number(newFilament.grams);
     const lowThreshold = Number(newFilament.lowThreshold);
     if (!newFilament.name.trim() || !Number.isFinite(grams) || grams < 0) { toast.error("Informe o nome e uma quantidade válida em gramas"); return; }
+    if (!/^#[0-9a-f]{6}$/i.test(newFilament.color)) {
+      setFilamentColorError(true);
+      toast.error("Selecione a cor da bobina antes de adicionar ao estoque");
+      return;
+    }
+    setFilamentColorError(false);
     setFilaments((current) => [...current, { id: Date.now(), name: newFilament.name.trim(), material: newFilament.material, color: newFilament.color, grams, lowThreshold: Number.isFinite(lowThreshold) && lowThreshold >= 0 ? lowThreshold : 0 }]);
-    setNewFilament({ name: "", material: "PLA", color: "#9b4dff", grams: "", lowThreshold: "200" });
+    setNewFilament({ name: "", material: "PLA", color: "", grams: "", lowThreshold: "200" });
     toast.success("Filamento adicionado ao estoque");
   };
 
@@ -455,7 +463,7 @@ function FilamentsView() {
 
   return <div className="filaments-view">
     <div className="section-heading"><div><p className="eyebrow">MATERIAIS</p><h2>Consumo de filamentos</h2><p>Controle seu estoque em gramas e confirme os débitos gerados pelas impressões.</p></div><div className="budget-safe-note"><LockKeyhole size={16} /> controle local</div></div>
-    <section className="filament-add-card"><div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><h3>Adicionar filamento</h3></div><p className="filament-card-heading-description">Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p><div className="filament-form-grid"><label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label><label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label><label className="budget-field"><span>Quantidade (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label><label className="budget-field"><span>Avisar abaixo de (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label><label className="budget-field color-field"><span>Cor da bobina</span><div className="color-input-wrap"><input className="filament-color-input" type="color" style={{ backgroundColor: newFilament.color }} value={newFilament.color} onChange={(event) => setNewFilament((current) => ({ ...current, color: event.target.value }))} /><code>{newFilament.color.toUpperCase()}</code></div></label><button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button></div></section>
+    <section className="filament-add-card"><div className="filament-card-heading"><div className="settings-symbol purple"><Plus size={19} /></div><h3>Adicionar filamento</h3></div><p className="filament-card-heading-description">Cadastre uma bobina, a quantidade disponível e o limite para aviso.</p><div className="filament-form-grid"><label className="budget-field"><span>Nome do filamento</span><input className="budget-text-input" value={newFilament.name} onChange={(event) => setNewFilament((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: PLA Silk Violeta" /></label><label className="budget-field"><span>Material</span><select value={newFilament.material} onChange={(event) => setNewFilament((current) => ({ ...current, material: event.target.value }))}><option>PLA</option><option>PETG</option><option>ABS</option><option>TPU</option></select></label><label className="budget-field"><span>Quantidade (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.grams} onChange={(event) => setNewFilament((current) => ({ ...current, grams: event.target.value }))} placeholder="1000" /></label><label className="budget-field"><span>Avisar abaixo de (g)</span><DecimalInput className="budget-text-input" min="0" step="1" value={newFilament.lowThreshold} onChange={(event) => setNewFilament((current) => ({ ...current, lowThreshold: event.target.value }))} /></label><div className="budget-field color-field"><span>Cor da bobina *</span><RequiredFilamentColor value={newFilament.color} invalid={filamentColorError} onChange={(color) => { setNewFilament((current) => ({ ...current, color })); setFilamentColorError(false); }} /></div><button className="filament-primary-button" onClick={addFilament}><Plus size={16} /> Adicionar ao estoque</button></div></section>
     <div className="filament-stock-grid">
       {filaments.map((item) => (
         <FilamentSpoolCard

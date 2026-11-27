@@ -67,12 +67,12 @@ describe("filament spool cards", () => {
     expect(stylesheet).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
-  it("shows the low-stock warning on a rounded, filament-colored top ribbon", () => {
+  it("shows the low-stock warning as a rounded, filament-colored overlay badge", () => {
     expect(card).toContain('{low && <span className="filament-card-low-ribbon">Estoque baixo</span>}');
     expect(card).toContain('${low ? ", estoque baixo" : ""}');
     expect(stylesheet).toContain(".filament-card-low-ribbon");
     expect(stylesheet).toContain("background: var(--filament-color, #8f77f4)");
-    expect(stylesheet).toContain("border-radius: 14px 14px 0 0");
+    expect(stylesheet).toContain("border-radius: 999px");
     expect(stylesheet).not.toContain(".filament-card-low-tag");
   });
 
