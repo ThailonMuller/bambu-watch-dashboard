@@ -99,4 +99,45 @@ describe("filament spool cards", () => {
     expect(home).toContain('className="history-summary"');
     expect(home).toContain('className="history-list"');
   });
+
+  it("gives add, debit and history headings the same size and aligns their icons", () => {
+    for (const title of [
+      "Adicionar filamento",
+      "Débitos de filamentos",
+      "Histórico de consumo",
+    ]) {
+      expect(home).toContain(`<h3>${title}</h3>`);
+    }
+    expect(stylesheet).toContain(
+      ".filament-card-heading h3 { font-size:18px !important; line-height:1.2; }"
+    );
+    expect(stylesheet).toContain(
+      ".debit-card .filament-card-heading,\n.history-card .filament-card-heading { align-items:center; }"
+    );
+    expect(stylesheet).toContain(
+      ".filament-card-heading .settings-symbol { flex:0 0 38px; }"
+    );
+    expect(stylesheet).toContain(
+      ".app-shell p.filament-card-heading-description {"
+    );
+    expect(stylesheet).toContain(
+      ".debit-card .filament-card-heading { flex-wrap:wrap; }"
+    );
+  });
+
+  it("fills the rounded debit color control without a nested swatch frame", () => {
+    expect(home).toContain('className="debit-color" type="color"');
+    expect(stylesheet).toContain(".debit-add-controls .debit-color {");
+    expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*padding:\s*0;/);
+    expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*border-radius:\s*9px;/);
+    expect(stylesheet).toContain(
+      ".debit-add-controls .debit-color::-webkit-color-swatch-wrapper { padding:0; }"
+    );
+    expect(stylesheet).toMatch(
+      /\.debit-add-controls \.debit-color::-webkit-color-swatch\s*\{\s*border:0;\s*border-radius:8px;/
+    );
+    expect(stylesheet).toContain(
+      ".debit-add-controls .debit-color::-moz-color-swatch {"
+    );
+  });
 });

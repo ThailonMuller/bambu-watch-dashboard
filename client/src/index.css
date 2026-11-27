@@ -1979,3 +1979,40 @@ html.light .filament-detail-activity { border-top-color: #e5dbea; }
 
 /* Debit filenames must follow the active theme, including light cards. */
 .light .app-shell .debit-row strong { color:var(--foreground); }
+
+/* Consistent filament section headers: same scale and vertically centered icons. */
+.filament-card-heading,
+.debit-card .filament-card-heading,
+.history-card .filament-card-heading { align-items:center; }
+.filament-card-heading h3 { font-size:18px !important; line-height:1.2; }
+.filament-card-heading .settings-symbol { flex:0 0 38px; }
+.app-shell p.filament-card-heading-description {
+  margin:5px 0 0 49px;
+  color:#aa98b6;
+  font-size:12px;
+  line-height:1.35;
+}
+html.light .app-shell p.filament-card-heading-description { color:#786887; }
+
+/* Let the selected debit color fill its entire rounded 39px control. */
+.debit-add-controls .debit-color {
+  box-sizing:border-box;
+  padding:0;
+  overflow:hidden;
+  border-radius:9px;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.debit-add-controls .debit-color::-webkit-color-swatch-wrapper { padding:0; }
+.debit-add-controls .debit-color::-webkit-color-swatch {
+  border:0;
+  border-radius:8px;
+}
+.debit-add-controls .debit-color::-moz-color-swatch {
+  border:0;
+  border-radius:8px;
+}
+@media (max-width:600px) {
+  .debit-card .filament-card-heading { flex-wrap:wrap; }
+  .history-card .filament-card-heading { flex-wrap:wrap; }
+}
