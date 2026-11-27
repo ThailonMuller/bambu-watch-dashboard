@@ -5,10 +5,18 @@ export default function RequiredFilamentColor({
   value,
   onChange,
   invalid = false,
+  errorMessage = "Selecione uma cor.",
+  label = "Selecionar cor da bobina",
+  title = "Escolher cor da bobina",
+  compact = false,
 }: {
   value: string;
   onChange: (color: string) => void;
   invalid?: boolean;
+  errorMessage?: string;
+  label?: string;
+  title?: string;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [draftColor, setDraftColor] = useState(value || "#000000");
@@ -21,7 +29,7 @@ export default function RequiredFilamentColor({
   };
 
   return (
-    <div className="required-filament-color">
+    <div className={`required-filament-color ${compact ? "is-compact" : ""}`}>
       <div className="color-input-wrap">
         <Popover open={open} onOpenChange={changeOpen}>
           <PopoverTrigger asChild>
@@ -29,7 +37,7 @@ export default function RequiredFilamentColor({
               type="button"
               className={`filament-color-trigger ${value ? "" : "is-empty"}`}
               style={value ? { backgroundColor: value } : undefined}
-              aria-label="Selecionar cor da bobina"
+              aria-label={label}
               aria-required="true"
               aria-invalid={invalid || undefined}
               aria-describedby={invalid ? errorId : undefined}
@@ -42,7 +50,7 @@ export default function RequiredFilamentColor({
             align="start"
             aria-labelledby={titleId}
           >
-            <h4 id={titleId}>Escolher cor da bobina</h4>
+            <h4 id={titleId}>{title}</h4>
             <label className="filament-color-draft">
               <span>Cor</span>
               <input
@@ -72,7 +80,7 @@ export default function RequiredFilamentColor({
         </Popover>
         <code>{value ? value.toUpperCase() : "Selecionar"}</code>
       </div>
-      {invalid && <small id={errorId} className="filament-color-error" role="alert">Selecione uma cor.</small>}
+      {invalid && <small id={errorId} className="filament-color-error" role="alert">{errorMessage}</small>}
     </div>
   );
 }

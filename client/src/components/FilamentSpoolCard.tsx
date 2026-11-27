@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DecimalInput from "./DecimalInput";
+import RequiredFilamentColor from "./RequiredFilamentColor";
 import { filamentTextColor, isLowStock } from "../../../shared/filament";
 
 type Filament = {
@@ -79,6 +80,7 @@ export default function FilamentSpoolCard({
 }: FilamentSpoolCardProps) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<FilamentDraft>(() => draftFrom(item));
+  const [colorError, setColorError] = useState(false);
   const low = isLowStock(item.grams, item.lowThreshold);
   const approvedGrams = relatedHistory
     .filter(entry => entry.status === "approved")
@@ -92,7 +94,8 @@ export default function FilamentSpoolCard({
   } as React.CSSProperties;
 
   const showDetails = () => {
-    setDraft(draftFrom(item));
+    setDraft({ ...draftFrom(item), color: "" });
+    setColorError(false);
     setOpen(true);
   };
 
@@ -112,6 +115,12 @@ export default function FilamentSpoolCard({
       toast.error("Informe um nome e valores válidos para estoque e alerta");
       return;
     }
+    if (!/^#[0-9a-f]{6}$/i.test(draft.color)) {
+      setColorError(true);
+      toast.error("Selecione a cor da bobina antes de salvar");
+      return;
+    }
+    setColorError(false);
     onSave(item.id, {
       name: draft.name.trim(),
       material: draft.material,
@@ -239,22 +248,14 @@ export default function FilamentSpoolCard({
             </label>
             <label className="filament-detail-field">
               <span>Cor da bobina</span>
-              <div className="filament-detail-color-control">
-                <input
-                  className="filament-color-input"
-                  type="color"
-                  style={{ backgroundColor: draft.color }}
-                  value={draft.color}
-                  onChange={event =>
-                    setDraft(current => ({
-                      ...current,
-                      color: event.target.value,
-                    }))
-                  }
-                  aria-label="Cor da bobina"
-                />
-                <code>{draft.color.toUpperCase()}</code>
-              </div>
+              <RequiredFilamentColor
+                value={draft.color}
+                invalid={colorError}
+                onChange={color => {
+                  setDraft(current => ({ ...current, color }));
+                  setColorError(false);
+                }}
+              />
             </label>
             <label className="filament-detail-field">
               <span>Estoque (g)</span>

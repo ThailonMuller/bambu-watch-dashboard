@@ -2070,5 +2070,10 @@ html.light .app-shell p.filament-card-heading-description { color:#786887; }
 .filament-color-popover-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
 .filament-color-popover-actions > button { min-height:36px; padding:0 10px; border-radius:8px; font-size:12px; }
 .filament-color-popover-actions > button:first-child { border:1px solid #65418a; background:transparent; }
+.required-filament-color.is-compact { position:relative; width:39px; min-width:39px; }
+.required-filament-color.is-compact .color-input-wrap { width:39px; gap:0; }
+.required-filament-color.is-compact .color-input-wrap code { display:none; }
+.required-filament-color.is-compact .filament-color-error { position:absolute; top:calc(100% + 3px); left:0; z-index:5; width:max-content; max-width:calc(100vw - 32px); padding:4px 6px; border-radius:5px; background:#2a143e; }
 html.light .filament-color-trigger.is-empty { color:#786887; border-color:#b8a2c7; }
 html.light .filament-color-error { color:#9e315f; }
+html.light .required-filament-color.is-compact .filament-color-error { border:1px solid #e7bfd0; background:#fff; }

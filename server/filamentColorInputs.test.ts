@@ -23,19 +23,21 @@ function declarations(selector: string) {
 }
 
 describe("filament color inputs", () => {
-  it("applies the same treatment to debit, editing and the explicit new-spool chooser", () => {
-    const inputs = [...colorInputs(home), ...colorInputs(spoolCard), ...colorInputs(requiredColor)];
-    expect(inputs).toHaveLength(3);
-    expect(inputs.every(input => /className="[^"}]*filament-color-input/.test(input))).toBe(true);
+  it("uses the shared chooser in all three color-selection flows", () => {
+    expect(colorInputs(home)).toHaveLength(0);
+    expect(colorInputs(spoolCard)).toHaveLength(0);
+    expect(colorInputs(requiredColor)).toHaveLength(1);
+    expect(home.match(/<RequiredFilamentColor\b/g)).toHaveLength(2);
+    expect(spoolCard).toContain("<RequiredFilamentColor");
     expect(home).toContain("<RequiredFilamentColor value={newFilament.color}");
+    expect(home).toContain("<RequiredFilamentColor compact label=\"Selecionar cor do débito\"");
+    expect(spoolCard).toContain("value={draft.color}");
     expect(requiredColor).toContain("backgroundColor: draftColor");
-    expect(home).toContain("backgroundColor: newDebit.color");
-    expect(spoolCard).toContain("backgroundColor: draft.color");
   });
 
-  it("preserves controlled color values and explicitly confirms only the new-spool draft", () => {
-    expect(home).toMatch(/value=\{newDebit\.color\}[\s\S]*?onChange=\{\(event\)[\s\S]*?color: event\.target\.value/);
-    expect(spoolCard).toMatch(/value=\{draft\.color\}[\s\S]*?onChange=\{event[\s\S]*?color: event\.target\.value/);
+  it("keeps selection values controlled and applies them only after confirmation", () => {
+    expect(home).toMatch(/value=\{newDebit\.color\}[\s\S]*?onChange=\{\(color\)[\s\S]*?color \}\)\);/);
+    expect(spoolCard).toMatch(/value=\{draft\.color\}[\s\S]*?onChange=\{color[\s\S]*?color \}\)\);/);
     expect(requiredColor).toContain("value={draftColor}");
     expect(requiredColor).toContain("setDraftColor(event.target.value)");
     expect(requiredColor).toContain("onChange(draftColor)");

@@ -97,7 +97,7 @@ describe("required filament color", () => {
     expect(openHandler).not.toMatch(/onChange\s*\(/);
   });
 
-  it("requires a valid color only for new filament registration and preserves ledger colors", () => {
+  it("requires an explicit color in registration, debit and spool editing", () => {
     expect(homeSource).toMatch(
       /const \[newFilament,\s*setNewFilament\] = useState\(\s*\{[^}]*\bcolor:\s*""/
     );
@@ -107,15 +107,16 @@ describe("required filament color", () => {
     expect(homeSource).toMatch(
       /const \[filamentColorError,\s*setFilamentColorError\] = useState(?:<boolean>)?\(false\)/
     );
+    expect(homeSource.match(/<RequiredFilamentColor\b/g)).toHaveLength(2);
     expect(homeSource).toMatch(
       /<RequiredFilamentColor\b(?=[^>]*\bvalue=\{newFilament\.color\})(?=[^>]*\binvalid=\{filamentColorError\})/
     );
 
     const addStart = homeSource.indexOf("const addFilament =");
-    const nextSection = homeSource.indexOf("const selectedDebitFilament", addStart) >= 0
-      ? homeSource.indexOf("const selectedDebitFilament", addStart)
-      : homeSource.indexOf("const updateFilament", addStart);
-    const addFilament = homeSource.slice(addStart, nextSection);
+    const debitStart = homeSource.indexOf("const addDebit =", addStart);
+    const debitEnd = homeSource.indexOf("const updateFilament", debitStart);
+    const addFilament = homeSource.slice(addStart, debitStart);
+    const addDebit = homeSource.slice(debitStart, debitEnd);
     const colorGuard = addFilament.search(/\/\^#\[0-9a-f\]\{6\}\$\/i\.test\(newFilament\.color\)/);
     const stockWrite = addFilament.indexOf("setFilaments(");
     expect(colorGuard).toBeGreaterThanOrEqual(0);
@@ -125,8 +126,20 @@ describe("required filament color", () => {
     expect(colorGuard).toBeLessThan(stockWrite);
     expect(addFilament).toMatch(/color:\s*newFilament\.color/);
 
+    expect(homeSource).toMatch(/const \[newDebit,\s*setNewDebit\] = useState\(\s*\{[^}]*\bcolor:\s*""/);
+    expect(homeSource).toContain('setNewDebit({ piece: "", grams: "", color: "", filamentId: newDebit.filamentId });');
+    expect(homeSource).toMatch(/<RequiredFilamentColor compact label="Selecionar cor do débito"[^>]*value=\{newDebit\.color\}[^>]*invalid=\{Boolean\(debitColorError\)\}/);
+    expect(addDebit).toMatch(/\/\^#\[0-9a-f\]\{6\}\$\/i\.test\(newDebit\.color\)/);
+    expect(addDebit).toContain('newDebit.color.toLowerCase() !== selectedDebitFilament.color.toLowerCase()');
+    expect(addDebit).toContain('color: newDebit.color');
+    expect(addDebit).toContain('setDebitColorError("Selecione a cor do débito.")');
+
+    expect(spoolCardSource).toMatch(/setDraft\(\{ \.\.\.draftFrom\(item\), color: "" \}\)/);
+    expect(spoolCardSource).toContain('<RequiredFilamentColor');
+    expect(spoolCardSource).toContain('invalid={colorError}');
+    expect(spoolCardSource).toMatch(/\/\^#\[0-9a-f\]\{6\}\$\/i\.test\(draft\.color\)/);
+    expect(spoolCardSource).toMatch(/color:\s*draft\.color/);
     expect(homeSource).toMatch(/<FilamentSpoolCard[\s\S]*?item=\{item\}[\s\S]*?onSave=\{updateFilament\}/);
-    expect(homeSource).toContain("color: selectedDebitFilament.color");
     expect(homeSource).toContain("color: linked?.color ?? debit.color");
   });
 

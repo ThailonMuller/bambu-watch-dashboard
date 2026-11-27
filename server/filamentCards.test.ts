@@ -125,19 +125,13 @@ describe("filament spool cards", () => {
     );
   });
 
-  it("fills the rounded debit color control without a nested swatch frame", () => {
-    expect(home).toContain('className="debit-color filament-color-input" type="color"');
-    expect(stylesheet).toContain(".debit-add-controls .debit-color {");
-    expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*padding:\s*0;/);
-    expect(stylesheet).toMatch(/\.debit-add-controls \.debit-color\s*\{[^}]*border-radius:\s*9px;/);
-    expect(stylesheet).toContain(
-      ".debit-add-controls .debit-color::-webkit-color-swatch-wrapper { padding:0; }"
-    );
-    expect(stylesheet).toMatch(
-      /\.debit-add-controls \.debit-color::-webkit-color-swatch\s*\{\s*border:0;\s*border-radius:8px;/
-    );
-    expect(stylesheet).toContain(
-      ".debit-add-controls .debit-color::-moz-color-swatch {"
-    );
+  it("uses an empty compact required color trigger in the debit form", () => {
+    expect(home).toContain('<RequiredFilamentColor compact label="Selecionar cor do débito"');
+    expect(home).toContain('invalid={Boolean(debitColorError)}');
+    expect(home).toContain('color: "", filamentId: ""');
+    expect(home).toContain('newDebit.color.toLowerCase() !== selectedDebitFilament.color.toLowerCase()');
+    expect(stylesheet).toContain(".required-filament-color.is-compact { position:relative; width:39px; min-width:39px; }");
+    expect(stylesheet).toContain(".required-filament-color.is-compact .color-input-wrap code { display:none; }");
+    expect(stylesheet).toContain(".filament-color-trigger.is-empty");
   });
 });
