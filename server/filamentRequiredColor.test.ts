@@ -133,7 +133,7 @@ describe("required filament color", () => {
     expect(addFilament).toMatch(/color:\s*newFilament\.color/);
 
     expect(homeSource).toMatch(/const \[newDebit,\s*setNewDebit\] = useState\(\s*\{[^}]*\bcolor:\s*""/);
-    expect(homeSource).toContain('setNewDebit({ piece: "", grams: "", color: "", filamentId: newDebit.filamentId });');
+    expect(homeSource).toContain('setNewDebit({ piece: "", grams: "", color: selectedDebitFilament.color, filamentId: newDebit.filamentId });');
     expect(homeSource).toMatch(/<RequiredFilamentColor compact label="Selecionar cor do débito"[^>]*value=\{newDebit\.color\}[^>]*invalid=\{Boolean\(debitColorError\)\}/);
     expect(addDebit).toMatch(/\/\^#\[0-9a-f\]\{6\}\$\/i\.test\(newDebit\.color\)/);
     expect(addDebit).toContain('newDebit.color.toLowerCase() !== selectedDebitFilament.color.toLowerCase()');
