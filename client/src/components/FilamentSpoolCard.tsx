@@ -97,7 +97,7 @@ export default function FilamentSpoolCard({
   } as React.CSSProperties;
 
   const showDetails = () => {
-    setDraft({ ...draftFrom(item), color: "" });
+    setDraft(draftFrom(item));
     setColorError(false);
     setOpen(true);
   };

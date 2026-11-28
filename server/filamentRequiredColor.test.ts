@@ -103,7 +103,7 @@ describe("required filament color", () => {
     expect(openHandler).not.toMatch(/onChange\s*\(/);
   });
 
-  it("requires an explicit color in registration, debit and spool editing", () => {
+  it("validates color in registration and debit while preserving the saved color in spool editing", () => {
     expect(homeSource).toMatch(
       /const \[newFilament,\s*setNewFilament\] = useState\(\s*\{[^}]*\bcolor:\s*""/
     );
@@ -140,13 +140,34 @@ describe("required filament color", () => {
     expect(addDebit).toContain('color: newDebit.color');
     expect(addDebit).toContain('setDebitColorError("Selecione a cor do débito.")');
 
-    expect(spoolCardSource).toMatch(/setDraft\(\{ \.\.\.draftFrom\(item\), color: "" \}\)/);
+    expect(spoolCardSource).toContain("setDraft(draftFrom(item));");
     expect(spoolCardSource).toContain('<RequiredFilamentColor');
     expect(spoolCardSource).toContain('invalid={colorError}');
     expect(spoolCardSource).toMatch(/\/\^#\[0-9a-f\]\{6\}\$\/i\.test\(draft\.color\)/);
     expect(spoolCardSource).toMatch(/color:\s*draft\.color/);
     expect(homeSource).toMatch(/<FilamentSpoolCard[\s\S]*?item=\{item\}[\s\S]*?onSave=\{updateFilament\}/);
     expect(homeSource).toContain("color: linked?.color ?? debit.color");
+  });
+
+  it("reloads the stored color every time spool editing opens without blanking or replacing it", () => {
+    const draftStart = spoolCardSource.indexOf("function draftFrom(");
+    const draftEnd = spoolCardSource.indexOf("function debitStatusLabel", draftStart);
+    expect(spoolCardSource.slice(draftStart, draftEnd)).toContain("color: item.color");
+    const openStart = spoolCardSource.indexOf("const showDetails =");
+    const openEnd = spoolCardSource.indexOf("const saveFilament =", openStart);
+    const showDetails = spoolCardSource.slice(openStart, openEnd);
+    expect(showDetails).toContain("setDraft(draftFrom(item));");
+    expect(showDetails).toContain("setColorError(false);");
+    expect(showDetails).not.toMatch(/color:\s*["']/);
+
+    for (const color of ["#000000", "#ffffff", "#9b4dff"]) {
+      const markup = renderToStaticMarkup(React.createElement(RequiredFilamentColor, { value: color, onChange: vi.fn() }));
+      const button = triggerButton(markup);
+      expect(button).toContain(`background-color:${color}`);
+      expect(button).not.toContain("is-empty");
+      expect(button).not.toContain('aria-invalid="true"');
+      expect(markup).toContain(`>${color.toUpperCase()}</code>`);
+    }
   });
 
   it("keeps the low-stock pill outside the surface without low-only padding", () => {
