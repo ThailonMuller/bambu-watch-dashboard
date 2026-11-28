@@ -55,17 +55,18 @@ describe("filament spool cards", () => {
     expect(home).toContain('aria-label="Bobinas de filamento"');
     expect(home).toContain('aria-label="Filtros das bobinas"');
     for (const label of [
-      'aria-label="Filtrar por nome"',
-      'aria-label="Filtrar por cor"',
+      'aria-label="Ordenar por nome"',
+      'aria-label="Ordenar por cor"',
       'aria-label="Filtrar por tipo"',
       'aria-label="Filtrar por peso"',
       'aria-label="Filtrar por fabricante"',
       "Agrupar por tons da mesma cor",
     ]) expect(home).toContain(label);
     expect(home).toMatch(/const defaultFilamentStockFilters[\s\S]*name: "all"[\s\S]*color: "all"[\s\S]*material: "all"[\s\S]*weight: "all"[\s\S]*manufacturer: "all"/);
-    expect(home).toContain('<option value="all">Todos</option>');
+    expect(home).toContain("filamentFilters.name");
+    expect(home).toContain("filamentFilters.color");
     expect(home).toContain("filterFilaments(filaments, filamentFilters)");
-    expect(home).toContain("groupFilamentsByTone(filteredFilaments)");
+    expect(home).toContain("groupFilamentsByTone(filteredFilaments, filamentFilters.color)");
   });
 
   it("shows stock, consumption and related internal movements", () => {

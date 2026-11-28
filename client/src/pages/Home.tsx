@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateBudget, createCleanBudgetInput, CUSTOM_BUDGET_INPUT, DEFAULT_BUDGET_INPUT, hasDuplicateProductId, hasInvalidBudgetPercentages, isValidProductId, migrateSpreadsheetSales, parsePackagingCostDraft, type BudgetInput, type BudgetResult } from "../../../shared/budget";
-import { debitStock, filterFilaments, groupFilamentsByTone, isLowStock, type FilamentStockFilters, type FilamentWeightFilter } from "../../../shared/filament";
+import { debitStock, filterFilaments, groupFilamentsByTone, isLowStock, type FilamentSortDirection, type FilamentStockFilters, type FilamentWeightFilter } from "../../../shared/filament";
 import { displayJobName, estimatedCompletionAt } from "../../../shared/printerTelemetry";
 import { useTheme } from "../contexts/ThemeContext";
 import { trpc } from "../lib/trpc";
@@ -477,13 +477,11 @@ function FilamentsView() {
   const rejectDebit = (id: number) => { const debit = debits.find((item) => item.id === id); if (debit) addHistory(debit, "rejected"); setDebits((current) => current.map((item) => item.id === id ? { ...item, status: "rejected" } : item)); toast.info("Débito rejeitado"); };
   const pendingDebits = debits.filter((item) => item.status === "pending");
   const uniqueSorted = (values: string[]) => values.map(value => value.trim()).filter((value, index, list) => value && list.indexOf(value) === index).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const filamentNames = uniqueSorted(filaments.map(item => item.name));
-  const filamentColors = uniqueSorted(filaments.map(item => item.color.toLowerCase()));
   const filamentMaterials = uniqueSorted(filaments.map(item => item.material));
   const filamentManufacturers = uniqueSorted(filaments.map(item => item.manufacturer ?? ""));
   const hasFilamentsWithoutManufacturer = filaments.some(item => !item.manufacturer?.trim());
   const filteredFilaments = filterFilaments(filaments, filamentFilters);
-  const toneGroups = groupFilamentsByTone(filteredFilaments);
+  const toneGroups = groupFilamentsByTone(filteredFilaments, filamentFilters.color);
   const filtersAreActive = filamentFilters.name !== "all" || filamentFilters.color !== "all" || filamentFilters.material !== "all" || filamentFilters.weight !== "all" || filamentFilters.manufacturer !== "all" || groupByColorTone;
   const clearFilamentFilters = () => { setFilamentFilters(defaultFilamentStockFilters); setGroupByColorTone(false); };
   const renderFilamentCard = (item: FilamentItem) => (
@@ -525,12 +523,12 @@ function FilamentsView() {
     </section>
     <section className="filament-collection" aria-label="Bobinas de filamento">
       <div className="filament-collection-heading">
-        <div><h3>Bobinas de filamento</h3><p>Filtre por nome, cor, tipo, peso e fabricante.</p></div>
+        <div><h3>Bobinas de filamento</h3><p>Ordene por nome ou cor e filtre por tipo, peso e fabricante.</p></div>
         <div className="filament-collection-actions"><span>{filteredFilaments.length} de {filaments.length} bobinas</span><button className="filament-filter-clear" type="button" onClick={clearFilamentFilters} disabled={!filtersAreActive}>Limpar filtros</button></div>
       </div>
       <div className="filament-filter-toolbar" aria-label="Filtros das bobinas">
-        <label className="filament-filter-field"><span>Nome</span><select aria-label="Filtrar por nome" value={filamentFilters.name} onChange={(event) => setFilamentFilters((current) => ({ ...current, name: event.target.value }))}><option value="all">Todos</option>{filamentNames.map(name => <option value={name} key={name}>{name}</option>)}</select></label>
-        <label className="filament-filter-field"><span>Cor</span><select aria-label="Filtrar por cor" value={filamentFilters.color} onChange={(event) => setFilamentFilters((current) => ({ ...current, color: event.target.value }))}><option value="all">Todos</option>{filamentColors.map(color => <option value={color} key={color}>{color.toUpperCase()}</option>)}</select></label>
+        <label className="filament-filter-field"><span>Nome</span><select aria-label="Ordenar por nome" title="Ordem alfabética: crescente de A a Z ou decrescente de Z a A" value={filamentFilters.name} onChange={(event) => { const name = event.target.value as FilamentSortDirection; setFilamentFilters((current) => ({ ...current, name, color: name === "all" ? current.color : "all" })); }}><option value="all">Todos</option><option value="asc">Crescente</option><option value="desc">Decrescente</option></select></label>
+        <label className="filament-filter-field"><span>Cor</span><select aria-label="Ordenar por cor" title="Ordem de matiz: crescente ou decrescente, incluindo os tons neutros por luminosidade" value={filamentFilters.color} onChange={(event) => { const color = event.target.value as FilamentSortDirection; setFilamentFilters((current) => ({ ...current, color, name: color === "all" ? current.name : "all" })); }}><option value="all">Todos</option><option value="asc">Crescente</option><option value="desc">Decrescente</option></select></label>
         <label className="filament-filter-field"><span>Tipo</span><select aria-label="Filtrar por tipo" value={filamentFilters.material} onChange={(event) => setFilamentFilters((current) => ({ ...current, material: event.target.value }))}><option value="all">Todos</option>{filamentMaterials.map(material => <option value={material} key={material}>{material}</option>)}</select></label>
         <label className="filament-filter-field"><span>Peso</span><select aria-label="Filtrar por peso" value={filamentFilters.weight} onChange={(event) => setFilamentFilters((current) => ({ ...current, weight: event.target.value as FilamentWeightFilter }))}><option value="all">Todos</option><option value="under250">Abaixo de 250 g</option><option value="250to499">250–499 g</option><option value="500to999">500–999 g</option><option value="1000plus">1.000 g ou mais</option></select></label>
         <label className="filament-group-toggle"><input type="checkbox" checked={groupByColorTone} onChange={(event) => setGroupByColorTone(event.target.checked)} /><span>Agrupar por tons da mesma cor</span></label>

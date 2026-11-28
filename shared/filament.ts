@@ -25,10 +25,11 @@ export function filamentTextColor(hex: string) {
 }
 
 export type FilamentWeightFilter = "all" | "under250" | "250to499" | "500to999" | "1000plus";
+export type FilamentSortDirection = "all" | "asc" | "desc";
 
 export type FilamentStockFilters = {
-  name: string;
-  color: string;
+  name: FilamentSortDirection;
+  color: FilamentSortDirection;
   material: string;
   weight: FilamentWeightFilter;
   manufacturer: string;
@@ -45,9 +46,7 @@ export type FilamentFilterable = {
 const normalizeFilterValue = (value: string | null | undefined) => (value ?? "").trim().toLocaleLowerCase("pt-BR");
 
 export function filterFilaments<T extends FilamentFilterable>(items: T[], filters: FilamentStockFilters) {
-  return items.filter((item) => {
-    if (filters.name !== "all" && normalizeFilterValue(item.name) !== normalizeFilterValue(filters.name)) return false;
-    if (filters.color !== "all" && normalizeFilterValue(item.color) !== normalizeFilterValue(filters.color)) return false;
+  const filtered = items.filter((item) => {
     if (filters.material !== "all" && normalizeFilterValue(item.material) !== normalizeFilterValue(filters.material)) return false;
     if (filters.manufacturer === "__none__" && normalizeFilterValue(item.manufacturer)) return false;
     if (filters.manufacturer !== "all" && filters.manufacturer !== "__none__" && normalizeFilterValue(item.manufacturer) !== normalizeFilterValue(filters.manufacturer)) return false;
@@ -68,20 +67,29 @@ export function filterFilaments<T extends FilamentFilterable>(items: T[], filter
     }
     return true;
   });
+  const collator = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
+  if (filters.name !== "all") {
+    const direction = filters.name === "desc" ? -1 : 1;
+    return filtered.sort((a, b) => direction * collator.compare(a.name.trim(), b.name.trim()));
+  }
+  if (filters.color !== "all") {
+    const direction = filters.color === "desc" ? -1 : 1;
+    return filtered.sort((a, b) => direction * compareFilamentColors(a.color, b.color) || collator.compare(a.name.trim(), b.name.trim()));
+  }
+  return filtered;
 }
 
 const colorToneOrder = ["Vermelhos", "Laranjas", "Amarelos", "Verdes", "Cianos", "Azuis", "Violetas", "Magentas", "Rosas", "Neutros"];
 
-export function filamentColorTone(hex: string) {
+function filamentHsl(hex: string) {
   const match = /^#?([0-9a-f]{6})$/i.exec(hex);
-  if (!match) return "Neutros";
+  if (!match) return null;
   const [r, g, b] = [0, 2, 4].map((offset) => parseInt(match[1]!.slice(offset, offset + 2), 16) / 255) as [number, number, number];
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const delta = max - min;
   const lightness = (max + min) / 2;
   const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
-  if (saturation < 0.14) return "Neutros";
 
   let hue = 0;
   if (delta !== 0) {
@@ -89,6 +97,30 @@ export function filamentColorTone(hex: string) {
     else if (max === g) hue = ((b - r) / delta + 2) * 60;
     else hue = ((r - g) / delta + 4) * 60;
   }
+  return { hue, saturation, lightness };
+}
+
+/** Spectral hue order, followed by neutral shades from black to white. */
+export function compareFilamentColors(a: string, b: string) {
+  const key = (hex: string) => {
+    const hsl = filamentHsl(hex);
+    if (!hsl) return [1, Infinity, 0, 0];
+    if (hsl.saturation < 0.14) return [1, hsl.lightness, 0, 0];
+    return [0, hsl.hue, hsl.lightness, hsl.saturation];
+  };
+  const aKey = key(a);
+  const bKey = key(b);
+  for (let index = 0; index < aKey.length; index++) {
+    if (aKey[index] === bKey[index]) continue;
+    return aKey[index]! < bKey[index]! ? -1 : 1;
+  }
+  return 0;
+}
+
+export function filamentColorTone(hex: string) {
+  const hsl = filamentHsl(hex);
+  if (!hsl || hsl.saturation < 0.14) return "Neutros";
+  const { hue } = hsl;
   if (hue < 15 || hue >= 345) return "Vermelhos";
   if (hue < 45) return "Laranjas";
   if (hue < 70) return "Amarelos";
@@ -100,7 +132,7 @@ export function filamentColorTone(hex: string) {
   return "Rosas";
 }
 
-export function groupFilamentsByTone<T extends { color: string }>(items: T[]) {
+export function groupFilamentsByTone<T extends { color: string }>(items: T[], direction: FilamentSortDirection = "all") {
   const groups = new Map<string, T[]>();
   for (const item of items) {
     const tone = filamentColorTone(item.color);
@@ -110,5 +142,6 @@ export function groupFilamentsByTone<T extends { color: string }>(items: T[]) {
   }
   const entries: [string, T[]][] = [];
   groups.forEach((group, tone) => entries.push([tone, group]));
-  return entries.sort(([toneA], [toneB]) => colorToneOrder.indexOf(toneA) - colorToneOrder.indexOf(toneB));
+  const order = direction === "desc" ? -1 : 1;
+  return entries.sort(([toneA], [toneB]) => order * (colorToneOrder.indexOf(toneA) - colorToneOrder.indexOf(toneB)));
 }

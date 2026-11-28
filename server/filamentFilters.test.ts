@@ -26,9 +26,12 @@ describe("filament stock filters", () => {
     expect(filterFilaments(items, allFilters())).toEqual(items);
   });
 
-  it("filters by name, exact color, material and manufacturer without case sensitivity", () => {
-    expect(filterFilaments(items, { ...allFilters(), name: "pla silk violeta" }).map(item => item.id)).toEqual([1]);
-    expect(filterFilaments(items, { ...allFilters(), color: "#00D8F5" }).map(item => item.id)).toEqual([2]);
+  it("uses name and color values as sort directions rather than exact-value filters", () => {
+    expect(filterFilaments(items, { ...allFilters(), name: "asc" })).toHaveLength(items.length);
+    expect(filterFilaments(items, { ...allFilters(), color: "desc" })).toHaveLength(items.length);
+  });
+
+  it("filters by material and manufacturer without case sensitivity", () => {
     expect(filterFilaments(items, { ...allFilters(), material: "petg" }).map(item => item.id)).toEqual([3]);
     expect(filterFilaments(items, { ...allFilters(), manufacturer: "voolt" }).map(item => item.id)).toEqual([1, 3]);
     expect(filterFilaments(items, { ...allFilters(), manufacturer: "__none__" }).map(item => item.id)).toEqual([4]);
@@ -41,7 +44,7 @@ describe("filament stock filters", () => {
     expect(filterFilaments(items, { ...allFilters(), weight: "1000plus" }).map(item => item.id)).toEqual([4]);
   });
 
-  it("groups similar shades by hue family and neutral tones separately", () => {
+  it("groups similar shades by hue family in the existing family order", () => {
     expect(filamentColorTone("#9b4dff")).toBe("Violetas");
     expect(filamentColorTone("#7541c8")).toBe("Violetas");
     expect(filamentColorTone("#00d8f5")).toBe("Cianos");
